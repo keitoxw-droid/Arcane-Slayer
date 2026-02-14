@@ -1,163 +1,186 @@
 --[[
-    🔱 NOX HUB v9.0 [INFINITE-BARRAGE] 🔱
-    "Spam them all. Spam them everywhere. Never stop."
+    🔱 NOX HUB v10.0 [ECLIPSE-MIRROR] 🔱
+    "Attack with their own weapons."
     
-    BARRAGE FEATURES:
-    - [ROUND-ROBIN SPAM] : Cycles through EVERY RemoteEvent in the game to dilute detection.
-    - [PHANTOM HOOK (ANTI-BAN)] : Blocks ALL outgoing security signals (Report/Kick/Ban).
-    - [TRAFFIC MASKING] : Sends "Empty" valid packets to bypass data checks.
-    - [AUTO-THROTTLE] : Adjusts speed dynamically to stay *just below* the ban threshold.
+    Verified Failure Analysis:
+    - v9.0 hit "DevTools" because it spammed blindly.
+    
+    ECLIPSE SOLUTION:
+    - [PASSIVE SNIFFER] : Records REAL traffic sent by the game.
+    - [SAFE-LIST BUILDING] : Only targets Remotes that have been legitimately fired.
+    - [REPLAY ATTACK] : Re-uses legitimate arguments to bypass type-checking.
 ]]
 
 -- // CORE SERVICES //
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
-local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
--- // 1. PHANTOM HOOK (THE ULTIMATE ANTI-BAN) //
-local function ActivatePhantom()
+-- // 1. TRAFFIC MIRROR ENGINE //
+local Engine = {
+    Recording = true,
+    Attacking = false,
+    SafeLog = {} -- Stores {Remote = instance, Args = {...}}
+}
+
+-- THE HOOK (SNIFFER)
+local function InstallHook()
     local mt = getrawmetatable(game)
     setreadonly(mt, false)
     local oldNamecall = mt.__namecall
     
     mt.__namecall = newcclosure(function(self, ...)
         local method = getnamecallmethod()
-        local name = self.Name:lower()
+        local args = {...}
         
-        -- BLOCK 1: KICK / BAN / TELEPORT
-        if method == "Kick" or method == "kick" or method == "Ban" or method == "Close" then
-            return nil -- REFUSED.
-        end
-        
-        -- BLOCK 2: SECURITY REMOTES (HONEYPOTS)
         if method == "FireServer" and self:IsA("RemoteEvent") then
-            -- If the remote name sounds like a snitch, SILENCE IT.
-            if name:find("clien") or name:find("security") or name:find("adm") or name:find("ban") or name:find("check") or name:find("log") then
-                return nil
+            -- If the script is NOT attacking, we are learning.
+            if not Engine.Attacking and Engine.Recording then
+                -- Check if we already know this remote
+                local known = false
+                for _, log in pairs(Engine.SafeLog) do
+                    if log.Remote == self then known = true break end
+                end
+                
+                if not known then
+                    -- FILTER: Ignore obviously bad ones even if game uses them (rare)
+                    local n = self.Name:lower()
+                    if not (n:find("ban") or n:find("kick") or n:find("debug")) then
+                        -- STORE IT AS SAFE
+                        table.insert(Engine.SafeLog, {
+                            Remote = self,
+                            Args = args -- Capture valid args
+                        })
+                    end
+                end
             end
         end
         
         return oldNamecall(self, ...)
     end)
-    
-    -- BLOCK 3: ERROR LOGGING
-    game:GetService("ScriptContext"):SetLegacyScripts(false)
     setreadonly(mt, true)
 end
-task.spawn(ActivatePhantom)
+task.spawn(InstallHook)
 
-
--- // 2. BARRAGE ENGINE (ROUND-ROBIN SPAM) //
-local Engine = {
-    Running = false,
-    Targets = {},
-    Index = 1
-}
-
-function Engine:Scan()
-    Engine.Targets = {}
-    -- WE TAKE EVERYTHING.
-    for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("RemoteEvent") and not v:IsA("RemoteFunction") then
-            -- Exclude obviously dangerous ones handled by Phantom, keep everything else
-            local n = v.Name:lower()
-            if not (n:find("admin") or n:find("ban") or n:find("kick")) then
-                table.insert(Engine.Targets, v)
-            end
-        end
-    end
-end
-
+-- THE ATTACK
 function Engine:Start()
-    if Engine.Running then return end
-    Engine:Scan()
+    if Engine.Attacking then return end
+    if #Engine.SafeLog == 0 then
+        game:GetService("StarterGui"):SetCore("SendNotification", {Title="NOX", Text="NO TRAFFIC CAPTURED YET. PLAY THE GAME FIRST!"})
+        return
+    end
     
-    if #Engine.Targets == 0 then return end
-    Engine.Running = true
+    Engine.Attacking = true
+    Engine.Recording = false -- Stop recording to save memory
     
-    -- THE BARRAGE LOGIC
     task.spawn(function()
-        local Payload = {} -- Empty table = Valid but useless data
-        
-        while Engine.Running do
-            -- Fire 50 remotes per Tick
-            for i = 1, 50 do
-                -- Round Robin Selection
-                Engine.Index = Engine.Index + 1
-                if Engine.Index > #Engine.Targets then Engine.Index = 1 end
-                
-                local Target = Engine.Targets[Engine.Index]
-                if Target then
-                    pcall(function() 
-                        Target:FireServer(Payload) 
-                        Target:FireServer("Update", Payload)
-                    end)
-                end
+        while Engine.Attacking do
+            -- SPAM ONLY THE KNOWN SAFE REMOTES
+            for _, log in pairs(Engine.SafeLog) do
+                pcall(function()
+                    -- REPLAY THE EXACT VALID ARGUMENTS 10 TIMES
+                    for i = 1, 10 do
+                        log.Remote:FireServer(unpack(log.Args))
+                    end
+                end)
             end
             RunService.Heartbeat:Wait()
         end
     end)
 end
 
--- // 3. BARRAGE UI //
+function Engine:Stop()
+    Engine.Attacking = false
+    Engine.Recording = true -- Resume learning
+end
+
+-- // 2. ECLIPSE UI //
 local Nox = {}
 
 function Nox:CreateUI()
-    for _, v in pairs(CoreGui:GetChildren()) do if v.Name == "NoxBarrage" then v:Destroy() end end
+    for _, v in pairs(CoreGui:GetChildren()) do if v.Name == "NoxEclipse" then v:Destroy() end end
     
     local Screen = Instance.new("ScreenGui")
-    Screen.Name = "NoxBarrage"
+    Screen.Name = "NoxEclipse"
     pcall(function() Screen.Parent = CoreGui end)
     
     local Main = Instance.new("Frame", Screen)
-    Main.Size = UDim2.new(0, 300, 0, 150)
-    Main.Position = UDim2.new(0.5, -150, 0.8, -150) -- Bottom Center
-    Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Main.BackgroundTransparency = 0.5
-    Main.BorderSizePixel = 2
-    Main.BorderColor3 = Color3.fromRGB(255, 0, 0)
+    Main.Size = UDim2.new(0, 350, 0, 180)
+    Main.Position = UDim2.new(0.5, -175, 0.5, -90)
+    Main.BackgroundColor3 = Color3.fromRGB(8, 8, 12)
+    Main.BorderSizePixel = 1
+    Main.BorderColor3 = Color3.fromRGB(100, 100, 255)
     
+    -- HEADER
     local Title = Instance.new("TextLabel", Main)
-    Title.Text = "NOX // INFINITE BARRAGE"
+    Title.Text = "NOX // ECLIPSE v10.0"
+    Title.Font = Enum.Font.GothamBold
+    Title.TextColor3 = Color3.fromRGB(150, 150, 255)
+    Title.TextSize = 16
     Title.Size = UDim2.new(1, 0, 0, 30)
-    Title.Font = Enum.Font.GothamBlack
-    Title.TextColor3 = Color3.fromRGB(255, 50, 50)
-    Title.TextSize = 18
     Title.BackgroundTransparency = 1
     
-    local Count = Instance.new("TextLabel", Main)
-    Count.Text = "TARGETS LOCKED: 0"
-    Count.Size = UDim2.new(1, 0, 0, 20)
-    Count.Position = UDim2.new(0, 0, 0, 30)
-    Count.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Count.Font = Enum.Font.Code
-    Status = Count -- Global ref
-    Count.BackgroundTransparency = 1
+    -- TRAFFIC MONITOR
+    local Monitor = Instance.new("TextLabel", Main)
+    Monitor.Text = "LISTENING FOR TRAFFIC..."
+    Monitor.TextColor3 = Color3.fromRGB(100, 255, 100)
+    Monitor.Font = Enum.Font.Code
+    Monitor.TextSize = 14
+    Monitor.Size = UDim2.new(1, 0, 0, 20)
+    Monitor.Position = UDim2.new(0, 0, 0, 40)
+    Monitor.BackgroundTransparency = 1
     
-    local Btn = Instance.new("TextButton", Main)
-    Btn.Size = UDim2.new(0.9, 0, 0.4, 0)
-    Btn.Position = UDim2.new(0.05, 0, 0.5, 0)
-    Btn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-    Btn.Text = "FIRE AT WILL"
-    Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 20
-    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    
-    Btn.MouseButton1Click:Connect(function()
-        if not Engine.Running then
-            Engine:Scan()
-            Count.Text = "TARGETS LOCKED: " .. #Engine.Targets
-            Engine:Start()
-            Btn.Text = "CEASE FIRE"
-            Btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-        else
-            Engine.Running = false
-            Btn.Text = "FIRE AT WILL"
-            Btn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+    -- UPDATE LOOP
+    task.spawn(function()
+        while Main.Parent do
+            if not Engine.Attacking then
+                Monitor.Text = "CAPTURED PACKETS: " .. #Engine.SafeLog
+                Monitor.TextColor3 = Color3.fromRGB(100, 255, 100)
+            else
+                Monitor.Text = "REPLAYING " .. #Engine.SafeLog .. " VECTORS..."
+                Monitor.TextColor3 = Color3.fromRGB(255, 50, 50)
+            end
+            wait(0.5)
         end
     end)
+    
+    -- ACTION BUTTON
+    local Btn = Instance.new("TextButton", Main)
+    Btn.Size = UDim2.new(0.8, 0, 0.4, 0)
+    Btn.Position = UDim2.new(0.1, 0, 0.5, 0)
+    Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+    Btn.Text = "MIRROR ATTACK"
+    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.Font = Enum.Font.GothamBlack
+    Btn.TextSize = 20
+    
+    Btn.MouseButton1Click:Connect(function()
+        if not Engine.Attacking then
+            Engine:Start()
+            Btn.Text = "STOP REFLECTION"
+            Btn.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
+        else
+            Engine:Stop()
+            Btn.Text = "MIRROR ATTACK"
+            Btn.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+        end
+    end)
+    
+     -- DRAG
+    local dragging, dragInput, dragStart, startPos
+    Main.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = true; dragStart = input.Position; startPos = Main.Position
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
+            local delta = input.Position - dragStart
+            Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+        end
+    end)
+    UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
 end
 
 Nox:CreateUI()

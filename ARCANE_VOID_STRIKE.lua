@@ -91,82 +91,169 @@ function Engine:Haunt(duration, updateCallback)
     end)
 end
 
--- // 2. GHOST UI //
+-- // 2. COMMAND CENTER UI //
 local Nox = {}
 
 function Nox:CreateUI()
     for _, v in pairs(CoreGui:GetChildren()) do if v.Name:find("Nox") then v:Destroy() end end
     
     local Screen = Instance.new("ScreenGui")
-    Screen.Name = "NoxGhost"
+    Screen.Name = "NoxCommand"
     pcall(function() Screen.Parent = CoreGui end)
     
+    -- MAIN WINDOW
     local Main = Instance.new("Frame", Screen)
-    Main.Size = UDim2.new(0, 350, 0, 200)
-    Main.Position = UDim2.new(0.5, -175, 0.5, -100)
-    Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Ghost White
-    Main.BackgroundTransparency = 0.9
-    Main.BorderSizePixel = 1
-    Main.BorderColor3 = Color3.fromRGB(255, 255, 255)
+    Main.Size = UDim2.new(0, 500, 0, 350)
+    Main.Position = UDim2.new(0.5, -250, 0.5, -175)
+    Main.BackgroundColor3 = Color3.fromRGB(20, 20, 25) -- Deep Dark
+    Main.BorderSizePixel = 0
+    Main.ClipsDescendants = true
     
-    -- BLUR EFFECT
-    local Blur = Instance.new("BlurEffect", game:GetService("Lighting"))
-    Blur.Enabled = false
-    Blur.Size = 0
+    local Corner = Instance.new("UICorner", Main)
+    Corner.CornerRadius = UDim.new(0, 6)
     
-    -- TITLE
-    local Title = Instance.new("TextLabel", Main)
-    Title.Text = "GHOST PROTOCOL v26.0"
-    Title.Font = Enum.Font.GothamThin
-    Title.TextColor3 = Color3.fromRGB(200, 200, 200)
-    Title.TextSize = 18
-    Title.Size = UDim2.new(1, 0, 0, 30)
+    local TopBar = Instance.new("Frame", Main)
+    TopBar.Size = UDim2.new(1, 0, 0, 40)
+    TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    local TopCorner = Instance.new("UICorner", TopBar)
+    TopCorner.CornerRadius = UDim.new(0, 6)
+    
+    local Title = Instance.new("TextLabel", TopBar)
+    Title.Text = "NOX COMMAND CENTER v27.0"
+    Title.Font = Enum.Font.GothamBold
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextSize = 14
+    Title.Size = UDim2.new(0.5, 0, 1, 0)
+    Title.Position = UDim2.new(0.05, 0, 0, 0)
+    Title.TextXAlignment = Enum.TextXAlignment.Left
     Title.BackgroundTransparency = 1
     
-    -- STATUS
-    local Status = Instance.new("TextLabel", Main)
-    Status.Text = "INVISIBLE"
-    Status.Size = UDim2.new(1, 0, 0, 20)
-    Status.Position = UDim2.new(0, 0, 0.4, 0)
-    Status.TextColor3 = Color3.fromRGB(150, 150, 150)
-    Status.Font = Enum.Font.Gotham
-    Status.BackgroundTransparency = 1
+    -- TABS
+    local Tabs = Instance.new("Frame", Main)
+    Tabs.Size = UDim2.new(0.25, 0, 0.85, 0) -- Left Sidebar
+    Tabs.Position = UDim2.new(0, 0, 0.15, 0)
+    Tabs.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    Tabs.BorderSizePixel = 0
     
-    -- BUTTON
-    local Btn = Instance.new("TextButton", Main)
-    Btn.Size = UDim2.new(0.6, 0, 0.25, 0)
-    Btn.Position = UDim2.new(0.2, 0, 0.65, 0)
-    Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Btn.BackgroundTransparency = 0.8
-    Btn.Text = "HAUNT SERVER (15s)"
-    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Btn.Font = Enum.Font.GothamLight
-    Btn.TextSize = 14
+    local function CreateTabBtn(text, order, callback)
+        local btn = Instance.new("TextButton", Tabs)
+        btn.Size = UDim2.new(1, 0, 0, 40)
+        btn.Position = UDim2.new(0, 0, 0, (order-1)*40)
+        btn.Text = text
+        btn.TextColor3 = Color3.fromRGB(150, 150, 150)
+        btn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+        btn.Font = Enum.Font.GothamMedium
+        btn.BorderSizePixel = 0
+        
+        btn.MouseButton1Click:Connect(function()
+            -- Reset all tabs
+            for _, c in pairs(Tabs:GetChildren()) do if c:IsA("TextButton") then c.TextColor3 = Color3.fromRGB(150, 150, 150) c.BackgroundColor3 = Color3.fromRGB(25, 25, 30) end end
+            -- Highlight this
+            btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+            callback()
+        end)
+        return btn
+    end
     
-    local BStroke = Instance.new("UIStroke", Btn)
-    BStroke.Color = Color3.fromRGB(255, 255, 255)
-    BStroke.Thickness = 1
-    BStroke.Transparency = 0.5
+    -- CONTENT AREA
+    local Content = Instance.new("Frame", Main)
+    Content.Size = UDim2.new(0.75, 0, 0.85, 0)
+    Content.Position = UDim2.new(0.25, 0, 0.15, 0)
+    Content.BackgroundTransparency = 1
     
-    Btn.MouseButton1Click:Connect(function()
+    -- PAGE 1: ATTACK
+    local PageAttack = Instance.new("Frame", Content)
+    PageAttack.Size = UDim2.new(1, 0, 1, 0)
+    PageAttack.BackgroundTransparency = 1
+    
+    local StatusLbl = Instance.new("TextLabel", PageAttack)
+    StatusLbl.Text = "STATUS: IDLE"
+    StatusLbl.Size = UDim2.new(1, 0, 0, 30)
+    StatusLbl.Position = UDim2.new(0, 0, 0.1, 0)
+    StatusLbl.TextColor3 = Color3.fromRGB(100, 255, 100)
+    StatusLbl.Font = Enum.Font.Code
+    StatusLbl.BackgroundTransparency = 1
+    
+    local BufferBarBg = Instance.new("Frame", PageAttack)
+    BufferBarBg.Size = UDim2.new(0.8, 0, 0.05, 0)
+    BufferBarBg.Position = UDim2.new(0.1, 0, 0.3, 0)
+    BufferBarBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    local BarCorner = Instance.new("UICorner", BufferBarBg)
+    
+    local BufferBarFill = Instance.new("Frame", BufferBarBg)
+    BufferBarFill.Size = UDim2.new(0, 0, 1, 0)
+    BufferBarFill.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
+    local FillCorner = Instance.new("UICorner", BufferBarFill)
+    
+    local MainBtn = Instance.new("TextButton", PageAttack)
+    MainBtn.Size = UDim2.new(0.6, 0, 0.2, 0)
+    MainBtn.Position = UDim2.new(0.2, 0, 0.6, 0)
+    MainBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 200)
+    MainBtn.Text = "START GHOST ATTACK (15s)"
+    MainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    MainBtn.Font = Enum.Font.GothamBold
+    local BtnCorner = Instance.new("UICorner", MainBtn)
+    
+    MainBtn.MouseButton1Click:Connect(function()
         if not Engine.Active then
-            -- Visual FX
-            Blur.Enabled = true
-            game:GetService("TweenService"):Create(Blur, TweenInfo.new(15), {Size = 20}):Play()
-            
             Engine:Haunt(15, function(timeLeft, txt)
-                Status.Text = txt
-                Btn.Text = "GHOSTING... " .. timeLeft
+                StatusLbl.Text = txt
+                local progress = (15 - timeLeft) / 15
+                BufferBarFill.Size = UDim2.new(progress, 0, 1, 0)
                 
                 if timeLeft == 0 then
-                    game:GetService("TweenService"):Create(Blur, TweenInfo.new(0.5), {Size = 0}):Play()
-                    wait(0.5)
-                    Blur.Enabled = false
-                    Btn.Text = "HAUNT SERVER (15s)"
+                   MainBtn.Text = "START GHOST ATTACK (15s)"
+                   BufferBarFill.Size = UDim2.new(0, 0, 1, 0)
+                else
+                   MainBtn.Text = "GHOSTING... " .. timeLeft
                 end
             end)
         end
     end)
+    
+    -- PAGE 2: VISUALS (Fake Graph)
+    local PageVisuals = Instance.new("Frame", Content)
+    PageVisuals.Size = UDim2.new(1, 0, 1, 0)
+    PageVisuals.BackgroundTransparency = 1
+    PageVisuals.Visible = false
+    
+    local GraphFrame = Instance.new("Frame", PageVisuals)
+    GraphFrame.Size = UDim2.new(0.9, 0, 0.6, 0)
+    GraphFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
+    GraphFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+    GraphFrame.BorderColor3 = Color3.fromRGB(50, 50, 50)
+    GraphFrame.BorderSizePixel = 1
+    
+    -- Simple bar graph simulation
+    for i = 1, 20 do
+        local bar = Instance.new("Frame", GraphFrame)
+        bar.Size = UDim2.new(0.04, 0, math.random()*0.5, 0)
+        bar.Position = UDim2.new((i-1)*0.05, 0, 1 - bar.Size.Y.Scale, 0)
+        bar.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+        bar.BorderSizePixel = 0
+        
+        task.spawn(function()
+            while GraphFrame.Parent do
+                -- Simulate traffic
+                local targetHeight = Engine.Active and math.random(0.8, 1) or math.random(0.1, 0.3)
+                bar:TweenSize(UDim2.new(0.04, 0, targetHeight, 0), "Out", "Quad", 0.5, true)
+                wait(0.1 + math.random()*0.2)
+            end
+        end)
+    end
+    
+    local GraphTitle = Instance.new("TextLabel", PageVisuals)
+    GraphTitle.Text = "NETWORK TRAFFIC MONITOR"
+    GraphTitle.Position = UDim2.new(0, 0, 0.1, 0)
+    GraphTitle.Size = UDim2.new(1, 0, 0, 20)
+    GraphTitle.TextColor3 = Color3.fromRGB(150, 150, 150)
+    GraphTitle.Font = Enum.Font.Code
+    GraphTitle.BackgroundTransparency = 1
+
+    -- TABS LOGIC
+    CreateTabBtn("ATTACK", 1, function() PageAttack.Visible = true; PageVisuals.Visible = false end)
+    CreateTabBtn("MONITOR", 2, function() PageAttack.Visible = false; PageVisuals.Visible = true end)
     
      -- DRAG UI
     local dragging, dragInput, dragStart, startPos
@@ -182,11 +269,6 @@ function Nox:CreateUI()
         end
     end)
     UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
-    
-    -- Cleanup Blur on Remove
-    Main.AncestryChanged:Connect(function()
-        if not Main.Parent then Blur:Destroy() end
-    end)
 end
 
 Nox:CreateUI()

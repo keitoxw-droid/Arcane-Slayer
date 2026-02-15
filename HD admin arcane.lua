@@ -1,12 +1,12 @@
 --[[
     ╔══════════════════════════════════════════════════════════╗
-    ║       HD ADMIN ARCANE (SINGULARITY v14.0)           ║
-    ║   "L'immobilisation totale par la tempête physique."     ║
+    ║       HD ADMIN ARCANE (EVENT HORIZON v15.0)         ║
+    ║   "L'emprisonnement invisible, l'autorité absolue."      ║
     ╚══════════════════════════════════════════════════════════╝
     
-    Opération : Sovereign Prestige (v24.0) - THE SINGULARITY
-    Engine : Collision-Storm v4.0 (8x8x8 + 0.25 Jitter + High-Density)
-    Fix : Target Residual Movement (Absolute Freeze)
+    Opération : Sovereign Prestige (v25.0) - THE EVENT HORIZON
+    Engine : Invisible Platform v5.0 (15x0.5x15 + Gravity Lock)
+    Fix : Target Movement (Absolute), Visibility (Invisible)
 ]]
 
 -- 1. CONFIGURATION
@@ -32,7 +32,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_Singularity_v24_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_EventHorizon_v25_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -90,7 +90,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR THE SINGULARITY
+-- 3. MOTEUR THE EVENT HORIZON
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -102,8 +102,8 @@ L.Chatted:Connect(function(m)
             if a and isEquipped then
                 State.Shackling = true
                 local oSize = a.Size; local oTrans = a.Transparency
-                -- v24.0: SINGULARITY ENGINE (Collision Storm 8x8x8)
-                a.Size = Vector3.new(8, 8, 8); a.Transparency = 0.5; a.CanCollide = true; a.Massless = false
+                -- v25.0: EVENT HORIZON ENGINE (Invisible Flat Platform 15x0.5x15)
+                a.Size = Vector3.new(15, 0.5, 15); a.Transparency = 1; a.CanCollide = true; a.Massless = false
                 a.CustomPhysicalProperties = PhysicalProperties.new(100, 2, 0, 1, 1)
                 
                 task.spawn(function()
@@ -113,23 +113,25 @@ L.Chatted:Connect(function(m)
                             a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = nil; conn:Disconnect() return 
                         end
                         pcall(function()
-                            -- Stable Detachment: Infinite Weld-Break
+                            -- Zero-Drag Detachment Fix
                             for _, v in pairs(L.Character:GetDescendants()) do
                                 if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then v:Destroy() end
                             end
-                            local targetPos = t.Character.HumanoidRootPart.CFrame
-                            -- v24.0: Collision Storm (0.25 Jitter on all axes)
-                            local jitter = Vector3.new(math.random(-1,1)*0.25, math.random(-1,1)*0.25, math.random(-1,1)*0.25)
-                            a.CFrame = targetPos + jitter
-                            a.AssemblyLinearVelocity = Vector3.zero; a.AssemblyAngularVelocity = Vector3.zero
+                            -- Position Platform 2.85 studs below RootPart to catch feet
+                            local targetRoot = t.Character.HumanoidRootPart
+                            local floorPos = targetRoot.Position - Vector3.new(0, 2.85, 0)
+                            local jitter = Vector3.new(math.random(-1,1)*0.5, 0, math.random(-1,1)*0.5)
+                            a.CFrame = CFrame.new(floorPos + jitter)
+                            -- Gravity Lock: Forced downward velocity
+                            a.AssemblyLinearVelocity = Vector3.new(0, -50, 0); a.AssemblyAngularVelocity = Vector3.zero
                         end)
                     end)
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "THE SINGULARITY", Text = "Absolute Freeze Engaged. Autorité Totale.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "THE EVENT HORIZON", Text = "Absolute Invisible Trap Active.", Duration = 4 })
             elseif a and not isEquipped then
-                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Singularity!", Duration = 5 })
+                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Event Horizon!", Duration = 5 })
             else
-                StarterGui:SetCore("SendNotification", { Title = "ERROR", Text = "No Tool detected!", Duration = 3 })
+                StarterGui:SetCore("SendNotification", { Title = "ERROR", Text = "No Tool/Anchor detected!", Duration = 3 })
             end
         elseif (cmd == "void" or cmd == "v") and t and t.Character then t.Character:Destroy()
         elseif (cmd == "mute" or cmd == "m") and t then State.Muted[t.UserId] = true
@@ -138,12 +140,12 @@ L.Chatted:Connect(function(m)
             StarterGui:SetCore("SendNotification", { Title = "🔱 HD AUTHORITY", Text = "Identity Verified: Arcane Sovereign.", Duration = 4 })
         elseif cmd == "release" or cmd == "r" then
             State.Shackling = false
-            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Field Collapsed. Target Released.", Duration = 4 })
+            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Field Collapsed. Absolute Freedom.", Duration = 4 })
         end
     end)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 SINGULARITY v24.0", Text = "Absolute Physics Freeze Loaded.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 EVENT HORIZON v25.0", Text = "Invisible Physics Lock Loaded.", Duration = 4 })
 _G.ArcaneCleanup = function() ScreenGui:Destroy(); State.Active = false; State.Shackling = false end
-print("🔱 ARCANE: Singularity v24.0 (Absolute Freeze) chargée.")
+print("🔱 ARCANE: Event Horizon v25.0 (Absolute Invisible Freeze) chargée.")

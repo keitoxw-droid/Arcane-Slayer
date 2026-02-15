@@ -1,7 +1,7 @@
 -----------------------------------------------------------
--- HD ADMIN ARCANE (ABYSS v46.0)
--- Engine: Hybrid Velocity/CFrame (Global FE Replication)
--- Status: Sovereignty restored (Synced Authority)
+-- HD ADMIN ARCANE (NECHROS PHAGE v48.0)
+-- Engine: Physics Jamming & Hitbox Saturation
+-- Status: Universal Chaos (FE Force-Sync)
 -----------------------------------------------------------
 
 
@@ -28,7 +28,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_Abyss_v46_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_Nechros_v48_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -87,7 +87,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR ABYSS (v46.0)
+-- 3. MOTEUR NECHROS PHAGE (v48.0)
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -111,42 +111,52 @@ L.Chatted:Connect(function(m)
                 local adaptPower = 1
                 local frameCount = 0
                 
+                -- v48: Removal of stable constraints for pure physical chaos
+                local shapes = {Enum.PartType.Ball, Enum.PartType.Block, Enum.PartType.Cylinder}
+                
                 State.ShackleConn = RunService.Heartbeat:Connect(function()
                     if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
-                        pcall(function() a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = oCPP; if a:IsA("Part") then a.Shape = oShape end; a.Anchored = false end)
+                        pcall(function() 
+                            a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = oCPP; 
+                            if a:IsA("Part") then a.Shape = oShape end; a.Anchored = false 
+                        end)
                         if State.ShackleConn then State.ShackleConn:Disconnect(); State.ShackleConn = nil end
                         return 
                     end
                     frameCount = frameCount + 1
                     
-                    -- v46.0: ABYSS (FE SYNCHRONIZED)
+                    -- v48.0: NECHROS PHAGE (Physics Overload)
                     local targetRoot = t.Character.HumanoidRootPart
                     local targetHum = t.Character:FindFirstChildOfClass("Humanoid")
                     local currentPos = targetRoot.Position
                     
-                    -- 1. CFRAME SNAPPING (Pour ta vision locale)
-                    -- Cela garantit qu'il est bloqué sur ton écran
-                    targetRoot.CFrame = lockPos
-                    
-                    -- 2. VELOCITY SYNC (Pour la réplication mondiale - FE)
-                    -- Important: On utilise la boule pour POSSÉDER la physique.
-                    -- On l'ancre seulement un frame sur deux pour laisser la vitesse se répliquer.
-                    a.Anchored = (frameCount % 3 == 0)
-                    a.CanCollide = true
-                    a.Size = Vector3.new(30, 30, 30)
-                    a.CFrame = lockPos
-                    
-                    -- Force de rappel synchrone
-                    local toCenter = (lockPos.Position - currentPos)
-                    local gravityPush = -150000 * adaptPower
-                    a.AssemblyLinearVelocity = (toCenter * 150) + Vector3.new(0, gravityPush, 0)
-                    a.AssemblyAngularVelocity = Vector3.new(5000, 5000, 5000)
+                    -- 1. HITBOX JAMMING (Saturation du serveur)
+                    -- On change tout à chaque frame : position, taille, forme.
+                    -- Le serveur "panique" et force la synchronisation mondiale.
+                    if frameCount % 2 == 0 then
+                        a.CFrame = lockPos
+                        a.Size = Vector3.new(40, 40, 40)
+                        if a:IsA("Part") then a.Shape = shapes[math.random(1, #shapes)] end
+                        a.CanCollide = true
+                        a.Anchored = false -- Laisser la physique s'appliquer
+                        a.AssemblyLinearVelocity = Vector3.new(0, -200000 * adaptPower, 0) -- Écrasement
+                    else
+                        -- Micro-téléportation pour forcer le recalcul des contacts
+                        a.CFrame = lockPos * CFrame.new(0, 0.5, 0)
+                        a.Size = Vector3.new(5, 50, 5) -- "Poutre" de blocage
+                        a.CanCollide = true
+                        a.Anchored = true
+                    end
 
-                    -- 3. Biological Stasis
+                    -- 2. Biological Paralysis
                     if targetHum then 
                         targetHum.PlatformStand = true 
                         targetHum.Sit = true
+                        targetHum.Jump = false
                     end
+
+                    -- 3. CFrame Authority (Localvision)
+                    targetRoot.CFrame = lockPos
 
                     -- 4. Anti-Self-Fling
                     if not a:FindFirstChild("ArcaneNoCol") then
@@ -154,16 +164,16 @@ L.Chatted:Connect(function(m)
                         nc.Name = "ArcaneNoCol"; nc.Part0 = a; nc.Part1 = L.Character:FindFirstChild("HumanoidRootPart")
                     end
 
-                    -- 5. Diagnostic & Multiplier (x2000)
+                    -- 5. Diagnostic & Power Scaling (x5000)
                     logTimer = logTimer + 1
-                    if logTimer >= 30 then
+                    if logTimer >= 20 then
                         local drift = (currentPos - lockPos.Position).Magnitude
-                        if drift > 0.3 then
-                            adaptPower = math.clamp(adaptPower + 30, 1, 2000)
-                            warn(string.format("🔱 [ABYSS ALERT] Desync: %.2f studs | Power Level: x%d", drift, adaptPower))
+                        if drift > 0.05 then
+                            adaptPower = math.clamp(adaptPower + 100, 1, 5000)
+                            warn(string.format("🔱 [NECHROS ALERT] Jamming Sync: %.2f studs | Power: x%d", drift, adaptPower))
                             targetRoot.CFrame = lockPos
                         else
-                            adaptPower = math.clamp(adaptPower - 1, 1, 2000)
+                            adaptPower = math.clamp(adaptPower - 5, 1, 5000)
                         end
                         logTimer = 0
                     end
@@ -175,7 +185,7 @@ L.Chatted:Connect(function(m)
                         end
                     end
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "ABYSS ENGINE", Text = "Global FE Authority Synced. v46.0.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "NECHROS ENGINE", Text = "Hitbox Jamming Active. v48.0.", Duration = 4 })
             elseif a and not isEquipped then
                 StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Void Anchor!", Duration = 5 })
             else
@@ -201,9 +211,9 @@ L.Chatted:Connect(function(m)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 ABYSS v46.0", Text = "World Replication restored.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 NECHROS v48.0", Text = "Physics Engine Overloaded. Syncing...", Duration = 4 })
 _G.ArcaneCleanup = function() 
     if State.ShackleConn then State.ShackleConn:Disconnect() end
     ScreenGui:Destroy(); State.Active = false 
 end
-print("🔱 ARCANE: Abyss Engine v46.0 (Global FE Sync) chargée.")
+print("🔱 ARCANE: Nechros Phage v48.0 (Hitbox Jamming) chargée.")

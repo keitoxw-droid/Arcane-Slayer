@@ -1,12 +1,12 @@
 --[[
     ╔══════════════════════════════════════════════════════════╗
-    ║       HD ADMIN ARCANE (BLACK HOLE v17.0)            ║
-    ║   "La singularité physique, l'arrêt du temps."           ║
+    ║       HD ADMIN ARCANE (ETHICAL TRUTH v18.0)         ║
+    ║   "La vérité technique, l'autorité simulée."             ║
     ╚══════════════════════════════════════════════════════════╝
     
-    Opération : Sovereign Prestige (v27.0) - THE BLACK HOLE
-    Engine : Velocity-Wave v6.0 (5x5x5 + -1000 Vel + 5000 RPM)
-    Fix : Target Residual Movement (Absolute Freeze)
+    Opération : Sovereign Prestige (v31.0) - THE ETHICAL TRUTH
+    Engine : Kinetic-Inverter v9.0 (Newton Inversion + Resonance Sphere)
+    Fix : Network Authority Boundary (Maximum FE Friction)
 ]]
 
 -- 1. CONFIGURATION
@@ -17,7 +17,7 @@ local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local StarterGui = game:GetService("StarterGui")
 
-local State = { Prefix = ";", Muted = {}, Active = true, Shackling = false }
+local State = { Prefix = ";", Muted = {}, Active = true, ShackleConn = nil }
 _G.ArcaneState = State
 pcall(function() if _G.ArcaneCleanup then _G.ArcaneCleanup() end end)
 
@@ -32,7 +32,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_BlackHole_v27_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_EthicalTruth_v31_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -91,64 +91,74 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR THE BLACK HOLE
+-- 3. MOTEUR THE ETHICAL TRUTH (v31.0)
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
         local args = m:sub(2):split(" "); local cmd = args[1]:lower(); local t_name = args[2]; local t = nil
         if t_name then for _, p in pairs(Players:GetPlayers()) do if p.Name:lower():find(t_name:lower()) or p.DisplayName:lower():find(t_name:lower()) then t = p break end end end
         
+        -- COMMAND: SHACKLE
         if (cmd == "shackle" or cmd == "s") and t then
-            if State.Shackling then State.Shackling = false; task.wait(0.1) end
+            if State.ShackleConn then State.ShackleConn:Disconnect(); State.ShackleConn = nil end
             local a, isEquipped, tool = getAnchor()
             if a and isEquipped then
-                State.Shackling = true
-                local oSize = a.Size; local oTrans = a.Transparency; local oCPP = a.CustomPhysicalProperties
-                -- v27.0: BLACK HOLE Core (Invisible 5x5x5 Concentrated)
-                a.Size = Vector3.new(5, 5, 5); a.Transparency = 1; a.CanCollide = true; a.Massless = false
+                local oSize = a.Size; local oTrans = a.Transparency; local oCPP = a.CustomPhysicalProperties; local oShape = a.Shape
+                -- v31.0: ET ENGINE (Invisible Sphere 12x12x12 + Kinetic Inverter)
+                a.Shape = Enum.PartType.Ball; a.Size = Vector3.new(12, 12, 12); a.Transparency = 1; a.CanCollide = true; a.Massless = false
                 a.CustomPhysicalProperties = PhysicalProperties.new(100, 2, 0, 1, 1)
                 
-                task.spawn(function()
-                    local conn
-                    conn = RunService.RenderStepped:Connect(function()
-                        if not (State.Active and State.Shackling and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
-                            pcall(function() a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = oCPP end)
-                            conn:Disconnect() 
-                            return 
+                State.ShackleConn = RunService.RenderStepped:Connect(function()
+                    if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
+                        pcall(function() a.Size = oSize; a.Transparency = oTrans; a.Shape = oShape; a.CustomPhysicalProperties = oCPP end)
+                        if State.ShackleConn then State.ShackleConn:Disconnect(); State.ShackleConn = nil end
+                        return 
+                    end
+                    pcall(function()
+                        -- Zero-Drag Detachment
+                        for _, v in pairs(L.Character:GetDescendants()) do
+                            if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then v:Destroy() end
                         end
-                        pcall(function()
-                            -- Zero-Drag Infinite Detachment
-                            for _, v in pairs(L.Character:GetDescendants()) do
-                                if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then v:Destroy() end
-                            end
-                            -- v27.0: Velocity Wave (Downward crushing + High Speed Spin)
-                            local targetRoot = t.Character.HumanoidRootPart
-                            local j = Vector3.new(math.random(-1,1)*1.25, math.random(-1,1)*1.25, math.random(-1,1)*1.25)
-                            a.CFrame = CFrame.new(targetRoot.Position + j)
-                            a.AssemblyLinearVelocity = Vector3.new(0, -1000, 0)
-                            a.AssemblyAngularVelocity = Vector3.new(0, 5000, 0)
-                        end)
+                        -- v31.0: Kinetic Inverter Paradox
+                        local targetRoot = t.Character.HumanoidRootPart
+                        local targetVel = targetRoot.AssemblyLinearVelocity
+                        
+                        a.CanCollide = not a.CanCollide -- Strobo-Physics
+                        a.CFrame = CFrame.new(targetRoot.Position + Vector3.new(math.random(-1,1)*0.25, math.random(-1,1)*0.25, math.random(-1,1)*0.25))
+                        -- Newton's Third Law Simulation: Counter-Force
+                        a.AssemblyLinearVelocity = -targetVel * 1.8 
+                        a.AssemblyAngularVelocity = Vector3.new(math.random(-1,1)*5000, 5000, math.random(-1,1)*5000)
                     end)
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "THE BLACK HOLE", Text = "Singularity Engaged. Final Freeze Active.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "ETHICAL TRUTH", Text = "Kinetic Inverter Engaged. Authorities Demo v31.0.", Duration = 4 })
             elseif a and not isEquipped then
-                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Singularity!", Duration = 5 })
+                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start ET Engine!", Duration = 5 })
             else
-                StarterGui:SetCore("SendNotification", { Title = "ERROR", Text = "No Tool detected!", Duration = 3 })
+                StarterGui:SetCore("SendNotification", { Title = "ERROR", Text = "No Anchor found!", Duration = 3 })
             end
+            
+        -- COMMAND: RELEASE
+        elseif cmd == "release" or cmd == "r" or cmd == "stop" then
+            if State.ShackleConn then 
+                State.ShackleConn:Disconnect(); State.ShackleConn = nil 
+                local a = getAnchor()
+                if a then pcall(function() a.Size = Vector3.new(1,1,1); a.Transparency = 0; a.Shape = Enum.PartType.Block end) end
+            end
+            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Project Paused. All Constraints Released.", Duration = 4 })
+            
         elseif (cmd == "void" or cmd == "v") and t and t.Character then t.Character:Destroy()
         elseif (cmd == "mute" or cmd == "m") and t then State.Muted[t.UserId] = true
         elseif cmd == "cmds" then CmdWindow.Visible = not CmdWindow.Visible
         elseif cmd == "badge" then
             StarterGui:SetCore("SendNotification", { Title = "🔱 HD AUTHORITY", Text = "Identity Verified: Arcane Sovereign.", Duration = 4 })
-        elseif cmd == "release" or cmd == "r" or cmd == "stop" then
-            State.Shackling = false
-            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Singularity Field Collapsed.", Duration = 4 })
         end
     end)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 BLACK HOLE v27.0", Text = "Definitive Physics Freeze Loaded.", Duration = 4 })
-_G.ArcaneCleanup = function() ScreenGui:Destroy(); State.Active = false; State.Shackling = false end
-print("🔱 ARCANE: Black Hole v27.0 (Definitive Freeze) chargée.")
+StarterGui:SetCore("SendNotification", { Title = "🔱 ARCANE v31.0", Text = "Newton's Curse Engine Loaded.", Duration = 4 })
+_G.ArcaneCleanup = function() 
+    if State.ShackleConn then State.ShackleConn:Disconnect() end
+    ScreenGui:Destroy(); State.Active = false 
+end
+print("🔱 ARCANE: Ethical Truth v31.0 (Kinetic Inverter) chargée.")

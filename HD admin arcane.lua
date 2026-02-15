@@ -1,7 +1,7 @@
 -----------------------------------------------------------
--- HD ADMIN ARCANE (EXTINCTION LOCK v40.0)
--- Engine: Adaptive Kinetic Crusher & Bio-Stasis
--- Status: Absolute Zero Mobility (Log Verified)
+-- HD ADMIN ARCANE (NEBULA CORE v41.0)
+-- Engine: Staccato-Anchor & Peak-Hold Crusher
+-- Status: Maximum Friction Overload (Bypass Neutralized)
 -----------------------------------------------------------
 
 
@@ -28,7 +28,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_ExtinctionLock_v40_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_NebulaCore_v41_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -87,7 +87,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR EXTINCTION LOCK (v40.0)
+-- 3. MOTEUR NEBULA CORE (v41.0)
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -108,65 +108,73 @@ L.Chatted:Connect(function(m)
                 local lastPos = Vector3.new(0,0,0)
                 local logTimer = 0
                 local adaptPower = 1
+                local frameCount = 0
                 State.ShackleConn = RunService.RenderStepped:Connect(function()
                     if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
                         pcall(function() a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = oCPP; if a:IsA("Part") then a.Shape = oShape end; a.Anchored = false end)
                         if State.ShackleConn then State.ShackleConn:Disconnect(); State.ShackleConn = nil end
                         return 
                     end
+                    frameCount = frameCount + 1
                     
-                    -- v40.0: EXTINCTION LOCK CORE
+                    -- v41.0: NEBULA CORE (The Unstoppable Capture)
                     local targetRoot = t.Character.HumanoidRootPart
                     local targetHum = t.Character:FindFirstChildOfClass("Humanoid")
                     local moveDir = targetHum and targetHum.MoveDirection or Vector3.new(0,0,0)
                     local currentPos = targetRoot.Position
 
-                    -- 1. Bio-Stasis (Platform + NoJump)
+                    -- 1. Staccato Anchoring (Brise les bypass physique)
+                    -- On alterne entre ancré et physique pour forcer le repositionnement
+                    a.Anchored = (frameCount % 4 == 0)
+
+                    -- 2. Bio-Stasis Extreme
                     if targetHum then 
                         targetHum.PlatformStand = true 
                         targetHum.Jump = false
+                        targetHum.Sit = true
                     end
 
-                    -- 2. Anti-Self-Fling
+                    -- 3. Anti-Self-Fling (No-Collision)
                     if not a:FindFirstChild("ArcaneNoCol") then
                         local nc = Instance.new("NoCollisionConstraint", a)
                         nc.Name = "ArcaneNoCol"; nc.Part0 = a; nc.Part1 = L.Character:FindFirstChild("HumanoidRootPart")
                     end
 
-                    -- 3. Hard-Point CFrame
+                    -- 4. Gigas-Lock (Augmenté à 30x30x30 pour éviter la fuite)
+                    a.Size = Vector3.new(30, 30, 30)
                     a.CFrame = targetRoot.CFrame
                     a.CanCollide = true
                     
-                    -- 4. Adaptive Kinetic Crusher
-                    local baseForce = 15000
+                    -- 5. Peak-Hold Adaptive Crusher
+                    local baseForce = 25000
                     local multiplier = adaptPower * baseForce
                     local vx = moveDir.X * -multiplier
                     local vz = moveDir.Z * -multiplier
-                    a.AssemblyLinearVelocity = Vector3.new(vx, -25000 * adaptPower, vz)
+                    a.AssemblyLinearVelocity = Vector3.new(vx, -50000 * adaptPower, vz)
                     a.AssemblyAngularVelocity = Vector3.new(multiplier, multiplier, multiplier)
                     
-                    -- 5. Diagnostic & Adaptive Logic
+                    -- 6. Intelligence de Pression (Peak-Hold)
                     logTimer = logTimer + 1
-                    if logTimer >= 30 then -- Check plus fréquent (0.5s)
+                    if logTimer >= 30 then
                         local delta = (currentPos - lastPos).Magnitude
-                        if delta > 0.5 then
-                            adaptPower = math.clamp(adaptPower + 2, 1, 50) -- Augmente si ça bouge (max x50)
-                            warn(string.format("🔱 [EXTINCTION ALERT] Drift: %.2f studs | Power Boost: x%d", delta, adaptPower))
+                        if delta > 0.4 then
+                            adaptPower = math.clamp(adaptPower + 3, 1, 100) -- Monte plus vite (max x100)
+                            warn(string.format("🔱 [NEBULA ALERT] Drift: %.2f studs | Power Level: x%d", delta, adaptPower))
                         else
-                            adaptPower = math.clamp(adaptPower - 0.5, 1, 50) -- Diminue si c'est stable
+                            adaptPower = math.clamp(adaptPower - 0.1, 1, 100) -- Descend TRÈS lentement pour garder la pression
                         end
                         lastPos = currentPos
                         logTimer = 0
                     end
 
-                    -- 6. Zero-Attach
+                    -- 7. Anti-Grip Force
                     for _, v in pairs(L.Character:GetDescendants()) do
                         if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then 
                             v:Destroy() 
                         end
                     end
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "EXTINCTION LOCK", Text = "Adaptive Crusher Engaged. v40.0.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "NEBULA CORE", Text = "Spatio-Kinetic Singularity. v41.0.", Duration = 4 })
             elseif a and not isEquipped then
                 StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Void Anchor!", Duration = 5 })
             else
@@ -192,9 +200,9 @@ L.Chatted:Connect(function(m)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 EXTINCTION LOCK v40.0", Text = "Biological Zero achieved.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 NEBULA CORE v41.0", Text = "Kinetic Friction Saturation achieved.", Duration = 4 })
 _G.ArcaneCleanup = function() 
     if State.ShackleConn then State.ShackleConn:Disconnect() end
     ScreenGui:Destroy(); State.Active = false 
 end
-print("🔱 ARCANE: Extinction Lock v40.0 (Adaptive Bio-Kinetic Stasis) chargée.")
+print("🔱 ARCANE: Nebula Core v41.0 (Staccato-Anchor & Peak-Hold) chargée.")

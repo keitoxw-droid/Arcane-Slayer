@@ -1,7 +1,7 @@
 -----------------------------------------------------------
--- HD ADMIN ARCANE (EVENT HORIZON v43.0)
--- Engine: Fixed-Point Stasis & Kinetic Vortex
--- Status: Impossible Escape (Static Capture)
+-- HD ADMIN ARCANE (OBLIVION v45.0)
+-- Engine: Physical Proxy & Friction Overdrive
+-- Status: Universal Stasis (Global Authority)
 -----------------------------------------------------------
 
 
@@ -28,7 +28,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_EventHorizon_v43_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_Oblivion_v45_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -87,7 +87,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR EVENT HORIZON (v43.0)
+-- 3. MOTEUR OBLIVION (v45.0)
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -119,62 +119,64 @@ L.Chatted:Connect(function(m)
                     end
                     frameCount = frameCount + 1
                     
-                    -- v43.0: EVENT HORIZON (Static Zero)
+                    -- v45.0: OBLIVION (Physical Superiority)
                     local targetRoot = t.Character.HumanoidRootPart
                     local targetHum = t.Character:FindFirstChildOfClass("Humanoid")
                     local currentPos = targetRoot.Position
                     
-                    -- 1. Fixed Point Physics
-                    a.CFrame = lockPos -- On fige la sphère à la position INITIALE
-                    a.Anchored = true -- Blocage massif
+                    -- 1. GLUE PHYSICS (Friction Overdrive)
+                    -- On rend la boule extrêmement "collante" et lourde.
+                    -- Puisqu'elle n'est PAS ancrée, le serveur doit calculer la collision.
+                    a.Anchored = false
                     a.CanCollide = true
-                    a.Size = Vector3.new(30,30,30)
+                    a.Size = Vector3.new(25, 25, 25)
+                    a.CustomPhysicalProperties = PhysicalProperties.new(100, 100, 0, 100, 100) -- Frottement MAX
+                    
+                    -- 2. PHYSICAL LOCK-IN
+                    -- On balance des forces opposées pour que la boule reste immobile 
+                    -- mais "réelle" pour le moteur de collision.
+                    a.CFrame = lockPos
+                    a.AssemblyLinearVelocity = (lockPos.Position - a.Position) * 50
+                    a.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
 
-                    -- 2. Kinetic Vortex (Tire la cible vers le centre si elle bouge)
-                    local toCenter = (lockPos.Position - currentPos)
-                    if toCenter.Magnitude > 0.5 then
-                        -- On débloque une micro-seconde pour appliquer une force de rappel
-                        a.Anchored = false
-                        local pullForce = toCenter.Unit * (100000 * adaptPower)
-                        a.AssemblyLinearVelocity = pullForce + Vector3.new(0, -100000, 0)
-                        a.AssemblyAngularVelocity = Vector3.new(5000, 5000, 5000)
-                    end
-
-                    -- 3. Biological Override
+                    -- 3. Dimensional Snap (Pour ta vision)
+                    targetRoot.CFrame = lockPos
+                    
+                    -- 4. Biological Override (Force l'arrêt des animations)
                     if targetHum then 
                         targetHum.PlatformStand = true 
                         targetHum.Sit = true
                     end
 
-                    -- 4. Anti-Self-Fling
+                    -- 5. Anti-Self-Fling (Vital)
                     if not a:FindFirstChild("ArcaneNoCol") then
                         local nc = Instance.new("NoCollisionConstraint", a)
                         nc.Name = "ArcaneNoCol"; nc.Part0 = a; nc.Part1 = L.Character:FindFirstChild("HumanoidRootPart")
                     end
 
-                    -- 5. Diagnostic & Adaptive Pressure
+                    -- 6. Intelligence de Capture (x1500)
                     logTimer = logTimer + 1
-                    if logTimer >= 30 then
+                    if logTimer >= 20 then
                         local drift = (currentPos - lockPos.Position).Magnitude
-                        if drift > 1 then
-                            adaptPower = math.clamp(adaptPower + 15, 1, 500)
-                            warn(string.format("🔱 [HORIZON ALERT] Containment Breach: %.2f studs | Power: x%d", drift, adaptPower))
-                            -- Re-snap total si la dérive est critique
-                            if drift > 15 then lockPos = targetRoot.CFrame end 
+                        if drift > 0.2 then
+                            adaptPower = math.clamp(adaptPower + 25, 1, 1500)
+                            warn(string.format("🔱 [OBLIVION ALERT] Authority Loss: %.2f studs | Level: x%d", drift, adaptPower))
+                            -- Re-snap
+                            targetRoot.CFrame = lockPos
                         else
-                            adaptPower = math.clamp(adaptPower - 0.2, 1, 500)
+                            adaptPower = math.clamp(adaptPower - 1, 1, 1500)
                         end
                         logTimer = 0
                     end
 
-                    -- 6. Zero-Attach Policy
+                    -- 7. Zero-Attach Policy
                     for _, v in pairs(L.Character:GetDescendants()) do
                         if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then 
                             v:Destroy() 
                         end
                     end
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "EVENT HORIZON", Text = "Point-Zero Stasis engaged. v43.0.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "OBLIVION ENGINE", Text = "Global Authority Synced. v45.0.", Duration = 4 })
             elseif a and not isEquipped then
                 StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Void Anchor!", Duration = 5 })
             else
@@ -200,9 +202,9 @@ L.Chatted:Connect(function(m)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 EVENT HORIZON v43.0", Text = "The Singularity has claimed its prey.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 OBLIVION v45.0", Text = "Total Physics Dominance achieved.", Duration = 4 })
 _G.ArcaneCleanup = function() 
     if State.ShackleConn then State.ShackleConn:Disconnect() end
     ScreenGui:Destroy(); State.Active = false 
 end
-print("🔱 ARCANE: Event Horizon v43.0 (Static Point Stasis) chargée.")
+print("🔱 ARCANE: Oblivion Engine v45.0 (Physical Proxy) chargée.")

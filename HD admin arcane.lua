@@ -1,7 +1,7 @@
 -----------------------------------------------------------
--- HD ADMIN ARCANE (VOID TETHER v49.0)
--- Engine: Physics Rubberbanding (FE-Impulse Sync)
--- Status: Absolute Shackle (Visible to World)
+-- HD ADMIN ARCANE (SOVEREIGN PARASITE v50.0)
+-- Engine: Character-Anchored Stasis (Absolute FE Authority)
+-- Status: Universal Blockade (Visible & Replicated)
 -----------------------------------------------------------
 
 
@@ -28,7 +28,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_Tether_v49_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_Parasite_v50_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -87,7 +87,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR VOID TETHER (v49.0)
+-- 3. MOTEUR SOVEREIGN PARASITE (v50.0)
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -105,75 +105,58 @@ L.Chatted:Connect(function(m)
                 a.CustomPhysicalProperties = PhysicalProperties.new(100, 100, 0, 100, 100)
                 if a:IsA("Part") then a.Shape = Enum.PartType.Ball end
                 
-                local lockPos = t.Character.HumanoidRootPart.CFrame
-                local lastPos = lockPos.Position
                 local logTimer = 0
-                local adaptPower = 1
+                local originalCFrame = L.Character.HumanoidRootPart.CFrame
                 
+                -- Fonction pour rendre invisible (Local)
+                local function SetInv(v)
+                    for _, part in pairs(L.Character:GetDescendants()) do
+                        if part:IsA("BasePart") or part:IsA("Decal") then
+                            part.Transparency = v and 1 or 0
+                            if part.Name == "HumanoidRootPart" then part.Transparency = 1 end
+                        end
+                    end
+                end
+
                 State.ShackleConn = RunService.Heartbeat:Connect(function()
-                    if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
+                    if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and L.Character:FindFirstChild("HumanoidRootPart")) then 
                         pcall(function() 
-                            a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = oCPP; 
-                            if a:IsA("Part") then a.Shape = oShape end; a.Anchored = false 
+                            L.Character.HumanoidRootPart.Anchored = false
+                            SetInv(false)
                         end)
                         if State.ShackleConn then State.ShackleConn:Disconnect(); State.ShackleConn = nil end
                         return 
                     end
                     
-                    -- v49.0: VOID TETHER (The Rubber-Band Shackle)
+                    -- v50.0: SOVEREIGN PARASITE (The End of FE filtering)
                     local targetRoot = t.Character.HumanoidRootPart
-                    local targetHum = t.Character:FindFirstChildOfClass("Humanoid")
-                    local currentPos = targetRoot.Position
-                    local dist = (currentPos - lockPos.Position).Magnitude
+                    local myRoot = L.Character.HumanoidRootPart
                     
-                    -- 1. TETHER LOGIC (Visible FE)
-                    -- Si la cible essaie de bouger, on lui envoie une impulsion massive vers le centre.
-                    -- Pour Brookhaven, c'est un "choc physique" valide, donc tout le monde le voit.
-                    if dist > 3 then
-                        a.Anchored = false
-                        a.CanCollide = true
-                        a.Size = Vector3.new(20, 20, 20)
-                        
-                        -- On téléporte la boule DERRIÈRE la cible pour la pousser vers le centre
-                        local pullDirection = (lockPos.Position - currentPos).Unit
-                        a.CFrame = CFrame.new(currentPos - (pullDirection * 5))
-                        
-                        -- Coup d'impulsion (C'est ÇA que les autres voient)
-                        a.AssemblyLinearVelocity = pullDirection * (15000 * adaptPower)
-                        a.AssemblyAngularVelocity = Vector3.new(1000, 1000, 1000)
-                    else
-                        -- On attend patiemment qu'il essaie de s'enfuir
-                        a.Anchored = true
-                        a.CFrame = lockPos * CFrame.new(0, -10, 0) -- On se cache sous lui
-                        a.CanCollide = false
-                    end
+                    -- 1. CHARACTER-BASED SHACKLE
+                    -- On ne peut pas bloquer son perso avec un objet ? On le bloque avec LE NOTRE.
+                    -- On se téléporte sur sa tête et on s'ancre. 
+                    -- Comme le serveur te voit comme un joueur "légitime", ton hitbox bloque la cible.
+                    SetInv(true)
+                    myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 2, 0) -- On s'assoit sur sa tête
+                    myRoot.Anchored = true
+                    myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                    
+                    -- 2. Biological Suppression
+                    local h = t.Character:FindFirstChildOfClass("Humanoid")
+                    if h then h.PlatformStand = true; h.Sit = true end
 
-                    -- 2. Biological Paralysis (Client-Side)
-                    if targetHum then 
-                        targetHum.PlatformStand = true 
-                        targetHum.Sit = true
-                    end
-
-                    -- 3. Diagnostic & Adaptive Power
+                    -- 3. Diagnostic
                     logTimer = logTimer + 1
-                    if logTimer >= 15 then
-                        if dist > 5 then
-                            adaptPower = math.clamp(adaptPower + 20, 1, 1500)
-                            warn(string.format("🔱 [TETHER ALERT] Pulling back: %.2f studs | Power: x%d", dist, adaptPower))
-                        else
-                            adaptPower = math.clamp(adaptPower - 1, 1, 1500)
+                    if logTimer >= 30 then
+                        local dist = (myRoot.Position - targetRoot.Position).Magnitude
+                        if dist > 4 then
+                            warn("🔱 [PARASITE ALERT] Target desync! Re-anchoring...")
+                            myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 2, 0)
                         end
                         logTimer = 0
                     end
-
-                    -- 4. Anti-Weld Policy
-                    for _, v in pairs(L.Character:GetDescendants()) do
-                        if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then 
-                            v:Destroy() 
-                        end
-                    end
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "TETHER ENGINE", Text = "Void Shackle Synced. v49.0.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "PARASITE ENGINE", Text = "Sovereign Shackle Active. v50.0.", Duration = 4 })
             elseif a and not isEquipped then
                 StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Void Anchor!", Duration = 5 })
             else
@@ -185,7 +168,7 @@ L.Chatted:Connect(function(m)
             if State.ShackleConn then 
                 State.ShackleConn:Disconnect(); State.ShackleConn = nil 
                 local a = getAnchor()
-                if a then pcall(function() a.Size = Vector3.new(1,1,1); a.Transparency = 0 end) end
+                pcall(function() L.Character.HumanoidRootPart.Anchored = false; for _,v in pairs(L.Character:GetDescendants()) do if v:IsA("BasePart") or v:IsA("Decal") then v.Transparency = (v.Name == "HumanoidRootPart" and 1 or 0) end end end)
             end
             StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Void Field Collapsed. Target Released.", Duration = 4 })
             
@@ -199,9 +182,9 @@ L.Chatted:Connect(function(m)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 TETHER v49.0", Text = "Visible Shackle deployed.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 PARASITE v50.0", Text = "Character Shackle Active.", Duration = 4 })
 _G.ArcaneCleanup = function() 
     if State.ShackleConn then State.ShackleConn:Disconnect() end
     ScreenGui:Destroy(); State.Active = false 
 end
-print("🔱 ARCANE: Void Tether v49.0 (Physics Rubberband) chargée.")
+print("🔱 ARCANE: Sovereign Parasite v50.0 (Ultimate Shackle) chargée.")

@@ -1,3 +1,4 @@
+--[[
     ╔══════════════════════════════════════════════════════════╗
     ║      HD ADMIN ARCANE (EVENT HORIZON v35.0)           ║
     ║   "L'horizon des événements, là où le temps s'arrête."   ║

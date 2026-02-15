@@ -1,7 +1,7 @@
 -----------------------------------------------------------
--- HD ADMIN ARCANE (NECHROS PHAGE v48.0)
--- Engine: Physics Jamming & Hitbox Saturation
--- Status: Universal Chaos (FE Force-Sync)
+-- HD ADMIN ARCANE (VOID TETHER v49.0)
+-- Engine: Physics Rubberbanding (FE-Impulse Sync)
+-- Status: Absolute Shackle (Visible to World)
 -----------------------------------------------------------
 
 
@@ -28,7 +28,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_Nechros_v48_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_Tether_v49_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -87,7 +87,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR NECHROS PHAGE (v48.0)
+-- 3. MOTEUR VOID TETHER (v49.0)
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -109,10 +109,6 @@ L.Chatted:Connect(function(m)
                 local lastPos = lockPos.Position
                 local logTimer = 0
                 local adaptPower = 1
-                local frameCount = 0
-                
-                -- v48: Removal of stable constraints for pure physical chaos
-                local shapes = {Enum.PartType.Ball, Enum.PartType.Block, Enum.PartType.Cylinder}
                 
                 State.ShackleConn = RunService.Heartbeat:Connect(function()
                     if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
@@ -123,69 +119,61 @@ L.Chatted:Connect(function(m)
                         if State.ShackleConn then State.ShackleConn:Disconnect(); State.ShackleConn = nil end
                         return 
                     end
-                    frameCount = frameCount + 1
                     
-                    -- v48.0: NECHROS PHAGE (Physics Overload)
+                    -- v49.0: VOID TETHER (The Rubber-Band Shackle)
                     local targetRoot = t.Character.HumanoidRootPart
                     local targetHum = t.Character:FindFirstChildOfClass("Humanoid")
                     local currentPos = targetRoot.Position
+                    local dist = (currentPos - lockPos.Position).Magnitude
                     
-                    -- 1. HITBOX JAMMING (Saturation du serveur)
-                    -- On change tout à chaque frame : position, taille, forme.
-                    -- Le serveur "panique" et force la synchronisation mondiale.
-                    if frameCount % 2 == 0 then
-                        a.CFrame = lockPos
-                        a.Size = Vector3.new(40, 40, 40)
-                        if a:IsA("Part") then a.Shape = shapes[math.random(1, #shapes)] end
+                    -- 1. TETHER LOGIC (Visible FE)
+                    -- Si la cible essaie de bouger, on lui envoie une impulsion massive vers le centre.
+                    -- Pour Brookhaven, c'est un "choc physique" valide, donc tout le monde le voit.
+                    if dist > 3 then
+                        a.Anchored = false
                         a.CanCollide = true
-                        a.Anchored = false -- Laisser la physique s'appliquer
-                        a.AssemblyLinearVelocity = Vector3.new(0, -200000 * adaptPower, 0) -- Écrasement
+                        a.Size = Vector3.new(20, 20, 20)
+                        
+                        -- On téléporte la boule DERRIÈRE la cible pour la pousser vers le centre
+                        local pullDirection = (lockPos.Position - currentPos).Unit
+                        a.CFrame = CFrame.new(currentPos - (pullDirection * 5))
+                        
+                        -- Coup d'impulsion (C'est ÇA que les autres voient)
+                        a.AssemblyLinearVelocity = pullDirection * (15000 * adaptPower)
+                        a.AssemblyAngularVelocity = Vector3.new(1000, 1000, 1000)
                     else
-                        -- Micro-téléportation pour forcer le recalcul des contacts
-                        a.CFrame = lockPos * CFrame.new(0, 0.5, 0)
-                        a.Size = Vector3.new(5, 50, 5) -- "Poutre" de blocage
-                        a.CanCollide = true
+                        -- On attend patiemment qu'il essaie de s'enfuir
                         a.Anchored = true
+                        a.CFrame = lockPos * CFrame.new(0, -10, 0) -- On se cache sous lui
+                        a.CanCollide = false
                     end
 
-                    -- 2. Biological Paralysis
+                    -- 2. Biological Paralysis (Client-Side)
                     if targetHum then 
                         targetHum.PlatformStand = true 
                         targetHum.Sit = true
-                        targetHum.Jump = false
                     end
 
-                    -- 3. CFrame Authority (Localvision)
-                    targetRoot.CFrame = lockPos
-
-                    -- 4. Anti-Self-Fling
-                    if not a:FindFirstChild("ArcaneNoCol") then
-                        local nc = Instance.new("NoCollisionConstraint", a)
-                        nc.Name = "ArcaneNoCol"; nc.Part0 = a; nc.Part1 = L.Character:FindFirstChild("HumanoidRootPart")
-                    end
-
-                    -- 5. Diagnostic & Power Scaling (x5000)
+                    -- 3. Diagnostic & Adaptive Power
                     logTimer = logTimer + 1
-                    if logTimer >= 20 then
-                        local drift = (currentPos - lockPos.Position).Magnitude
-                        if drift > 0.05 then
-                            adaptPower = math.clamp(adaptPower + 100, 1, 5000)
-                            warn(string.format("🔱 [NECHROS ALERT] Jamming Sync: %.2f studs | Power: x%d", drift, adaptPower))
-                            targetRoot.CFrame = lockPos
+                    if logTimer >= 15 then
+                        if dist > 5 then
+                            adaptPower = math.clamp(adaptPower + 20, 1, 1500)
+                            warn(string.format("🔱 [TETHER ALERT] Pulling back: %.2f studs | Power: x%d", dist, adaptPower))
                         else
-                            adaptPower = math.clamp(adaptPower - 5, 1, 5000)
+                            adaptPower = math.clamp(adaptPower - 1, 1, 1500)
                         end
                         logTimer = 0
                     end
 
-                    -- 6. Zero-Attach Policy
+                    -- 4. Anti-Weld Policy
                     for _, v in pairs(L.Character:GetDescendants()) do
                         if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then 
                             v:Destroy() 
                         end
                     end
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "NECHROS ENGINE", Text = "Hitbox Jamming Active. v48.0.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "TETHER ENGINE", Text = "Void Shackle Synced. v49.0.", Duration = 4 })
             elseif a and not isEquipped then
                 StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Void Anchor!", Duration = 5 })
             else
@@ -211,9 +199,9 @@ L.Chatted:Connect(function(m)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 NECHROS v48.0", Text = "Physics Engine Overloaded. Syncing...", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 TETHER v49.0", Text = "Visible Shackle deployed.", Duration = 4 })
 _G.ArcaneCleanup = function() 
     if State.ShackleConn then State.ShackleConn:Disconnect() end
     ScreenGui:Destroy(); State.Active = false 
 end
-print("🔱 ARCANE: Nechros Phage v48.0 (Hitbox Jamming) chargée.")
+print("🔱 ARCANE: Void Tether v49.0 (Physics Rubberband) chargée.")

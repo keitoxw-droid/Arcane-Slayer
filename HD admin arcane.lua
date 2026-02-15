@@ -1,7 +1,7 @@
 -----------------------------------------------------------
--- HD ADMIN ARCANE (QUANTUM OBSERVATION v39.0)
--- Engine: Omega-Stasis & Movement Tracker
--- Status: Total Immobility (Smart Diagnostic)
+-- HD ADMIN ARCANE (EXTINCTION LOCK v40.0)
+-- Engine: Adaptive Kinetic Crusher & Bio-Stasis
+-- Status: Absolute Zero Mobility (Log Verified)
 -----------------------------------------------------------
 
 
@@ -28,7 +28,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_QuantumObs_v39_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_ExtinctionLock_v40_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -87,7 +87,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR QUANTUM OBSERVATION (v39.0)
+-- 3. MOTEUR EXTINCTION LOCK (v40.0)
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -107,6 +107,7 @@ L.Chatted:Connect(function(m)
                 
                 local lastPos = Vector3.new(0,0,0)
                 local logTimer = 0
+                local adaptPower = 1
                 State.ShackleConn = RunService.RenderStepped:Connect(function()
                     if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
                         pcall(function() a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = oCPP; if a:IsA("Part") then a.Shape = oShape end; a.Anchored = false end)
@@ -114,52 +115,58 @@ L.Chatted:Connect(function(m)
                         return 
                     end
                     
-                    -- v39.0: QUANTUM OBSERVATION CORE
+                    -- v40.0: EXTINCTION LOCK CORE
                     local targetRoot = t.Character.HumanoidRootPart
                     local targetHum = t.Character:FindFirstChildOfClass("Humanoid")
                     local moveDir = targetHum and targetHum.MoveDirection or Vector3.new(0,0,0)
                     local currentPos = targetRoot.Position
 
-                    -- 1. Platform-Stasis (Total Biological Override)
+                    -- 1. Bio-Stasis (Platform + NoJump)
                     if targetHum then 
                         targetHum.PlatformStand = true 
+                        targetHum.Jump = false
                     end
 
-                    -- 2. Anti-Self-Fling (No-Collision)
+                    -- 2. Anti-Self-Fling
                     if not a:FindFirstChild("ArcaneNoCol") then
                         local nc = Instance.new("NoCollisionConstraint", a)
                         nc.Name = "ArcaneNoCol"; nc.Part0 = a; nc.Part1 = L.Character:FindFirstChild("HumanoidRootPart")
                     end
 
-                    -- 3. Position Lock
+                    -- 3. Hard-Point CFrame
                     a.CFrame = targetRoot.CFrame
                     a.CanCollide = true
                     
-                    -- 4. Kinetic Cancellation
-                    local vx = moveDir.X * -5000
-                    local vz = moveDir.Z * -5000
-                    a.AssemblyLinearVelocity = Vector3.new(vx, -8000, vz)
-                    a.AssemblyAngularVelocity = Vector3.new(5000, 5000, 5000)
+                    -- 4. Adaptive Kinetic Crusher
+                    local baseForce = 15000
+                    local multiplier = adaptPower * baseForce
+                    local vx = moveDir.X * -multiplier
+                    local vz = moveDir.Z * -multiplier
+                    a.AssemblyLinearVelocity = Vector3.new(vx, -25000 * adaptPower, vz)
+                    a.AssemblyAngularVelocity = Vector3.new(multiplier, multiplier, multiplier)
                     
-                    -- 5. Smart Movement Logs (Diagnostic v39.0)
+                    -- 5. Diagnostic & Adaptive Logic
                     logTimer = logTimer + 1
-                    if logTimer >= 60 then
+                    if logTimer >= 30 then -- Check plus fréquent (0.5s)
                         local delta = (currentPos - lastPos).Magnitude
-                        if delta > 0.1 then -- On logue seulement si un mouvement est détecté
-                            warn(string.format("🔱 [MOVEMENT DETECTED] Target: %s | Drift: %.3f studs | MoveDir: %s", t.Name, delta, tostring(moveDir)))
+                        if delta > 0.5 then
+                            adaptPower = math.clamp(adaptPower + 2, 1, 50) -- Augmente si ça bouge (max x50)
+                            warn(string.format("🔱 [EXTINCTION ALERT] Drift: %.2f studs | Power Boost: x%d", delta, adaptPower))
+                        else
+                            adaptPower = math.clamp(adaptPower - 0.5, 1, 50) -- Diminue si c'est stable
                         end
                         lastPos = currentPos
                         logTimer = 0
                     end
 
-                    -- 6. Zero-Attach Policy
+                    -- 6. Zero-Attach
                     for _, v in pairs(L.Character:GetDescendants()) do
                         if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then 
                             v:Destroy() 
                         end
                     end
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "QUANTUM OBSERVATION", Text = "Movement Watcher Active. v39.0.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "EXTINCTION LOCK", Text = "Adaptive Crusher Engaged. v40.0.", Duration = 4 })
             elseif a and not isEquipped then
                 StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Void Anchor!", Duration = 5 })
             else
@@ -185,9 +192,9 @@ L.Chatted:Connect(function(m)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 QUANTUM OBSERVATION v39.0", Text = "Sovereign Gaze Engaged.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 EXTINCTION LOCK v40.0", Text = "Biological Zero achieved.", Duration = 4 })
 _G.ArcaneCleanup = function() 
     if State.ShackleConn then State.ShackleConn:Disconnect() end
     ScreenGui:Destroy(); State.Active = false 
 end
-print("🔱 ARCANE: Quantum Observation v39.0 (Stasis & Intelligence) chargée.")
+print("🔱 ARCANE: Extinction Lock v40.0 (Adaptive Bio-Kinetic Stasis) chargée.")

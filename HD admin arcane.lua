@@ -100,8 +100,8 @@ L.Chatted:Connect(function(m)
             local a, isEquipped, tool = getAnchor()
             if a and isEquipped then
                 local oSize = a.Size; local oTrans = a.Transparency; local oCPP = a.CustomPhysicalProperties; local oShape = a.Shape
-                -- v36.0: VOID ANCHOR ENGINE (Sphere XXL 15x15x15)
-                a.Size = Vector3.new(15, 15, 15); a.Transparency = 1; a.CanCollide = true; a.Massless = false
+                -- Point-Zero Engine initialization
+                a.Size = Vector3.new(30, 30, 30); a.Transparency = 1; a.CanCollide = true; a.Massless = false
                 a.CustomPhysicalProperties = PhysicalProperties.new(100, 100, 0, 100, 100)
                 if a:IsA("Part") then a.Shape = Enum.PartType.Ball end
                 
@@ -128,16 +128,16 @@ L.Chatted:Connect(function(m)
                     a.CFrame = lockPos -- On fige la sphère à la position INITIALE
                     a.Anchored = true -- Blocage massif
                     a.CanCollide = true
-                    a.Size = Vector3.new(30, 30, 30)
+                    a.Size = Vector3.new(30,30,30)
 
                     -- 2. Kinetic Vortex (Tire la cible vers le centre si elle bouge)
                     local toCenter = (lockPos.Position - currentPos)
                     if toCenter.Magnitude > 0.5 then
                         -- On débloque une micro-seconde pour appliquer une force de rappel
                         a.Anchored = false
-                        local pullForce = toCenter.Unit * (50000 * adaptPower)
-                        a.AssemblyLinearVelocity = pullForce + Vector3.new(0, -50000, 0)
-                        a.AssemblyAngularVelocity = Vector3.new(1000, 1000, 1000)
+                        local pullForce = toCenter.Unit * (100000 * adaptPower)
+                        a.AssemblyLinearVelocity = pullForce + Vector3.new(0, -100000, 0)
+                        a.AssemblyAngularVelocity = Vector3.new(5000, 5000, 5000)
                     end
 
                     -- 3. Biological Override
@@ -157,12 +157,12 @@ L.Chatted:Connect(function(m)
                     if logTimer >= 30 then
                         local drift = (currentPos - lockPos.Position).Magnitude
                         if drift > 1 then
-                            adaptPower = math.clamp(adaptPower + 10, 1, 300)
+                            adaptPower = math.clamp(adaptPower + 15, 1, 500)
                             warn(string.format("🔱 [HORIZON ALERT] Containment Breach: %.2f studs | Power: x%d", drift, adaptPower))
                             -- Re-snap total si la dérive est critique
-                            if drift > 10 then lockPos = targetRoot.CFrame end 
+                            if drift > 15 then lockPos = targetRoot.CFrame end 
                         else
-                            adaptPower = math.clamp(adaptPower - 0.1, 1, 300)
+                            adaptPower = math.clamp(adaptPower - 0.2, 1, 500)
                         end
                         logTimer = 0
                     end

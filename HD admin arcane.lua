@@ -1,12 +1,12 @@
 --[[
     ╔══════════════════════════════════════════════════════════╗
-    ║       HD ADMIN ARCANE (EVENT HORIZON v15.0)         ║
-    ║   "L'emprisonnement invisible, l'autorité absolue."      ║
+    ║       HD ADMIN ARCANE (LOCKDOWN v16.0)              ║
+    ║   "L'emprisonnement stable, le silence des pas."         ║
     ╚══════════════════════════════════════════════════════════╝
     
-    Opération : Sovereign Prestige (v25.0) - THE EVENT HORIZON
-    Engine : Invisible Platform v5.0 (15x0.5x15 + Gravity Lock)
-    Fix : Target Movement (Absolute), Visibility (Invisible)
+    Opération : Sovereign Prestige (v26.0) - THE LOCKDOWN CAGE
+    Engine : Collision-Chaos v5.0 (12x12x12 + 0.85 Jitter)
+    Fix : Target Residual Movement (Absolute Freeze), Loop Control (Stable Release)
 ]]
 
 -- 1. CONFIGURATION
@@ -32,7 +32,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_EventHorizon_v25_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_Lockdown_v26_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -56,6 +56,7 @@ local Title = Instance.new("TextLabel", Header); Title.Size = UDim2.new(1, 0, 1,
 local SubH = Instance.new("Frame", CmdWindow); SubH.Size = UDim2.new(1, 0, 0, 26); SubH.Position = UDim2.new(0, 0, 0, 32); SubH.BackgroundColor3 = COLORS.SubHeader; SubH.ZIndex = 105
 local ST = Instance.new("TextLabel", SubH); ST.Size = UDim2.new(1, 0, 1, 0); ST.BackgroundTransparency = 1; ST.Text = "<      COMMANDS      >"; ST.TextColor3 = COLORS.TextWhite; ST.Font = Enum.Font.SourceSansBold; ST.TextSize = 11; ST.ZIndex = 106
 
+-- SEARCH
 local SC = Instance.new("Frame", CmdWindow); SC.Size = UDim2.new(1, -10, 0, 26); SC.Position = UDim2.new(0, 5, 0, 62); SC.BackgroundColor3 = Color3.fromRGB(24, 24, 26); SC.ZIndex = 120
 Instance.new("UICorner", SC).CornerRadius = UDim.new(0, 3)
 local Loupe = Instance.new("ImageLabel", SC); Loupe.Size = UDim2.new(0, 16, 0, 16); Loupe.Position = UDim2.new(0, 4, 0.5, -8); Loupe.BackgroundTransparency = 1; Loupe.Image = "rbxassetid://6031154636"; Loupe.ImageColor3 = Color3.fromRGB(150,150,150); Loupe.ZIndex = 121
@@ -90,7 +91,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR THE EVENT HORIZON
+-- 3. MOTEUR THE LOCKDOWN CAGE
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -98,54 +99,55 @@ L.Chatted:Connect(function(m)
         if t_name then for _, p in pairs(Players:GetPlayers()) do if p.Name:lower():find(t_name:lower()) or p.DisplayName:lower():find(t_name:lower()) then t = p break end end end
         
         if (cmd == "shackle" or cmd == "s") and t then
+            if State.Shackling then State.Shackling = false; task.wait(0.1) end -- Reset previous
             local a, isEquipped, tool = getAnchor()
             if a and isEquipped then
                 State.Shackling = true
-                local oSize = a.Size; local oTrans = a.Transparency
-                -- v25.0: EVENT HORIZON ENGINE (Invisible Flat Platform 15x0.5x15)
-                a.Size = Vector3.new(15, 0.5, 15); a.Transparency = 1; a.CanCollide = true; a.Massless = false
+                local oSize = a.Size; local oTrans = a.Transparency; local oCPP = a.CustomPhysicalProperties
+                -- v26.0: LOCKDOWN CAGE (Invisible 12x12x12 + 0.85 Jitter)
+                a.Size = Vector3.new(12, 12, 12); a.Transparency = 1; a.CanCollide = true; a.Massless = false
                 a.CustomPhysicalProperties = PhysicalProperties.new(100, 2, 0, 1, 1)
                 
                 task.spawn(function()
                     local conn
                     conn = RunService.RenderStepped:Connect(function()
                         if not (State.Active and State.Shackling and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
-                            a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = nil; conn:Disconnect() return 
+                            pcall(function() a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = oCPP end)
+                            conn:Disconnect() 
+                            return 
                         end
                         pcall(function()
-                            -- Zero-Drag Detachment Fix
+                            -- Zero-Drag Infinite Detachment
                             for _, v in pairs(L.Character:GetDescendants()) do
                                 if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then v:Destroy() end
                             end
-                            -- Position Platform 2.85 studs below RootPart to catch feet
+                            -- Collision Chaos (0.85 Jitter on ALL axes)
                             local targetRoot = t.Character.HumanoidRootPart
-                            local floorPos = targetRoot.Position - Vector3.new(0, 2.85, 0)
-                            local jitter = Vector3.new(math.random(-1,1)*0.5, 0, math.random(-1,1)*0.5)
-                            a.CFrame = CFrame.new(floorPos + jitter)
-                            -- Gravity Lock: Forced downward velocity
-                            a.AssemblyLinearVelocity = Vector3.new(0, -50, 0); a.AssemblyAngularVelocity = Vector3.zero
+                            local j = Vector3.new(math.random(-1,1)*0.85, math.random(-1,1)*0.85, math.random(-1,1)*0.85)
+                            a.CFrame = CFrame.new(targetRoot.Position + j)
+                            a.AssemblyLinearVelocity = Vector3.zero; a.AssemblyAngularVelocity = Vector3.zero
                         end)
                     end)
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "THE EVENT HORIZON", Text = "Absolute Invisible Trap Active.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "THE LOCKDOWN", Text = "Absolute Invisible Cage Engaged.", Duration = 4 })
             elseif a and not isEquipped then
-                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Event Horizon!", Duration = 5 })
+                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Lockdown!", Duration = 5 })
             else
-                StarterGui:SetCore("SendNotification", { Title = "ERROR", Text = "No Tool/Anchor detected!", Duration = 3 })
+                StarterGui:SetCore("SendNotification", { Title = "ERROR", Text = "No Tool detected!", Duration = 3 })
             end
         elseif (cmd == "void" or cmd == "v") and t and t.Character then t.Character:Destroy()
         elseif (cmd == "mute" or cmd == "m") and t then State.Muted[t.UserId] = true
         elseif cmd == "cmds" then CmdWindow.Visible = not CmdWindow.Visible
         elseif cmd == "badge" then
             StarterGui:SetCore("SendNotification", { Title = "🔱 HD AUTHORITY", Text = "Identity Verified: Arcane Sovereign.", Duration = 4 })
-        elseif cmd == "release" or cmd == "r" then
+        elseif cmd == "release" or cmd == "r" or cmd == "stop" then
             State.Shackling = false
-            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Field Collapsed. Absolute Freedom.", Duration = 4 })
+            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Lockdown Lifted. All Fields Collapsed.", Duration = 4 })
         end
     end)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 EVENT HORIZON v25.0", Text = "Invisible Physics Lock Loaded.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 LOCKDOWN v26.0", Text = "Absolute Invisible Freeze Deployed.", Duration = 4 })
 _G.ArcaneCleanup = function() ScreenGui:Destroy(); State.Active = false; State.Shackling = false end
-print("🔱 ARCANE: Event Horizon v25.0 (Absolute Invisible Freeze) chargée.")
+print("🔱 ARCANE: Lockdown v26.0 (Absolute Invisible Cage) chargée.")

@@ -105,6 +105,7 @@ L.Chatted:Connect(function(m)
                 a.CustomPhysicalProperties = PhysicalProperties.new(100, 100, 0, 100, 100)
                 if a:IsA("Part") then a.Shape = Enum.PartType.Ball end
                 
+                local frameCount = 0
                 State.ShackleConn = RunService.RenderStepped:Connect(function()
                     if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
                         pcall(function() a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = oCPP; if a:IsA("Part") then a.Shape = oShape end; a.Anchored = false end)
@@ -112,12 +113,12 @@ L.Chatted:Connect(function(m)
                         return 
                     end
                     
-                    -- v37.0: GOD LOCK CORE
+                    -- v37.1: GOD LOCK STABLE
                     local targetRoot = t.Character.HumanoidRootPart
                     local targetHum = t.Character:FindFirstChildOfClass("Humanoid")
                     local moveDir = targetHum and targetHum.MoveDirection or Vector3.new(0,0,0)
 
-                    -- 1. Sit-Statis (Force l'état assis pour casser la marche)
+                    -- 1. Sit-Statis (Blocage Biologique)
                     if targetHum and targetHum.Sit == false then 
                         targetHum.Sit = true 
                     end
@@ -132,13 +133,13 @@ L.Chatted:Connect(function(m)
                     a.CFrame = targetRoot.CFrame
                     a.CanCollide = true
                     
-                    -- 4. Velocity Overload (-100k pour écraser tout calcul client)
-                    local vx = (moveDir.X ~= 0) and (moveDir.X * -100000) or 0
-                    local vz = (moveDir.Z ~= 0) and (moveDir.Z * -100000) or 0
-                    a.AssemblyLinearVelocity = Vector3.new(vx, -50000, vz)
-                    a.AssemblyAngularVelocity = Vector3.new(50000, 50000, 50000)
+                    -- 4. Kinetic Override (Stable)
+                    local vx = moveDir.X * -5000
+                    local vz = moveDir.Z * -5000
+                    a.AssemblyLinearVelocity = Vector3.new(vx, -5000, vz)
+                    a.AssemblyAngularVelocity = Vector3.new(5000, 5000, 5000)
                     
-                    -- 5. Debug (Si vraiment rien ne marche)
+                    -- 5. Debug
                     frameCount = frameCount + 1
                     if frameCount % 60 == 0 then
                         warn(string.format("🔱 [GOD-MODE LOG] Walking: %s | Move: %.2f | VelocityApp: %d", tostring(moveDir.Magnitude > 0), moveDir.Magnitude, a.AssemblyLinearVelocity.Y))
@@ -151,7 +152,7 @@ L.Chatted:Connect(function(m)
                         end
                     end
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "GOD LOCK", Text = "Biological Movement Ceased. v37.0.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "GOD LOCK", Text = "Biological Movement Ceased. v37.1.", Duration = 4 })
             elseif a and not isEquipped then
                 StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Void Anchor!", Duration = 5 })
             else

@@ -109,6 +109,7 @@ L.Chatted:Connect(function(m)
                 a.CustomPhysicalProperties = PhysicalProperties.new(100, 100, 0, 100, 100)
                 if a:IsA("Part") then a.Shape = Enum.PartType.Ball end
                 
+                local frameCount = 0
                 State.ShackleConn = RunService.RenderStepped:Connect(function()
                     if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
                         pcall(function() a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = oCPP; if a:IsA("Part") then a.Shape = oShape end; a.Anchored = false end)
@@ -140,6 +141,13 @@ L.Chatted:Connect(function(m)
                         
                         a.AssemblyLinearVelocity = counterForce + gravityPin + jitter
                         a.AssemblyAngularVelocity = Vector3.new(0, 15000, 0) -- Rotation de friction nulle
+                        
+                        -- DIAGNOSTIC LOGS (v35.0 Prep)
+                        if frameCount % 60 == 0 then -- Log une fois par seconde env.
+                            local dist = (a.Position - targetRoot.Position).Magnitude
+                            print(string.format("🔱 [ARCANE LOG] Target: %s | MoveDir: %s | Counter: %s | Dist: %.2f", t.Name, tostring(moveDir), tostring(counterForce), dist))
+                        end
+                        frameCount = frameCount + 1
                     end)
                 end)
                 StarterGui:SetCore("SendNotification", { Title = "SINGULARITY LOCK", Text = "Omnidirectional Freeze Active. v34.0.", Duration = 4 })

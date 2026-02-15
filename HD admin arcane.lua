@@ -1,12 +1,12 @@
 --[[
     ╔═══════════════════════════════════════════════════════════╗
-    ║       HD ADMIN ARCANE (UNIVERSAL v11.1)             ║
-    ║   "L'autorité détecte tout ce qu'elle possède."          ║
+    ║       HD ADMIN ARCANE (ZERO-DRAG v12.0)             ║
+    ║   "Se délier de soi pour mieux lier les autres."         ║
     ╚═══════════════════════════════════════════════════════════╝
     
-    Opération : Sovereign Prestige (v21.1) - UNIVERSAL DETECTION
-    Fix : Tool Detection (Character + Backpack), Anchor Search (Recursive BasePart)
-    Engine : Massive Force Shackle v2.1
+    Opération : Sovereign Prestige (v22.0) - THE FE PINNER
+    Fix : Self-Teleport (Weld Break), Target Freeze (0.05 Jitter)
+    Engine : Zero-Drag Massive Force v2.2
 ]]
 
 -- 1. CONFIGURATION
@@ -32,7 +32,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_Universal_v21_1"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_Pinner_v22_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -44,13 +44,13 @@ local HDStroke = Instance.new("UIStroke", HDButton); HDStroke.Color = Color3.new
 
 -- WINDOW
 local CmdWindow = Instance.new("Frame", ScreenGui)
-CmdWindow.Size = UDim2.new(0, 310, 0, 400); CmdWindow.Position = UDim2.new(0.5, -155, 0.5, -200); CmdWindow.BackgroundColor3 = COLORS.Background; CmdWindow.Visible = false; CmdWindow.Active = true; CmdWindow.ZIndex = 100
+CmdWindow.Size = UDim2.new(0, 310, 0, 400); CmdWindow.Position = UDim2.new(0.5, -155, 0.5, -200); CmdWindow.BackgroundColor3 = COLORS.Background; CmdWindow.Visible = false; CmdWindow.Active = true; CmdWindow.ZIndex = 120
 Instance.new("UICorner", CmdWindow).CornerRadius = UDim.new(0, 4)
 local WindowStroke = Instance.new("UIStroke", CmdWindow); WindowStroke.Color = Color3.new(0,0,0); WindowStroke.Transparency = 0.5; WindowStroke.Thickness = 1.5
 
-local Header = Instance.new("Frame", CmdWindow); Header.Size = UDim2.new(1, 0, 0, 32); Header.BackgroundColor3 = COLORS.Header; Header.ZIndex = 110
+local Header = Instance.new("Frame", CmdWindow); Header.Size = UDim2.new(1, 0, 0, 32); Header.BackgroundColor3 = COLORS.Header; Header.ZIndex = 130
 Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 4)
-local XBtn = Instance.new("TextButton", Header); XBtn.Size = UDim2.new(0, 32, 1, 0); XBtn.Position = UDim2.new(1, -32, 0, 0); XBtn.BackgroundTransparency = 1; XBtn.Text = "X"; XBtn.TextColor3 = COLORS.TextWhite; XBtn.Font = Enum.Font.SourceSansBold; XBtn.TextSize = 14; XBtn.ZIndex = 115; XBtn.MouseButton1Click:Connect(function() CmdWindow.Visible = false end)
+local XBtn = Instance.new("TextButton", Header); XBtn.Size = UDim2.new(0, 32, 1, 0); XBtn.Position = UDim2.new(1, -32, 0, 0); XBtn.BackgroundTransparency = 1; XBtn.Text = "X"; XBtn.TextColor3 = COLORS.TextWhite; XBtn.Font = Enum.Font.SourceSansBold; XBtn.TextSize = 14; XBtn.ZIndex = 131; XBtn.MouseButton1Click:Connect(function() CmdWindow.Visible = false end)
 local Title = Instance.new("TextLabel", Header); Title.Size = UDim2.new(1, 0, 1, 0); Title.BackgroundTransparency = 1; Title.Text = "COMMANDS"; Title.TextColor3 = COLORS.TextWhite; Title.Font = Enum.Font.SourceSansBold; Title.TextSize = 14; Title.ZIndex = 111
 
 local SubH = Instance.new("Frame", CmdWindow); SubH.Size = UDim2.new(1, 0, 0, 26); SubH.Position = UDim2.new(0, 0, 0, 32); SubH.BackgroundColor3 = COLORS.SubHeader; SubH.ZIndex = 105
@@ -59,8 +59,8 @@ local ST = Instance.new("TextLabel", SubH); ST.Size = UDim2.new(1, 0, 1, 0); ST.
 -- SEARCH
 local SC = Instance.new("Frame", CmdWindow); SC.Size = UDim2.new(1, -10, 0, 26); SC.Position = UDim2.new(0, 5, 0, 62); SC.BackgroundColor3 = Color3.fromRGB(24, 24, 26); SC.ZIndex = 120
 Instance.new("UICorner", SC).CornerRadius = UDim.new(0, 3)
-local SB = Instance.new("TextBox", SC); SB.Size = UDim2.new(1, -24, 1, 0); SB.Position = UDim2.new(0, 24, 0, 0); SB.BackgroundTransparency = 1; SB.TextColor3 = COLORS.TextWhite; SB.Font = Enum.Font.SourceSans; SB.TextSize = 13; SB.PlaceholderText = "Search"; SB.Text = ""; SB.TextXAlignment = Enum.TextXAlignment.Left; SB.ZIndex = 121
 local Loupe = Instance.new("ImageLabel", SC); Loupe.Size = UDim2.new(0, 16, 0, 16); Loupe.Position = UDim2.new(0, 4, 0.5, -8); Loupe.BackgroundTransparency = 1; Loupe.Image = "rbxassetid://6031154636"; Loupe.ImageColor3 = Color3.fromRGB(150,150,150); Loupe.ZIndex = 121
+local SB = Instance.new("TextBox", SC); SB.Size = UDim2.new(1, -24, 1, 0); SB.Position = UDim2.new(0, 24, 0, 0); SB.BackgroundTransparency = 1; SB.TextColor3 = COLORS.TextWhite; SB.Font = Enum.Font.SourceSans; SB.TextSize = 13; SB.PlaceholderText = "Search"; SB.Text = ""; SB.TextXAlignment = Enum.TextXAlignment.Left; SB.ZIndex = 121
 
 local List = Instance.new("ScrollingFrame", CmdWindow); List.Size = UDim2.new(1, -10, 1, -100); List.Position = UDim2.new(0, 5, 0, 93); List.BackgroundTransparency = 1; List.ScrollBarThickness = 5; List.ZIndex = 120; List.AutomaticCanvasSize = Enum.AutomaticSize.Y
 Instance.new("UIListLayout", List).SortOrder = Enum.SortOrder.LayoutOrder
@@ -82,7 +82,7 @@ end)
 local dS, sP, dG; Header.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dG = true; dS = i.Position; sP = CmdWindow.Position; i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then dG = false end end) end end)
 UIS.InputChanged:Connect(function(i) if dG and i.UserInputType == Enum.UserInputType.MouseMovement then local d = i.Position - dS; CmdWindow.Position = UDim2.new(sP.X.Scale, sP.X.Offset + d.X, sP.Y.Scale, sP.Y.Offset + d.Y) end end)
 
--- PHYSICS SEARCH (v2.1)
+-- PHYSICS ANCHOR DETECTOR
 local function getAnchor()
     local t = L.Character and L.Character:FindFirstChildOfClass("Tool")
     if t then return t:FindFirstChild("Handle") or t:FindFirstChildWhichIsA("BasePart"), true end
@@ -91,7 +91,7 @@ local function getAnchor()
     return nil, false
 end
 
--- 3. MOTEUR
+-- 3. MOTEUR ZERO-DRAG
 L.Chatted:Connect(function(m)
     if not State.Active or m:sub(1,1) ~= ";" then return end
     local args = m:sub(2):split(" "); local cmd = args[1]:lower(); local t_name = args[2]; local t = nil
@@ -100,13 +100,21 @@ L.Chatted:Connect(function(m)
     if (cmd == "shackle" or cmd == "s") and t then
         local a, isEquipped = getAnchor()
         if a and isEquipped then
+            -- v22.0: Detach from hand to stop self-teleport
+            for _, v in pairs(L.Character:GetDescendants()) do
+                if v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D") then
+                    if v.Part0 == a or v.Part1 == a or v.Name:find("Grip") then v:Destroy() end
+                end
+            end
+            
             task.spawn(function()
                 local conn
                 conn = RunService.RenderStepped:Connect(function()
                     if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then conn:Disconnect() return end
                     pcall(function()
                         local targetPos = t.Character.HumanoidRootPart.CFrame
-                        local jitter = Vector3.new(math.random(-1,1)*0.01, math.random(-1,1)*0.01, math.random(-1,1)*0.01)
+                        -- v22.0: Incrased Jitter for Hard Freeze
+                        local jitter = Vector3.new(math.random(-1,1)*0.05, math.random(-1,1)*0.05, math.random(-1,1)*0.05)
                         a.CFrame = targetPos + jitter
                         a.AssemblyLinearVelocity = Vector3.zero
                         a.AssemblyAngularVelocity = Vector3.zero
@@ -114,7 +122,7 @@ L.Chatted:Connect(function(m)
                 end)
             end)
         elseif a and not isEquipped then
-            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to activate Shackle!", Duration = 5 })
+            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to activate Zero-Drag Shackle!", Duration = 5 })
         else
             StarterGui:SetCore("SendNotification", { Title = "ERROR", Text = "No Tool/Caddie detected!", Duration = 3 })
         end
@@ -126,5 +134,5 @@ L.Chatted:Connect(function(m)
     end
 end)
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 DETECTION FIXED", Text = "Universal Anchor Engine v21.1 Deployed.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 ZERO-DRAG", Text = "Sovereign v22.0 FE Pinner Deployed.", Duration = 4 })
 _G.ArcaneCleanup = function() ScreenGui:Destroy(); State.Active = false end

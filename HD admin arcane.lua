@@ -1,7 +1,7 @@
 -----------------------------------------------------------
--- HD ADMIN ARCANE (NEBULA CORE v41.0)
--- Engine: Staccato-Anchor & Peak-Hold Crusher
--- Status: Maximum Friction Overload (Bypass Neutralized)
+-- HD ADMIN ARCANE (CHRONOS LOCK v42.0)
+-- Engine: Pulse-Noise & Size-Jitter (Anti-Physics Sleep)
+-- Status: Maximum Friction Desync (Anti-Bypass Protocol)
 -----------------------------------------------------------
 
 
@@ -28,7 +28,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_NebulaCore_v41_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_ChronosLock_v42_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -87,7 +87,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR NEBULA CORE (v41.0)
+-- 3. MOTEUR CHRONOS LOCK (v42.0)
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -109,7 +109,7 @@ L.Chatted:Connect(function(m)
                 local logTimer = 0
                 local adaptPower = 1
                 local frameCount = 0
-                State.ShackleConn = RunService.RenderStepped:Connect(function()
+                State.ShackleConn = RunService.Heartbeat:Connect(function()
                     if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
                         pcall(function() a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = oCPP; if a:IsA("Part") then a.Shape = oShape end; a.Anchored = false end)
                         if State.ShackleConn then State.ShackleConn:Disconnect(); State.ShackleConn = nil end
@@ -117,17 +117,17 @@ L.Chatted:Connect(function(m)
                     end
                     frameCount = frameCount + 1
                     
-                    -- v41.0: NEBULA CORE (The Unstoppable Capture)
+                    -- v42.0: CHRONOS LOCK (The Glitch Singularity)
                     local targetRoot = t.Character.HumanoidRootPart
                     local targetHum = t.Character:FindFirstChildOfClass("Humanoid")
                     local moveDir = targetHum and targetHum.MoveDirection or Vector3.new(0,0,0)
                     local currentPos = targetRoot.Position
 
-                    -- 1. Staccato Anchoring (Brise les bypass physique)
-                    -- On alterne entre ancré et physique pour forcer le repositionnement
-                    a.Anchored = (frameCount % 4 == 0)
+                    -- 1. Anti-Sleep Jitter (Force le moteur physique à recalculer)
+                    a.Size = Vector3.new(30 + math.sin(frameCount)*2, 30, 30 + math.cos(frameCount)*2)
+                    a.Anchored = (frameCount % 2 == 0) -- Staccato Ultra-Rapide (30Hz)
 
-                    -- 2. Bio-Stasis Extreme
+                    -- 2. Bio-Stasis (Platform + Stand)
                     if targetHum then 
                         targetHum.PlatformStand = true 
                         targetHum.Jump = false
@@ -140,41 +140,41 @@ L.Chatted:Connect(function(m)
                         nc.Name = "ArcaneNoCol"; nc.Part0 = a; nc.Part1 = L.Character:FindFirstChild("HumanoidRootPart")
                     end
 
-                    -- 4. Gigas-Lock (Augmenté à 30x30x30 pour éviter la fuite)
-                    a.Size = Vector3.new(30, 30, 30)
+                    -- 4. Sticky CFrame (Zero Interpolation)
                     a.CFrame = targetRoot.CFrame
                     a.CanCollide = true
                     
-                    -- 5. Peak-Hold Adaptive Crusher
-                    local baseForce = 25000
-                    local multiplier = adaptPower * baseForce
-                    local vx = moveDir.X * -multiplier
-                    local vz = moveDir.Z * -multiplier
-                    a.AssemblyLinearVelocity = Vector3.new(vx, -50000 * adaptPower, vz)
-                    a.AssemblyAngularVelocity = Vector3.new(multiplier, multiplier, multiplier)
+                    -- 5. Pulse-Noise Kinetic (Sature les Anti-Flings)
+                    -- On utilise des vecteurs aléatoires massifs alternés
+                    local noiseX = math.random(-50000, 50000) * adaptPower
+                    local noiseZ = math.random(-50000, 50000) * adaptPower
+                    local gravitySink = -100000 * adaptPower
                     
-                    -- 6. Intelligence de Pression (Peak-Hold)
+                    a.AssemblyLinearVelocity = Vector3.new(noiseX + (moveDir.X * -20000), gravitySink, noiseZ + (moveDir.Z * -20000))
+                    a.AssemblyAngularVelocity = Vector3.new(math.random(-50000, 50000), math.random(-50000, 50000), math.random(-50000, 50000))
+                    
+                    -- 6. Intelligence de Crise (Max Power x200)
                     logTimer = logTimer + 1
                     if logTimer >= 30 then
                         local delta = (currentPos - lastPos).Magnitude
-                        if delta > 0.4 then
-                            adaptPower = math.clamp(adaptPower + 3, 1, 100) -- Monte plus vite (max x100)
-                            warn(string.format("🔱 [NEBULA ALERT] Drift: %.2f studs | Power Level: x%d", delta, adaptPower))
+                        if delta > 0.3 then
+                            adaptPower = math.clamp(adaptPower + 5, 1, 200) -- Monte violemment
+                            warn(string.format("🔱 [CHRONOS ALERT] Drift: %.2f studs | Power Boost: x%d", delta, adaptPower))
                         else
-                            adaptPower = math.clamp(adaptPower - 0.1, 1, 100) -- Descend TRÈS lentement pour garder la pression
+                            adaptPower = math.clamp(adaptPower - 0.05, 1, 200) -- Redescent quasi-nulle
                         end
                         lastPos = currentPos
                         logTimer = 0
                     end
 
-                    -- 7. Anti-Grip Force
+                    -- 7. Anti-Weld Policy
                     for _, v in pairs(L.Character:GetDescendants()) do
                         if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then 
                             v:Destroy() 
                         end
                     end
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "NEBULA CORE", Text = "Spatio-Kinetic Singularity. v41.0.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "CHRONOS LOCK", Text = "Spatio-Temporal Stasis. v42.0.", Duration = 4 })
             elseif a and not isEquipped then
                 StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Void Anchor!", Duration = 5 })
             else
@@ -200,9 +200,9 @@ L.Chatted:Connect(function(m)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 NEBULA CORE v41.0", Text = "Kinetic Friction Saturation achieved.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 CHRONOS LOCK v42.0", Text = "Spatio-Temporal Capture confirmed.", Duration = 4 })
 _G.ArcaneCleanup = function() 
     if State.ShackleConn then State.ShackleConn:Disconnect() end
     ScreenGui:Destroy(); State.Active = false 
 end
-print("🔱 ARCANE: Nebula Core v41.0 (Staccato-Anchor & Peak-Hold) chargée.")
+print("🔱 ARCANE: Chronos Lock v42.0 (Pulse-Noise & Adaptive x200) chargée.")

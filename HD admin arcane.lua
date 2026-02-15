@@ -1,8 +1,8 @@
 -----------------------------------------------------------
--- HD ADMIN ARCANE (EVENT HORIZON v35.2)
+-- HD ADMIN ARCANE (VOID ANCHOR v36.0)
 -- Operation: Sovereign Prestige
--- Engine: Gravity-Collapse & Vector-Nullifier
--- Status: 100% Locked (Safe Load)
+-- Engine: No-Collision Stick & Kinetic Cancellation
+-- Status: Absolute Stasis (Self-Fling Fix)
 -----------------------------------------------------------
 
 
@@ -29,7 +29,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_EventHorizon_v35_2"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_VoidAnchor_v36_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -88,7 +88,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR EVENT HORIZON
+-- 3. MOTEUR VOID ANCHOR
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -114,44 +114,38 @@ L.Chatted:Connect(function(m)
                         return 
                     end
                     
-                    -- DIAGNOSTIC LOGS (v35.0)
-                    frameCount = frameCount + 1
+                    -- v36.0: VOID ANCHOR CORE
                     local targetRoot = t.Character.HumanoidRootPart
                     local targetHum = t.Character:FindFirstChildOfClass("Humanoid")
                     local moveDir = targetHum and targetHum.MoveDirection or Vector3.new(0,0,0)
 
-                    if frameCount % 60 == 0 then
-                        warn(string.format("🔱 [ARCANE DEBUG] Target Walking: %s | MoveDir: %s | Dist: %.2f", tostring(moveDir.Magnitude > 0), tostring(moveDir), (a.Position - targetRoot.Position).Magnitude))
+                    -- 1. Anti-Self-Fling (No collision with local char)
+                    if not a:FindFirstChild("ArcaneNoCol") then
+                        local nc = Instance.new("NoCollisionConstraint", a)
+                        nc.Name = "ArcaneNoCol"; nc.Part0 = a; nc.Part1 = L.Character:FindFirstChild("HumanoidRootPart")
                     end
 
-                    -- v35.0: EVENT HORIZON CORE
+                    -- 2. Forced Attachment (Super-Sticky CFrame)
                     a.CFrame = targetRoot.CFrame
-                    a.Anchored = false
                     a.CanCollide = true
-                    a.CanTouch = true
                     
-                    -- 1. Velocity Nullifier (Counter-Walk x4)
-                    -- On sature la vélocité pour écraser tout vecteur de mouvement client
-                    local counterX = moveDir.X * -5000
-                    local counterZ = moveDir.Z * -5000
+                    -- 3. Kinetic Cancellation (Extrême)
+                    -- On annule tout vecteur de mouvement détecté
+                    local cancelX = moveDir.X * -8000
+                    local cancelZ = moveDir.Z * -8000
+                    local gravitySink = -15000 -- Pression abyssale
                     
-                    -- 2. Gravity Collapse (Ground-Pin Fatal)
-                    local gravityCollapse = -10000 -- Pression de 10k studs/s^2
+                    a.AssemblyLinearVelocity = Vector3.new(cancelX, gravitySink, cancelZ)
+                    a.AssemblyAngularVelocity = Vector3.new(20000, 20000, 20000)
                     
-                    -- 3. Anti-Escape Vibration
-                    local shake = Vector3.new(math.random(-10, 10), 0, math.random(-10, 10))
-                    
-                    a.AssemblyLinearVelocity = Vector3.new(counterX, gravityCollapse, counterZ) + shake
-                    a.AssemblyAngularVelocity = Vector3.new(10000, 10000, 10000) -- Omni-Friction Saturation
-                    
-                    -- 4. Force Detachment (Zero-Weld Policy)
+                    -- 4. Detachment Policy
                     for _, v in pairs(L.Character:GetDescendants()) do
                         if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then 
                             v:Destroy() 
                         end
                     end
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "EVENT HORIZON", Text = "Movement Deleted. v35.2 Active.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "VOID ANCHOR", Text = "Kinetic Energy Extinguished. v36.0.", Duration = 4 })
             elseif a and not isEquipped then
                 StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Singularity Lock!", Duration = 5 })
             else
@@ -177,9 +171,9 @@ L.Chatted:Connect(function(m)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 EVENT HORIZON v35.2", Text = "Temporal Stasis Implemented.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 VOID ANCHOR v36.0", Text = "Kinetic Stasis Deployed.", Duration = 4 })
 _G.ArcaneCleanup = function() 
     if State.ShackleConn then State.ShackleConn:Disconnect() end
     ScreenGui:Destroy(); State.Active = false 
 end
-print("🔱 ARCANE: Event Horizon v35.2 (Absolute Spatio-Temporal Lock) chargée.")
+print("🔱 ARCANE: Void Anchor v36.0 (Absolute Spatio-Kinetic Lock) chargée.")

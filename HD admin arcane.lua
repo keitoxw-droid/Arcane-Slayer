@@ -1,7 +1,7 @@
 -----------------------------------------------------------
--- HD ADMIN ARCANE (SOVEREIGN PARASITE v50.0)
--- Engine: Character-Anchored Stasis (Absolute FE Authority)
--- Status: Universal Blockade (Visible & Replicated)
+-- HD ADMIN ARCANE (ARCANE ZERO v51.0)
+-- Engine: Client Nullification & Reality Collapse
+-- Status: Forbidden Command (100% OP - Anti-Predator)
 -----------------------------------------------------------
 
 
@@ -28,7 +28,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_Parasite_v50_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_Zero_v51_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -87,7 +87,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR SOVEREIGN PARASITE (v50.0)
+-- 3. MOTEUR ARCANE ZERO (v51.0)
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -106,57 +106,63 @@ L.Chatted:Connect(function(m)
                 if a:IsA("Part") then a.Shape = Enum.PartType.Ball end
                 
                 local logTimer = 0
-                local originalCFrame = L.Character.HumanoidRootPart.CFrame
+                local adaptPower = 1
                 
-                -- Fonction pour rendre invisible (Local)
-                local function SetInv(v)
-                    for _, part in pairs(L.Character:GetDescendants()) do
-                        if part:IsA("BasePart") or part:IsA("Decal") then
-                            part.Transparency = v and 1 or 0
-                            if part.Name == "HumanoidRootPart" then part.Transparency = 1 end
-                        end
-                    end
-                end
-
                 State.ShackleConn = RunService.Heartbeat:Connect(function()
-                    if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and L.Character:FindFirstChild("HumanoidRootPart")) then 
+                    if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
                         pcall(function() 
-                            L.Character.HumanoidRootPart.Anchored = false
-                            SetInv(false)
+                            a.Size = Vector3.new(1,1,1); a.Transparency = 0; a.Anchored = false 
                         end)
                         if State.ShackleConn then State.ShackleConn:Disconnect(); State.ShackleConn = nil end
                         return 
                     end
                     
-                    -- v50.0: SOVEREIGN PARASITE (The End of FE filtering)
+                    -- v51.0: ARCANE ZERO (The Forbidden Shackle)
                     local targetRoot = t.Character.HumanoidRootPart
-                    local myRoot = L.Character.HumanoidRootPart
+                    local targetHum = t.Character:FindFirstChildOfClass("Humanoid")
                     
-                    -- 1. CHARACTER-BASED SHACKLE
-                    -- On ne peut pas bloquer son perso avec un objet ? On le bloque avec LE NOTRE.
-                    -- On se téléporte sur sa tête et on s'ancre. 
-                    -- Comme le serveur te voit comme un joueur "légitime", ton hitbox bloque la cible.
-                    SetInv(true)
-                    myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 2, 0) -- On s'assoit sur sa tête
-                    myRoot.Anchored = true
-                    myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                    -- 1. CLIENT NULLIFICATION (Logic Lock)
+                    -- On crée un paradoxe de collision à l'intérieur de SA hitbox.
+                    -- Son processeur va essayer de calculer des millions de contacts.
+                    -- Ça va faire ramer son jeu à 0 FPS ou le faire crasher.
+                    a.Anchored = false
+                    a.CanCollide = true
+                    a.Transparency = 0.5 -- Aspect "Glitch"
+                    a.Color = Color3.new(0,0,0) -- Sphère Noire
+                    a.Material = Enum.Material.Neon
                     
-                    -- 2. Biological Suppression
-                    local h = t.Character:FindFirstChildOfClass("Humanoid")
-                    if h then h.PlatformStand = true; h.Sit = true end
+                    -- Chaos de taille (Force le recalcul constant de l'AABB)
+                    local frameSize = 30 + (math.sin(tick() * 50) * 10)
+                    a.Size = Vector3.new(frameSize, frameSize, frameSize)
+                    if a:IsA("Part") then a.Shape = Enum.PartType.Cylinder end -- Forme complexe pour le moteur
+                    
+                    -- On reste DANS son torse
+                    a.CFrame = targetRoot.CFrame * CFrame.Angles(math.random(), math.random(), math.random())
+                    
+                    -- Impulsion de saturation (Vitesse infinie pour casser le solveur)
+                    a.AssemblyLinearVelocity = Vector3.new(0, 500000, 0)
+                    a.AssemblyAngularVelocity = Vector3.new(500000, 500000, 500000)
+                    
+                    -- 2. Biological Shutdown (Local)
+                    if targetHum then 
+                        targetHum.PlatformStand = true 
+                        targetHum.Sit = true
+                    end
 
-                    -- 3. Diagnostic
+                    -- 3. Anti-Self-Fling (Crucial pour ne pas crash TOI)
+                    if not a:FindFirstChild("ArcaneZeroLink") then
+                        local nc = Instance.new("NoCollisionConstraint", a)
+                        nc.Name = "ArcaneZeroLink"; nc.Part0 = a; nc.Part1 = L.Character:FindFirstChild("HumanoidRootPart")
+                    end
+
+                    -- 4. Status
                     logTimer = logTimer + 1
-                    if logTimer >= 30 then
-                        local dist = (myRoot.Position - targetRoot.Position).Magnitude
-                        if dist > 4 then
-                            warn("🔱 [PARASITE ALERT] Target desync! Re-anchoring...")
-                            myRoot.CFrame = targetRoot.CFrame * CFrame.new(0, 2, 0)
-                        end
+                    if logTimer >= 40 then
+                        warn("🔱 [ARCANE ZERO] Reality Collapsing on Target... Client response dropping.")
                         logTimer = 0
                     end
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "PARASITE ENGINE", Text = "Sovereign Shackle Active. v50.0.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "ARCANE ZERO", Text = "Reality Dissolved. Target is NULL. v51.0.", Duration = 4 })
             elseif a and not isEquipped then
                 StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Void Anchor!", Duration = 5 })
             else
@@ -168,7 +174,7 @@ L.Chatted:Connect(function(m)
             if State.ShackleConn then 
                 State.ShackleConn:Disconnect(); State.ShackleConn = nil 
                 local a = getAnchor()
-                pcall(function() L.Character.HumanoidRootPart.Anchored = false; for _,v in pairs(L.Character:GetDescendants()) do if v:IsA("BasePart") or v:IsA("Decal") then v.Transparency = (v.Name == "HumanoidRootPart" and 1 or 0) end end end)
+                if a then pcall(function() a.Size = Vector3.new(1,1,1); a.Transparency = 0; a.Anchored = false end) end
             end
             StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Void Field Collapsed. Target Released.", Duration = 4 })
             
@@ -182,9 +188,9 @@ L.Chatted:Connect(function(m)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 PARASITE v50.0", Text = "Character Shackle Active.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 ARCANE ZERO v51.0", Text = "Forbidden Command Deployed.", Duration = 4 })
 _G.ArcaneCleanup = function() 
     if State.ShackleConn then State.ShackleConn:Disconnect() end
     ScreenGui:Destroy(); State.Active = false 
 end
-print("🔱 ARCANE: Sovereign Parasite v50.0 (Ultimate Shackle) chargée.")
+print("🔱 ARCANE: ZERO Engine v51.0 (Reality Collapse) chargée.")

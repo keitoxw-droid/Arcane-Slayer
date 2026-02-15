@@ -1,8 +1,7 @@
 -----------------------------------------------------------
--- HD ADMIN ARCANE (VOID ANCHOR v36.0)
--- Operation: Sovereign Prestige
--- Engine: No-Collision Stick & Kinetic Cancellation
--- Status: Absolute Stasis (Self-Fling Fix)
+-- HD ADMIN ARCANE (GOD LOCK v37.0)
+-- Engine: Sit-Stasis & Velocity Overload
+-- Status: Impossible Movement (Hybrid Protocol)
 -----------------------------------------------------------
 
 
@@ -29,7 +28,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_VoidAnchor_v36_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_GodLock_v37_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -88,7 +87,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR VOID ANCHOR (v36.0)
+-- 3. MOTEUR GOD LOCK (v37.0)
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -113,37 +112,46 @@ L.Chatted:Connect(function(m)
                         return 
                     end
                     
-                    -- v36.0: VOID ANCHOR CORE
+                    -- v37.0: GOD LOCK CORE
                     local targetRoot = t.Character.HumanoidRootPart
                     local targetHum = t.Character:FindFirstChildOfClass("Humanoid")
                     local moveDir = targetHum and targetHum.MoveDirection or Vector3.new(0,0,0)
 
-                    -- 1. Anti-Self-Fling (No collision with local char)
+                    -- 1. Sit-Statis (Force l'état assis pour casser la marche)
+                    if targetHum and targetHum.Sit == false then 
+                        targetHum.Sit = true 
+                    end
+
+                    -- 2. Anti-Self-Fling
                     if not a:FindFirstChild("ArcaneNoCol") then
                         local nc = Instance.new("NoCollisionConstraint", a)
                         nc.Name = "ArcaneNoCol"; nc.Part0 = a; nc.Part1 = L.Character:FindFirstChild("HumanoidRootPart")
                     end
 
-                    -- 2. Forced Attachment (Super-Sticky CFrame)
+                    -- 3. Absolute Pinner
                     a.CFrame = targetRoot.CFrame
                     a.CanCollide = true
                     
-                    -- 3. Kinetic Cancellation (Extreme)
-                    local cancelX = moveDir.X * -8000
-                    local cancelZ = moveDir.Z * -8000
-                    local gravitySink = -15000 
+                    -- 4. Velocity Overload (-100k pour écraser tout calcul client)
+                    local vx = (moveDir.X ~= 0) and (moveDir.X * -100000) or 0
+                    local vz = (moveDir.Z ~= 0) and (moveDir.Z * -100000) or 0
+                    a.AssemblyLinearVelocity = Vector3.new(vx, -50000, vz)
+                    a.AssemblyAngularVelocity = Vector3.new(50000, 50000, 50000)
                     
-                    a.AssemblyLinearVelocity = Vector3.new(cancelX, gravitySink, cancelZ)
-                    a.AssemblyAngularVelocity = Vector3.new(20000, 20000, 20000)
-                    
-                    -- 4. Detachment Policy
+                    -- 5. Debug (Si vraiment rien ne marche)
+                    frameCount = frameCount + 1
+                    if frameCount % 60 == 0 then
+                        warn(string.format("🔱 [GOD-MODE LOG] Walking: %s | Move: %.2f | VelocityApp: %d", tostring(moveDir.Magnitude > 0), moveDir.Magnitude, a.AssemblyLinearVelocity.Y))
+                    end
+
+                    -- 6. Zero-Attach
                     for _, v in pairs(L.Character:GetDescendants()) do
                         if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then 
                             v:Destroy() 
                         end
                     end
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "VOID ANCHOR", Text = "Kinetic Energy Extinguished. v36.0.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "GOD LOCK", Text = "Biological Movement Ceased. v37.0.", Duration = 4 })
             elseif a and not isEquipped then
                 StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Void Anchor!", Duration = 5 })
             else
@@ -169,9 +177,9 @@ L.Chatted:Connect(function(m)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 VOID ANCHOR v36.0", Text = "Kinetic Stasis Deployed.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 GOD LOCK v37.0", Text = "Biological Stasis Deployed.", Duration = 4 })
 _G.ArcaneCleanup = function() 
     if State.ShackleConn then State.ShackleConn:Disconnect() end
     ScreenGui:Destroy(); State.Active = false 
 end
-print("🔱 ARCANE: Void Anchor v36.0 (Absolute Spatio-Kinetic Lock) chargée.")
+print("🔱 ARCANE: God Lock v37.0 (Biological & Spatio-Kinetic Absolute) chargée.")

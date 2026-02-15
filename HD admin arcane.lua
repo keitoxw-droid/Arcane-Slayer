@@ -1,12 +1,12 @@
 --[[
     ╔══════════════════════════════════════════════════════════╗
-    ║      HD ADMIN ARCANE (QUANTUM SATURATION v33.0)      ║
-    ║   "L'arrêt absolu, la physique brisée."              ║
+    ║      HD ADMIN ARCANE (SINGULARITY LOCK v34.0)        ║
+    ║   "L'épingle de fer, le néant du mouvement."         ║
     ╚══════════════════════════════════════════════════════════╝
     
-    Opération : Sovereign Prestige (v33.0) - QUANTUM SATURATION
-    Engine : Anchor-Toggle & Torque Saturation (100% FE Freeze)
-    Status : Ultra-Agressive Physics Override
+    Opération : Sovereign Prestige (v34.0) - SINGULARITY LOCK
+    Engine : Ground-Pin & Velocity Clamp (Absolute Omnidirectional)
+    Status : Iron-Grip Physics Saturation
 ]]
 
 -- 1. CONFIGURATION
@@ -32,7 +32,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_QuantumSaturation_v33_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_SingularityLock_v34_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -91,7 +91,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR QUANTUM SATURATION
+-- 3. MOTEUR SINGULARITY LOCK
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -104,8 +104,8 @@ L.Chatted:Connect(function(m)
             local a, isEquipped, tool = getAnchor()
             if a and isEquipped then
                 local oSize = a.Size; local oTrans = a.Transparency; local oCPP = a.CustomPhysicalProperties; local oShape = a.Shape
-                -- v33.0: QUANTUM SATURATION ENGINE (Sphere XL 12x12x12)
-                a.Size = Vector3.new(12, 12, 12); a.Transparency = 1; a.CanCollide = true; a.Massless = false
+                -- v34.0: SINGULARITY LOCK ENGINE (Sphere XXL 15x15x15)
+                a.Size = Vector3.new(15, 15, 15); a.Transparency = 1; a.CanCollide = true; a.Massless = false
                 a.CustomPhysicalProperties = PhysicalProperties.new(100, 100, 0, 100, 100)
                 if a:IsA("Part") then a.Shape = Enum.PartType.Ball end
                 
@@ -121,26 +121,30 @@ L.Chatted:Connect(function(m)
                             if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then v:Destroy() end
                         end
                         
-                        -- v33.0: Quantum Saturation Core
+                        -- v34.0: Singularity Lock Core
                         local targetRoot = t.Character.HumanoidRootPart
                         local targetHum = t.Character:FindFirstChildOfClass("Humanoid")
                         
                         a.CFrame = targetRoot.CFrame
+                        a.Anchored = false -- Force Desancré pour la physique active
                         
-                        -- 1. Anchor-Toggle Saturation (Brise la réplication)
-                        a.Anchored = not a.Anchored
-                        
-                        -- 2. Impulse Overload (Contre le WalkSpeed)
+                        -- 1. Velocity Clamping (Omnidirectionnel)
                         local moveDir = targetHum and targetHum.MoveDirection or Vector3.new(0,0,0)
-                        a.AssemblyLinearVelocity = (moveDir * -250) + Vector3.new(0, math.random(-500, 500), 0)
+                        local counterForce = moveDir * -1200 -- Contre-poussée immédiate
                         
-                        -- 3. Rotation Lock (Sature la friction)
-                        a.AssemblyAngularVelocity = Vector3.new(0, 10000, 0)
+                        -- 2. Ground Pin (Pression descendante extrême)
+                        local gravityPin = Vector3.new(0, -2500, 0)
+                        
+                        -- 3. Sine Jitter (Vibration de rupture)
+                        local jitter = Vector3.new(math.sin(tick()*60)*4, 0, math.cos(tick()*60)*4)
+                        
+                        a.AssemblyLinearVelocity = counterForce + gravityPin + jitter
+                        a.AssemblyAngularVelocity = Vector3.new(0, 15000, 0) -- Rotation de friction nulle
                     end)
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "QUANTUM SATURATION", Text = "Neural Link Severed. v33.0 Active.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "SINGULARITY LOCK", Text = "Omnidirectional Freeze Active. v34.0.", Duration = 4 })
             elseif a and not isEquipped then
-                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Quantum Saturation!", Duration = 5 })
+                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Singularity Lock!", Duration = 5 })
             else
                 StarterGui:SetCore("SendNotification", { Title = "ERROR", Text = "No Anchor found!", Duration = 3 })
             end
@@ -152,7 +156,7 @@ L.Chatted:Connect(function(m)
                 local a = getAnchor()
                 if a then pcall(function() a.Size = Vector3.new(1,1,1); a.Transparency = 0 end) end
             end
-            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Quantum Field Collapsed. Target Released.", Duration = 4 })
+            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Singularity Field Collapsed. Target Released.", Duration = 4 })
             
         elseif (cmd == "void" or cmd == "v") and t and t.Character then t.Character:Destroy()
         elseif (cmd == "mute" or cmd == "m") and t then State.Muted[t.UserId] = true
@@ -164,9 +168,9 @@ L.Chatted:Connect(function(m)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 QUANTUM SATURATION v33.0", Text = "Neural Desync Engine Deployed.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 SINGULARITY LOCK v34.0", Text = "Iron-Pin Engine Deployed.", Duration = 4 })
 _G.ArcaneCleanup = function() 
     if State.ShackleConn then State.ShackleConn:Disconnect() end
     ScreenGui:Destroy(); State.Active = false 
 end
-print("🔱 ARCANE: Quantum Saturation v33.0 (Absolute Physics Breach) chargée.")
+print("🔱 ARCANE: Singularity Lock v34.0 (Absolute Omnidirectional Freeze) chargée.")

@@ -4,50 +4,56 @@
     ║   "L'autorité est un vêtement que nous tissons en code."  ║
     ╚═══════════════════════════════════════════════════════════╝
     
-    Opération : Sovereign Prestige (v12.8) - RECOVERY ENGINE
-    Fix : Immediate Chat Reset, Ultra-Defensive UI, Boot Logs
+    Opération : Sovereign Prestige (v12.9) - NUCLEAR RECOVERY
+    Fix : Atomic Chat Hook, Safe-Container UI, Desktop Deployment
 ]]
 
-print("🔱 ARCANE [BOOT]: Démarrage...")
-
 -- ═══════════════════════════════════════════════════════════
---  1. RESET CHAT & CLEANUP (PRIORITÉ ABSOLUE)
+--  1. ATOMIC CHAT FIX (DÉBLOQUE LE JEU)
 -- ═══════════════════════════════════════════════════════════
 local TCS = game:GetService("TextChatService")
+local FALLBACK_PROPS = Instance.new("TextChatMessageProperties")
+
 if TCS then
     pcall(function()
         TCS.OnIncomingMessage = function()
-            return Instance.new("TextChatMessageProperties")
+            return FALLBACK_PROPS
         end
     end)
-    print("🔱 ARCANE [BOOT]: Chat Hook débloqué.")
+    print("🔱 ARCANE [NUCLEAR]: Chat Engine débloqué.")
 end
 
-local CoreGui = game:GetService("CoreGui")
+-- ═══════════════════════════════════════════════════════════
+--  2. NETTOYAGE & SERVICES
+-- ═══════════════════════════════════════════════════════════
 local Players = game:GetService("Players")
 local L = Players.LocalPlayer
+local CoreGui = game:GetService("CoreGui")
 
-local function ForceCleanup()
+local function NuclearCleanup()
     if _G.ArcaneCleanup then pcall(_G.ArcaneCleanup) end
-    local targets = {CoreGui, L:FindFirstChild("PlayerGui")}
-    for _, p in pairs(targets) do
-        if p then
-            for _, v in pairs(p:GetChildren()) do
-                if v.Name:find("Arcane") or v.Name:find("Sovereign") then pcall(function() v:Destroy() end) end
+    local names = {"Arcane", "Sovereign"}
+    local containers = {
+        (gethui and gethui()),
+        CoreGui,
+        L:FindFirstChild("PlayerGui")
+    }
+    for _, parent in pairs(containers) do
+        if parent then
+            for _, v in pairs(parent:GetChildren()) do
+                for _, n in pairs(names) do
+                    if v.Name:find(n) then pcall(function() v:Destroy() end) end
+                end
             end
         end
     end
 end
-pcall(ForceCleanup)
-print("🔱 ARCANE [BOOT]: Cleanup terminé.")
+pcall(NuclearCleanup)
 
 -- ═══════════════════════════════════════════════════════════
---  2. ÉTAT GLOBAL
+--  3. ÉTAT & ASSETS
 -- ═══════════════════════════════════════════════════════════
-local State = {
-    Prefix = ";", Shackled = {}, Voided = {}, Muted = {},
-    Commands = {}, Connections = {}, Active = true
-}
+local State = { Prefix = ";", Shackled = {}, Voided = {}, Muted = {}, Commands = {}, Connections = {}, Active = true }
 _G.ArcaneState = State
 
 local RunService = game:GetService("RunService")
@@ -57,26 +63,17 @@ local HD_FONT = Enum.Font.GothamBold
 local HD_COLORS = { Main = Color3.fromRGB(45, 45, 48), Blurple = Color3.fromRGB(74, 144, 226), White = Color3.fromRGB(255, 255, 255) }
 
 -- ═══════════════════════════════════════════════════════════
---  3. INTERFACE (UI) ULTRA-DÉFENSIVE
+--  4. INTERFACE (UI) SAFE-CONTAINER
 -- ═══════════════════════════════════════════════════════════
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ArcaneSovereign_v12.8"
+ScreenGui.Name = "ArcaneSovereign_v12.9"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.DisplayOrder = 10000
 
-local ui_parent = nil
-if pcall(function() ScreenGui.Parent = CoreGui end) then
-    ui_parent = CoreGui
-else
-    ui_parent = L:FindFirstChild("PlayerGui")
-    if ui_parent then ScreenGui.Parent = ui_parent end
-end
+local UI_PARENT = (gethui and gethui()) or (pcall(function() return game:GetService("CoreGui") end) and game:GetService("CoreGui")) or L:WaitForChild("PlayerGui")
+ScreenGui.Parent = UI_PARENT
 
-if not ScreenGui.Parent then 
-    warn("❌ ARCANE [BOOT]: Échec injection UI.")
-    return 
-end
-print("✅ ARCANE [BOOT]: UI injectée dans " .. ScreenGui.Parent.Name)
+print("✅ ARCANE [NUCLEAR]: UI injectée dans " .. (UI_PARENT and UI_PARENT.Name or "Unknown"))
 
 local LogoBtn = Instance.new("ImageButton", ScreenGui)
 LogoBtn.Name = "HDLogo"; LogoBtn.Size = UDim2.new(0, 45, 0, 45)
@@ -97,7 +94,7 @@ LogoBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ═══════════════════════════════════════════════════════════
---  4. LOGIQUE MOTEUR
+--  5. COMMANDES
 -- ═══════════════════════════════════════════════════════════
 local function ntf(t, m) pcall(function() StarterGui:SetCore("SendNotification", { Title = t, Text = m, Icon = HD_LOGO, Duration = 5 }) end) end
 local function register(n, a, d, c) State.Commands[n] = {Aliases = a, Desc = d, Callback = c} end
@@ -121,11 +118,10 @@ end
 table.insert(State.Connections, L.Chatted:Connect(execute))
 CmdBar.FocusLost:Connect(function(ep) if ep then execute(CmdBar.Text); CmdBar.Text = ""; CmdBar.Visible = false end end)
 
--- COMMANDES
 register("cmds", {"help"}, "Liste", function()
     local c = ""
     for n, d in pairs(State.Commands) do c = c .. n .. ", " end
-    print("🔱 ARCANE: COMMANDES -> " .. c); ntf("CMDS", "Check F9 console.")
+    print("🔱 ARCANE: CMDS -> " .. c); ntf("CMDS", "Check F9 console.")
 end)
 
 register("shackle", {"s"}, "Stase", function(args)
@@ -135,7 +131,7 @@ register("shackle", {"s"}, "Stase", function(args)
     for _, v in pairs(workspace:GetDescendants()) do
         if v:IsA("BasePart") and v.Name == "Handle" and pcall(function() return v:GetNetworkOwner() == L end) then anchor = v break end
     end
-    if not anchor then return ntf("ERROR", "Sors un objet !") end
+    if not anchor then return ntf("ERROR", "Sors un objet (Skate/Outil) !") end
     State.Shackled[target.UserId] = anchor
     ntf("STASIS", target.DisplayName .. " bloqué.")
     task.spawn(function()
@@ -152,27 +148,27 @@ register("unshackle", {"un"}, "Libère", function(args)
 end)
 
 register("void", {"v"}, "Purge locale", function(args)
-    local t = get(args[1]); if t and t.Character then t.Character:Destroy(); ntf("VOID", "Cible purgée.") end
+    local t = get(args[1]); if t and t.Character then t.Character:Destroy(); ntf("VOID", "Purgé.") end
 end)
 
 register("mute", {"m"}, "Censure locale", function(args)
-    local t = get(args[1]); if t then State.Muted[t.UserId] = true ntf("MUTE", "Voix étouffée.") end
+    local t = get(args[1]); if t then State.Muted[t.UserId] = true ntf("MUTE", "Mute.") end
 end)
 
 register("badge", {"admin"}, "Prestige Staff", function()
     local char = L.Character or L.CharacterAdded:Wait()
     local h = char:WaitForChild("Head")
     local b = h:FindFirstChild("ArcaneBadge") or Instance.new("BillboardGui", h)
-    b.Name = "ArcaneBadge"; b.Size = UDim2.new(0, 150, 0, 40); b.StudsOffset = Vector3.new(0, 3, 0); b.AlwaysOnTop = true
+    b.Name = "ArcaneBadge"; b.Size = UDim2.new(0, 150, 0, 40); b.AlwaysOnTop = true
     local m = b:FindFirstChild("Main") or Instance.new("Frame", b); m.Size = UDim2.new(1, 0, 1, 0); m.BackgroundColor3 = HD_COLORS.Blurple
     if not m:FindFirstChildOfClass("UICorner") then Instance.new("UICorner", m).CornerRadius = UDim.new(0, 8) end
     local l = m:FindFirstChild("Label") or Instance.new("TextLabel", m); l.Size = UDim2.new(1, 0, 1, 0); l.BackgroundTransparency = 1
     l.Text = "🛡️ STAFF 🛡️"; l.TextColor3 = HD_COLORS.White; l.TextScaled = true; l.Font = HD_FONT
-    ntf("PRESTIGE", "Rang confirmé.")
+    ntf("PRESTIGE", "Confirmé.")
 end)
 
 -- ═══════════════════════════════════════════════════════════
---  5. CHAT ENGINE (FINAL HOOK)
+--  6. FINAL RECOVERY HOOK
 -- ═══════════════════════════════════════════════════════════
 _G.ArcaneCleanup = function()
     State.Active = false
@@ -194,5 +190,5 @@ if TCS then
     end)
 end
 
-ntf("ARCANE", "Shadow HD v12.8 (RECOVERY) actif. <3")
-print("🔱 ARCANE [BOOT]: Succès total.")
+ntf("ARCANE", "Shadow HD v12.9 (NUCLEAR) Déployé. <3")
+print("🔥 ARCANE [BOOT]: Tout est opérationnel.")

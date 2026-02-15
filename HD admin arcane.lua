@@ -1,11 +1,11 @@
 --[[
     ╔═══════════════════════════════════════════════════════════╗
-    ║       HD ADMIN ARCANE (AUTHENTIC v1.0)              ║
-    ║   "L'autorité n'est pas imitée, elle est clonée."         ║
+    ║       HD ADMIN ARCANE (SURGICAL CLONE v1.0)         ║
+    ║   "L'autorité est une présence, pas une gêne."            ║
     ╚═══════════════════════════════════════════════════════════╝
     
-    Opération : Sovereign Prestige (v15.0) - TRUE 1:1 CLONE
-    Fix : Authentic HD UI, Hierarchical Window, Command Triangle Icons
+    Opération : Sovereign Prestige (v15.1) - SURGICAL CLONE
+    Fix : Minimalist UI, True Circular HD Button, Chat-Only Commands
 ]]
 
 -- 1. CONFIGURATION
@@ -21,7 +21,6 @@ local State = { Prefix = ";", Muted = {}, Active = true }
 _G.ArcaneState = State
 pcall(function() if _G.ArcaneCleanup then _G.ArcaneCleanup() end end)
 
--- THEME CONSTANTS (1:1 HD)
 local HD_THEME = {
     MainBlue = Color3.fromRGB(0, 107, 173),
     DarkBlue = Color3.fromRGB(0, 85, 135),
@@ -34,74 +33,45 @@ local HD_THEME = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HDAdmin_Authentic_v15"
+ScreenGui.Name = "HDAdmin_Surgical_v15_1"
 ScreenGui.ResetOnSpawn = false
 ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or (pcall(function() return CoreGui end) and CoreGui) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
--- CIRCULAR HD BUTTON (TOPBAR)
+-- BOUTON "HD" ROND (TAILLE ET POSITION 1:1)
 local HDButton = Instance.new("TextButton", ScreenGui)
 HDButton.Name = "HDButton"
-HDButton.Size = UDim2.new(0, 28, 0, 28)
-HDButton.Position = UDim2.new(0, 110, 0, 2) -- Near the Roblox menu
+HDButton.Size = UDim2.new(0, 30, 0, 30)
+HDButton.Position = UDim2.new(0, 125, 0, 4) -- Alignement Topbar
 HDButton.BackgroundColor3 = Color3.fromRGB(40, 40, 43)
 HDButton.BorderSizePixel = 0
 HDButton.Text = "HD"
 HDButton.TextColor3 = Color3.new(1, 1, 1)
 HDButton.Font = Enum.Font.GothamBold
-HDButton.TextSize = 12
+HDButton.TextSize = 13
 HDButton.ZIndex = 110
 Instance.new("UICorner", HDButton).CornerRadius = UDim.new(1, 0)
 local HDStroke = Instance.new("UIStroke", HDButton)
 HDStroke.Color = Color3.fromRGB(100, 100, 100)
 HDStroke.Thickness = 1
 
--- AUTHENTIC COMMAND BAR (TOP SLIDE)
-local TopBar = Instance.new("Frame", ScreenGui)
-TopBar.Name = "TopBar"
-TopBar.Size = UDim2.new(1, 0, 0, 32)
-TopBar.Position = UDim2.new(0, 0, 0, -32) -- Hidden at start
-TopBar.BackgroundColor3 = Color3.fromRGB(40, 40, 43)
-TopBar.BorderSizePixel = 0
-TopBar.ZIndex = 500
-
-local BarInput = Instance.new("TextBox", TopBar)
-BarInput.Name = "Input"
-BarInput.Size = UDim2.new(1, 0, 1, 0)
-BarInput.BackgroundTransparency = 1
-BarInput.TextColor3 = Color3.new(1, 1, 1)
-BarInput.Font = Enum.Font.Gotham
-BarInput.TextSize = 16
-BarInput.PlaceholderText = "Click here or press ; to run a command"
-BarInput.Text = ""
-BarInput.ZIndex = 501
-
-local function ToggleBar(s)
-    if s then
-        TopBar:TweenPosition(UDim2.new(0, 0, 0, 0), "Out", "Quart", 0.3, true)
-        BarInput:CaptureFocus()
-    else
-        TopBar:TweenPosition(UDim2.new(0, 0, 0, -32), "In", "Quart", 0.3, true)
-    end
-end
-
--- AUTHENTIC COMMANDS WINDOW
+-- COMMANDS WINDOW
 local CmdWindow = Instance.new("Frame", ScreenGui)
 CmdWindow.Name = "CommandsWindow"
-CmdWindow.Size = UDim2.new(0, 305, 0, 380)
-CmdWindow.Position = UDim2.new(0.5, -152, 0.5, -190)
+CmdWindow.Size = UDim2.new(0, 300, 0, 380)
+CmdWindow.Position = UDim2.new(0.5, -150, 0.5, -190)
 CmdWindow.BackgroundColor3 = HD_THEME.Background
 CmdWindow.Visible = false
 CmdWindow.ZIndex = 1000
-Instance.new("UICorner", CmdWindow).CornerRadius = UDim.new(0, 3)
+Instance.new("UICorner", CmdWindow).CornerRadius = UDim.new(0, 4)
 
--- DRAG HANDLE (Header)
+-- Header Principal
 local Header = Instance.new("Frame", CmdWindow)
 Header.Size = UDim2.new(1, 0, 0, 28)
 Header.BackgroundColor3 = HD_THEME.MainBlue
 Header.ZIndex = 1001
-Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 3)
+Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 4)
 
 local HeaderTitle = Instance.new("TextLabel", Header)
 HeaderTitle.Size = UDim2.new(1, 0, 1, 0)
@@ -110,7 +80,6 @@ HeaderTitle.Text = "COMMANDS"
 HeaderTitle.TextColor3 = HD_THEME.TextWhite
 HeaderTitle.Font = Enum.Font.GothamBold
 HeaderTitle.TextSize = 12
-HeaderTitle.ZIndex = 1002
 
 local CloseBtn = Instance.new("TextButton", Header)
 CloseBtn.Size = UDim2.new(0, 28, 0, 28)
@@ -120,7 +89,6 @@ CloseBtn.Text = "X"
 CloseBtn.TextColor3 = HD_THEME.TextWhite
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.TextSize = 14
-CloseBtn.ZIndex = 1003
 CloseBtn.MouseButton1Click:Connect(function() CmdWindow.Visible = false end)
 
 local MinBtn = Instance.new("TextButton", Header)
@@ -131,89 +99,77 @@ MinBtn.Text = "-"
 MinBtn.TextColor3 = HD_THEME.TextWhite
 MinBtn.Font = Enum.Font.GothamBold
 MinBtn.TextSize = 18
-MinBtn.ZIndex = 1003
 
--- SUB-HEADER
-local SubHeader = Instance.new("Frame", CmdWindow)
-SubHeader.Size = UDim2.new(1, 0, 0, 24)
-SubHeader.Position = UDim2.new(0, 0, 0, 28)
-SubHeader.BackgroundColor3 = HD_THEME.DarkBlue
-SubHeader.ZIndex = 1001
+-- Sub Header
+local SubH = Instance.new("Frame", CmdWindow)
+SubH.Size = UDim2.new(1, 0, 0, 24)
+SubH.Position = UDim2.new(0, 0, 0, 28)
+SubH.BackgroundColor3 = HD_THEME.DarkBlue
+SubH.ZIndex = 1001
 
-local SubTitle = Instance.new("TextLabel", SubHeader)
-SubTitle.Size = UDim2.new(1, 0, 1, 0)
-SubTitle.BackgroundTransparency = 1
-SubTitle.Text = "<      COMMANDS      >"
-SubTitle.TextColor3 = HD_THEME.TextWhite
-SubTitle.Font = Enum.Font.GothamBold
-SubTitle.TextSize = 12
-SubTitle.ZIndex = 1002
+local SubT = Instance.new("TextLabel", SubH)
+SubT.Size = UDim2.new(1, 0, 1, 0)
+SubT.BackgroundTransparency = 1
+SubT.Text = "<      COMMANDS      >"
+SubT.TextColor3 = HD_THEME.TextWhite
+SubT.Font = Enum.Font.GothamBold
+SubT.TextSize = 12
 
--- SEARCH BAR
-local SearchBox = Instance.new("TextBox", CmdWindow)
-SearchBox.Size = UDim2.new(1, -8, 0, 24)
-SearchBox.Position = UDim2.new(0, 4, 0, 56)
-SearchBox.BackgroundColor3 = HD_THEME.SearchBg
-SearchBox.TextColor3 = HD_THEME.TextWhite
-SearchBox.Font = Enum.Font.Gotham
-SearchBox.TextSize = 12
-SearchBox.PlaceholderText = "Search"
-SearchBox.Text = ""
-SearchBox.ZIndex = 1001
-Instance.new("UICorner", SearchBox).CornerRadius = UDim.new(0, 2)
+-- Search
+local Search = Instance.new("TextBox", CmdWindow)
+Search.Size = UDim2.new(1, -10, 0, 24)
+Search.Position = UDim2.new(0, 5, 0, 56)
+Search.BackgroundColor3 = HD_THEME.SearchBg
+Search.TextColor3 = HD_THEME.TextWhite
+Search.Font = Enum.Font.Gotham
+Search.TextSize = 12
+Search.PlaceholderText = "Search"
+Search.Text = ""
+Instance.new("UICorner", Search).CornerRadius = UDim.new(0, 2)
 
-local SearchIcon = Instance.new("ImageLabel", SearchBox)
-SearchIcon.Size = UDim2.new(0, 16, 0, 16)
-SearchIcon.Position = UDim2.new(0, 4, 0.5, -8)
-SearchIcon.BackgroundTransparency = 1
-SearchIcon.Image = "rbxassetid://6031154871"
-SearchIcon.ImageColor3 = HD_THEME.TextGray
-SearchIcon.ZIndex = 1002
-SearchBox.TextXAlignment = Enum.TextXAlignment.Left
-SearchBox.TextIndentPosition = Enum.TextIndentPosition.Left
--- Add padding to text to avoid overlap with icon
-pcall(function() SearchBox.TextXAlignment = Enum.TextXAlignment.Left SearchBox.ClearTextOnFocus = true end)
+local SIcon = Instance.new("ImageLabel", Search)
+SIcon.Size = UDim2.new(0, 16, 0, 16)
+SIcon.Position = UDim2.new(0, 4, 0.5, -8)
+SIcon.BackgroundTransparency = 1
+SIcon.Image = "rbxassetid://6031154871"
+SIcon.ImageColor3 = HD_THEME.TextGray
 
--- COMMAND LIST
+-- List
 local List = Instance.new("ScrollingFrame", CmdWindow)
-List.Size = UDim2.new(1, -8, 1, -88)
-List.Position = UDim2.new(0, 4, 0, 84)
+List.Size = UDim2.new(1, -10, 1, -90)
+List.Position = UDim2.new(0, 5, 0, 85)
 List.BackgroundTransparency = 1
-List.ZIndex = 1001
 List.ScrollBarThickness = 4
-List.ScrollBarImageColor3 = HD_THEME.DarkBlue
+Instance.new("UIListLayout", List).SortOrder = Enum.SortOrder.LayoutOrder
 
-local Layout = Instance.new("UIListLayout", List)
-Layout.SortOrder = Enum.SortOrder.LayoutOrder
-
-local function CreateRow(n, d)
+local function AddCmd(n, d)
     local r = Instance.new("Frame", List)
     r.Size = UDim2.new(1, 0, 0, 26)
     r.BackgroundColor3 = HD_THEME.RowBg
     r.BorderSizePixel = 0
     
-    local Icon = Instance.new("ImageLabel", r)
-    Icon.Size = UDim2.new(0, 14, 0, 14)
-    Icon.Position = UDim2.new(0, 6, 0.5, -7)
-    Icon.BackgroundTransparency = 1
-    Icon.Image = "rbxassetid://4370345144" -- Triangle icon
-    Icon.ImageColor3 = HD_THEME.TextGray
+    local i = Instance.new("ImageLabel", r)
+    i.Size = UDim2.new(0, 14, 0, 14)
+    i.Position = UDim2.new(0, 6, 0.5, -7)
+    i.BackgroundTransparency = 1
+    i.Image = "rbxassetid://4370345144"
+    i.ImageColor3 = HD_THEME.TextGray
     
-    local Label = Instance.new("TextLabel", r)
-    Label.Size = UDim2.new(1, -30, 1, 0)
-    Label.Position = UDim2.new(0, 26, 0, 0)
-    Label.BackgroundTransparency = 1
-    Label.Text = ";" .. n .. " " .. (d or "")
-    Label.TextColor3 = HD_THEME.TextWhite
-    Label.Font = Enum.Font.Gotham
-    Label.TextSize = 11
-    Label.TextXAlignment = Enum.TextXAlignment.Left
+    local l = Instance.new("TextLabel", r)
+    l.Size = UDim2.new(1, -30, 1, 0)
+    l.Position = UDim2.new(0, 26, 0, 0)
+    l.BackgroundTransparency = 1
+    l.Text = ";" .. n .. " " .. (d or "")
+    l.TextColor3 = HD_THEME.TextWhite
+    l.Font = Enum.Font.Gotham
+    l.TextSize = 11
+    l.TextXAlignment = Enum.TextXAlignment.Left
     
-    local Line = Instance.new("Frame", r)
-    Line.Size = UDim2.new(1, 0, 0, 1)
-    Line.Position = UDim2.new(0, 0, 1, -1)
-    Line.BackgroundColor3 = Color3.fromRGB(30, 30, 33)
-    Line.BorderSizePixel = 0
+    local li = Instance.new("Frame", r)
+    li.Size = UDim2.new(1, 0, 0, 1)
+    li.Position = UDim2.new(0, 0, 1, -1)
+    li.BackgroundColor3 = Color3.fromRGB(30, 30, 33)
+    li.BorderSizePixel = 0
 end
 
 local CMDS = {
@@ -221,9 +177,9 @@ local CMDS = {
     {"void", "<player>"}, {"v", "<player>"}, {"mute", "<player>"},
     {"m", "<player>"}, {"unmute", "<player>"}, {"cmds", ""}, {"badge", ""}
 }
-for _, c in pairs(CMDS) do CreateRow(c[1], c[2]) end
+for _, c in pairs(CMDS) do AddCmd(c[1], c[2]) end
 
--- 3. MOTEUR
+-- 3. MOTEUR (CHAT ONLY)
 local function execute(msg)
     if not State.Active or msg:sub(1,1) ~= State.Prefix then return end
     local args = msg:sub(2):split(" ")
@@ -240,12 +196,10 @@ local function execute(msg)
     elseif cmd == "cmds" then CmdWindow.Visible = true end
 end
 
--- KEYBINDS & CLICKS
-UIS.InputBegan:Connect(function(i, g) if not g and i.KeyCode == Enum.KeyCode.Semicolon then ToggleBar(true); task.wait(); BarInput.Text = "" end end)
-BarInput.FocusLost:Connect(function(ep) if ep then execute(";" .. BarInput.Text); BarInput.Text = "" end ToggleBar(false) end)
+L.Chatted:Connect(execute)
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
 
--- 4. ATOMIC CHAT HOOK
+-- 4. CHAT HOOK ATOMIQUE
 _G.ArcaneProps = Instance.new("TextChatMessageProperties")
 if TCS then
     pcall(function()
@@ -257,4 +211,4 @@ if TCS then
 end
 
 _G.ArcaneCleanup = function() State.Active = false; ScreenGui:Destroy() end
-print("🔱 ARCANE: Restoration HD Admin 1:1 complétée.")
+print("🔱 ARCANE: Restoration Minimaliste HD 1:1 complétée.")

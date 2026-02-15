@@ -1,12 +1,12 @@
 --[[
-    ╔═══════════════════════════════════════════════════════════╗
-    ║       HD ADMIN ARCANE (ZERO-DRAG v12.0)             ║
-    ║   "Se délier de soi pour mieux lier les autres."         ║
-    ╚═══════════════════════════════════════════════════════════╝
+    ╔══════════════════════════════════════════════════════════╗
+    ║       HD ADMIN ARCANE (IRON GRIP v13.1)             ║
+    ║   "L'emprisonnement stable, la mobilité retrouvée."      ║
+    ╚══════════════════════════════════════════════════════════╝
     
-    Opération : Sovereign Prestige (v22.0) - THE FE PINNER
-    Fix : Self-Teleport (Weld Break), Target Freeze (0.05 Jitter)
-    Engine : Zero-Drag Massive Force v2.2
+    Opération : Sovereign Prestige (v23.1) - THE IRON GRIP
+    Fix : Brookhaven Script Crashes (Tool-Stay), Self-TP (Infinite Weld-Break)
+    Engine : Massive Force Shackle v2.3 (Stable RenderStepped Loop)
 ]]
 
 -- 1. CONFIGURATION
@@ -17,7 +17,7 @@ local CoreGui = game:GetService("CoreGui")
 local UIS = game:GetService("UserInputService")
 local StarterGui = game:GetService("StarterGui")
 
-local State = { Prefix = ";", Muted = {}, Active = true }
+local State = { Prefix = ";", Muted = {}, Active = true, Shackling = false }
 _G.ArcaneState = State
 pcall(function() if _G.ArcaneCleanup then _G.ArcaneCleanup() end end)
 
@@ -32,7 +32,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_Pinner_v22_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_IronGrip_v23_1"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -44,9 +44,9 @@ local HDStroke = Instance.new("UIStroke", HDButton); HDStroke.Color = Color3.new
 
 -- WINDOW
 local CmdWindow = Instance.new("Frame", ScreenGui)
-CmdWindow.Size = UDim2.new(0, 310, 0, 400); CmdWindow.Position = UDim2.new(0.5, -155, 0.5, -200); CmdWindow.BackgroundColor3 = COLORS.Background; CmdWindow.Visible = false; CmdWindow.Active = true; CmdWindow.ZIndex = 120
+CmdWindow.Name = "CmdWindow"; CmdWindow.Size = UDim2.new(0, 310, 0, 400); CmdWindow.Position = UDim2.new(0.5, -155, 0.5, -200); CmdWindow.BackgroundColor3 = COLORS.Background; CmdWindow.Visible = false; CmdWindow.Active = true; CmdWindow.ZIndex = 120
 Instance.new("UICorner", CmdWindow).CornerRadius = UDim.new(0, 4)
-local WindowStroke = Instance.new("UIStroke", CmdWindow); WindowStroke.Color = Color3.new(0,0,0); WindowStroke.Transparency = 0.5; WindowStroke.Thickness = 1.5
+Instance.new("UIStroke", CmdWindow).Color = Color3.new(0,0,0); Instance.new("UIStroke", CmdWindow).Transparency = 0.5; Instance.new("UIStroke", CmdWindow).Thickness = 1.5
 
 local Header = Instance.new("Frame", CmdWindow); Header.Size = UDim2.new(1, 0, 0, 32); Header.BackgroundColor3 = COLORS.Header; Header.ZIndex = 130
 Instance.new("UICorner", Header).CornerRadius = UDim.new(0, 4)
@@ -56,7 +56,6 @@ local Title = Instance.new("TextLabel", Header); Title.Size = UDim2.new(1, 0, 1,
 local SubH = Instance.new("Frame", CmdWindow); SubH.Size = UDim2.new(1, 0, 0, 26); SubH.Position = UDim2.new(0, 0, 0, 32); SubH.BackgroundColor3 = COLORS.SubHeader; SubH.ZIndex = 105
 local ST = Instance.new("TextLabel", SubH); ST.Size = UDim2.new(1, 0, 1, 0); ST.BackgroundTransparency = 1; ST.Text = "<      COMMANDS      >"; ST.TextColor3 = COLORS.TextWhite; ST.Font = Enum.Font.SourceSansBold; ST.TextSize = 11; ST.ZIndex = 106
 
--- SEARCH
 local SC = Instance.new("Frame", CmdWindow); SC.Size = UDim2.new(1, -10, 0, 26); SC.Position = UDim2.new(0, 5, 0, 62); SC.BackgroundColor3 = Color3.fromRGB(24, 24, 26); SC.ZIndex = 120
 Instance.new("UICorner", SC).CornerRadius = UDim.new(0, 3)
 local Loupe = Instance.new("ImageLabel", SC); Loupe.Size = UDim2.new(0, 16, 0, 16); Loupe.Position = UDim2.new(0, 4, 0.5, -8); Loupe.BackgroundTransparency = 1; Loupe.Image = "rbxassetid://6031154636"; Loupe.ImageColor3 = Color3.fromRGB(150,150,150); Loupe.ZIndex = 121
@@ -72,7 +71,7 @@ local function Add(n, d)
     local l = Instance.new("TextLabel", r); l.Size = UDim2.new(1, -40, 1, 0); l.Position = UDim2.new(0, 32, 0, 0); l.BackgroundTransparency = 1; l.Text = ";" .. n .. " " .. (d or ""); l.TextColor3 = COLORS.TextWhite; l.Font = Enum.Font.SourceSans; l.TextSize = 13; l.TextXAlignment = Enum.TextXAlignment.Left; l.ZIndex = 122
     Rows[n] = r
 end
-for _, c in pairs({{"shackle", "<player>"}, {"s", "<player>"}, {"void", "<player>"}, {"v", "<player>"}, {"mute", "<player>"}, {"m", "<player>"}, {"cmds", ""}, {"badge", ""}}) do Add(c[1], c[2]) end
+for _, c in pairs({{"shackle", "<player>"}, {"s", "<player>"}, {"void", "<player>"}, {"v", "<player>"}, {"mute", "<player>"}, {"m", "<player>"}, {"cmds", ""}, {"badge", ""}, {"release", ""}}) do Add(c[1], c[2]) end
 
 SB:GetPropertyChangedSignal("Text"):Connect(function()
     local q = SB.Text:lower()
@@ -82,57 +81,65 @@ end)
 local dS, sP, dG; Header.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then dG = true; dS = i.Position; sP = CmdWindow.Position; i.Changed:Connect(function() if i.UserInputState == Enum.UserInputState.End then dG = false end end) end end)
 UIS.InputChanged:Connect(function(i) if dG and i.UserInputType == Enum.UserInputType.MouseMovement then local d = i.Position - dS; CmdWindow.Position = UDim2.new(sP.X.Scale, sP.X.Offset + d.X, sP.Y.Scale, sP.Y.Offset + d.Y) end end)
 
--- PHYSICS ANCHOR DETECTOR
+-- PHYSICS DETECTOR
 local function getAnchor()
     local t = L.Character and L.Character:FindFirstChildOfClass("Tool")
-    if t then return t:FindFirstChild("Handle") or t:FindFirstChildWhichIsA("BasePart"), true end
+    if t then return t:FindFirstChild("Handle") or t:FindFirstChildWhichIsA("BasePart"), true, t end
     t = L.Backpack:FindFirstChildOfClass("Tool")
-    if t then return t:FindFirstChild("Handle") or t:FindFirstChildWhichIsA("BasePart"), false end
-    return nil, false
+    if t then return t:FindFirstChild("Handle") or t:FindFirstChildWhichIsA("BasePart"), false, t end
+    return nil, false, nil
 end
 
--- 3. MOTEUR ZERO-DRAG
+-- 3. MOTEUR IRON GRIP
 L.Chatted:Connect(function(m)
-    if not State.Active or m:sub(1,1) ~= ";" then return end
-    local args = m:sub(2):split(" "); local cmd = args[1]:lower(); local t_name = args[2]; local t = nil
-    if t_name then for _, p in pairs(Players:GetPlayers()) do if p.Name:lower():find(t_name:lower()) or p.DisplayName:lower():find(t_name:lower()) then t = p break end end end
-    
-    if (cmd == "shackle" or cmd == "s") and t then
-        local a, isEquipped = getAnchor()
-        if a and isEquipped then
-            -- v22.0: Detach from hand to stop self-teleport
-            for _, v in pairs(L.Character:GetDescendants()) do
-                if v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D") then
-                    if v.Part0 == a or v.Part1 == a or v.Name:find("Grip") then v:Destroy() end
-                end
-            end
-            
-            task.spawn(function()
-                local conn
-                conn = RunService.RenderStepped:Connect(function()
-                    if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then conn:Disconnect() return end
-                    pcall(function()
-                        local targetPos = t.Character.HumanoidRootPart.CFrame
-                        -- v22.0: Incrased Jitter for Hard Freeze
-                        local jitter = Vector3.new(math.random(-1,1)*0.05, math.random(-1,1)*0.05, math.random(-1,1)*0.05)
-                        a.CFrame = targetPos + jitter
-                        a.AssemblyLinearVelocity = Vector3.zero
-                        a.AssemblyAngularVelocity = Vector3.zero
+    pcall(function() -- Global Shield for stability
+        if not State.Active or m:sub(1,1) ~= ";" then return end
+        local args = m:sub(2):split(" "); local cmd = args[1]:lower(); local t_name = args[2]; local t = nil
+        if t_name then for _, p in pairs(Players:GetPlayers()) do if p.Name:lower():find(t_name:lower()) or p.DisplayName:lower():find(t_name:lower()) then t = p break end end end
+        
+        if (cmd == "shackle" or cmd == "s") and t then
+            local a, isEquipped, tool = getAnchor()
+            if a and isEquipped then
+                State.Shackling = true
+                local oSize = a.Size
+                a.Size = Vector3.new(4, 4, 4); a.CanCollide = true; a.Massless = false
+                
+                task.spawn(function()
+                    local conn
+                    conn = RunService.RenderStepped:Connect(function()
+                        if not (State.Active and State.Shackling and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
+                            a.Size = oSize; conn:Disconnect() return 
+                        end
+                        pcall(function()
+                            -- v23.1 Detachment Fix: Destroy all welds to character EVERY FRAME
+                            for _, v in pairs(L.Character:GetDescendants()) do
+                                if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then v:Destroy() end
+                            end
+                            local targetPos = t.Character.HumanoidRootPart.CFrame
+                            a.CFrame = targetPos + Vector3.new(math.random(-1,1)*0.05, 0, math.random(-1,1)*0.05)
+                            a.AssemblyLinearVelocity = Vector3.zero; a.AssemblyAngularVelocity = Vector3.zero
+                        end)
                     end)
                 end)
-            end)
-        elseif a and not isEquipped then
-            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to activate Zero-Drag Shackle!", Duration = 5 })
-        else
-            StarterGui:SetCore("SendNotification", { Title = "ERROR", Text = "No Tool/Caddie detected!", Duration = 3 })
+                StarterGui:SetCore("SendNotification", { Title = "IRON GRIP", Text = "Target Pinned. Physics Detachment Active.", Duration = 4 })
+            elseif a and not isEquipped then
+                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to activate Iron Grip!", Duration = 5 })
+            else
+                StarterGui:SetCore("SendNotification", { Title = "ERROR", Text = "No Anchor found. Get a Tool/Caddie!", Duration = 3 })
+            end
+        elseif (cmd == "void" or cmd == "v") and t and t.Character then t.Character:Destroy()
+        elseif (cmd == "mute" or cmd == "m") and t then State.Muted[t.UserId] = true
+        elseif cmd == "cmds" then CmdWindow.Visible = not CmdWindow.Visible
+        elseif cmd == "badge" then
+            StarterGui:SetCore("SendNotification", { Title = "🔱 HD AUTHORITY", Text = "Identity Verified: Arcane Sovereign.", Duration = 4 })
+        elseif cmd == "release" or cmd == "r" then
+            State.Shackling = false
+            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "All Shackles Released.", Duration = 4 })
         end
-    elseif (cmd == "void" or cmd == "v") and t and t.Character then t.Character:Destroy()
-    elseif (cmd == "mute" or cmd == "m") and t then State.Muted[t.UserId] = true
-    elseif cmd == "cmds" then CmdWindow.Visible = not CmdWindow.Visible
-    elseif cmd == "badge" then
-        StarterGui:SetCore("SendNotification", { Title = "🔱 HD AUTHORITY", Text = "Identity Verified: Arcane Sovereign.", Duration = 4 })
-    end
+    end)
 end)
+
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 ZERO-DRAG", Text = "Sovereign v22.0 FE Pinner Deployed.", Duration = 4 })
-_G.ArcaneCleanup = function() ScreenGui:Destroy(); State.Active = false end
+StarterGui:SetCore("SendNotification", { Title = "🔱 IRON GRIP", Text = "Sovereign v23.1 Stability Patch Deployed.", Duration = 4 })
+_G.ArcaneCleanup = function() ScreenGui:Destroy(); State.Active = false; State.Shackling = false end
+print("🔱 ARCANE: Stability v23.1 (Iron Grip) chargée.")

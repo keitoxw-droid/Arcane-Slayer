@@ -1,12 +1,12 @@
 --[[
     ╔══════════════════════════════════════════════════════════╗
-    ║       HD ADMIN ARCANE (IRON GRIP v13.1)             ║
-    ║   "L'emprisonnement stable, la mobilité retrouvée."      ║
+    ║       HD ADMIN ARCANE (SINGULARITY v14.0)           ║
+    ║   "L'immobilisation totale par la tempête physique."     ║
     ╚══════════════════════════════════════════════════════════╝
     
-    Opération : Sovereign Prestige (v23.1) - THE IRON GRIP
-    Fix : Brookhaven Script Crashes (Tool-Stay), Self-TP (Infinite Weld-Break)
-    Engine : Massive Force Shackle v2.3 (Stable RenderStepped Loop)
+    Opération : Sovereign Prestige (v24.0) - THE SINGULARITY
+    Engine : Collision-Storm v4.0 (8x8x8 + 0.25 Jitter + High-Density)
+    Fix : Target Residual Movement (Absolute Freeze)
 ]]
 
 -- 1. CONFIGURATION
@@ -32,7 +32,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_IronGrip_v23_1"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_Singularity_v24_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -90,9 +90,9 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR IRON GRIP
+-- 3. MOTEUR THE SINGULARITY
 L.Chatted:Connect(function(m)
-    pcall(function() -- Global Shield for stability
+    pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
         local args = m:sub(2):split(" "); local cmd = args[1]:lower(); local t_name = args[2]; local t = nil
         if t_name then for _, p in pairs(Players:GetPlayers()) do if p.Name:lower():find(t_name:lower()) or p.DisplayName:lower():find(t_name:lower()) then t = p break end end end
@@ -101,31 +101,35 @@ L.Chatted:Connect(function(m)
             local a, isEquipped, tool = getAnchor()
             if a and isEquipped then
                 State.Shackling = true
-                local oSize = a.Size
-                a.Size = Vector3.new(4, 4, 4); a.CanCollide = true; a.Massless = false
+                local oSize = a.Size; local oTrans = a.Transparency
+                -- v24.0: SINGULARITY ENGINE (Collision Storm 8x8x8)
+                a.Size = Vector3.new(8, 8, 8); a.Transparency = 0.5; a.CanCollide = true; a.Massless = false
+                a.CustomPhysicalProperties = PhysicalProperties.new(100, 2, 0, 1, 1)
                 
                 task.spawn(function()
                     local conn
                     conn = RunService.RenderStepped:Connect(function()
                         if not (State.Active and State.Shackling and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
-                            a.Size = oSize; conn:Disconnect() return 
+                            a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = nil; conn:Disconnect() return 
                         end
                         pcall(function()
-                            -- v23.1 Detachment Fix: Destroy all welds to character EVERY FRAME
+                            -- Stable Detachment: Infinite Weld-Break
                             for _, v in pairs(L.Character:GetDescendants()) do
                                 if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then v:Destroy() end
                             end
                             local targetPos = t.Character.HumanoidRootPart.CFrame
-                            a.CFrame = targetPos + Vector3.new(math.random(-1,1)*0.05, 0, math.random(-1,1)*0.05)
+                            -- v24.0: Collision Storm (0.25 Jitter on all axes)
+                            local jitter = Vector3.new(math.random(-1,1)*0.25, math.random(-1,1)*0.25, math.random(-1,1)*0.25)
+                            a.CFrame = targetPos + jitter
                             a.AssemblyLinearVelocity = Vector3.zero; a.AssemblyAngularVelocity = Vector3.zero
                         end)
                     end)
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "IRON GRIP", Text = "Target Pinned. Physics Detachment Active.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "THE SINGULARITY", Text = "Absolute Freeze Engaged. Autorité Totale.", Duration = 4 })
             elseif a and not isEquipped then
-                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to activate Iron Grip!", Duration = 5 })
+                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Singularity!", Duration = 5 })
             else
-                StarterGui:SetCore("SendNotification", { Title = "ERROR", Text = "No Anchor found. Get a Tool/Caddie!", Duration = 3 })
+                StarterGui:SetCore("SendNotification", { Title = "ERROR", Text = "No Tool detected!", Duration = 3 })
             end
         elseif (cmd == "void" or cmd == "v") and t and t.Character then t.Character:Destroy()
         elseif (cmd == "mute" or cmd == "m") and t then State.Muted[t.UserId] = true
@@ -134,12 +138,12 @@ L.Chatted:Connect(function(m)
             StarterGui:SetCore("SendNotification", { Title = "🔱 HD AUTHORITY", Text = "Identity Verified: Arcane Sovereign.", Duration = 4 })
         elseif cmd == "release" or cmd == "r" then
             State.Shackling = false
-            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "All Shackles Released.", Duration = 4 })
+            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Field Collapsed. Target Released.", Duration = 4 })
         end
     end)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 IRON GRIP", Text = "Sovereign v23.1 Stability Patch Deployed.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 SINGULARITY v24.0", Text = "Absolute Physics Freeze Loaded.", Duration = 4 })
 _G.ArcaneCleanup = function() ScreenGui:Destroy(); State.Active = false; State.Shackling = false end
-print("🔱 ARCANE: Stability v23.1 (Iron Grip) chargée.")
+print("🔱 ARCANE: Singularity v24.0 (Absolute Freeze) chargée.")

@@ -88,7 +88,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR VOID ANCHOR
+-- 3. MOTEUR VOID ANCHOR (v36.0)
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -101,12 +101,11 @@ L.Chatted:Connect(function(m)
             local a, isEquipped, tool = getAnchor()
             if a and isEquipped then
                 local oSize = a.Size; local oTrans = a.Transparency; local oCPP = a.CustomPhysicalProperties; local oShape = a.Shape
-                -- v34.0: SINGULARITY LOCK ENGINE (Sphere XXL 15x15x15)
+                -- v36.0: VOID ANCHOR ENGINE (Sphere XXL 15x15x15)
                 a.Size = Vector3.new(15, 15, 15); a.Transparency = 1; a.CanCollide = true; a.Massless = false
                 a.CustomPhysicalProperties = PhysicalProperties.new(100, 100, 0, 100, 100)
                 if a:IsA("Part") then a.Shape = Enum.PartType.Ball end
                 
-                local frameCount = 0
                 State.ShackleConn = RunService.RenderStepped:Connect(function()
                     if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
                         pcall(function() a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = oCPP; if a:IsA("Part") then a.Shape = oShape end; a.Anchored = false end)
@@ -129,11 +128,10 @@ L.Chatted:Connect(function(m)
                     a.CFrame = targetRoot.CFrame
                     a.CanCollide = true
                     
-                    -- 3. Kinetic Cancellation (Extrême)
-                    -- On annule tout vecteur de mouvement détecté
+                    -- 3. Kinetic Cancellation (Extreme)
                     local cancelX = moveDir.X * -8000
                     local cancelZ = moveDir.Z * -8000
-                    local gravitySink = -15000 -- Pression abyssale
+                    local gravitySink = -15000 
                     
                     a.AssemblyLinearVelocity = Vector3.new(cancelX, gravitySink, cancelZ)
                     a.AssemblyAngularVelocity = Vector3.new(20000, 20000, 20000)
@@ -147,7 +145,7 @@ L.Chatted:Connect(function(m)
                 end)
                 StarterGui:SetCore("SendNotification", { Title = "VOID ANCHOR", Text = "Kinetic Energy Extinguished. v36.0.", Duration = 4 })
             elseif a and not isEquipped then
-                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Singularity Lock!", Duration = 5 })
+                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Void Anchor!", Duration = 5 })
             else
                 StarterGui:SetCore("SendNotification", { Title = "ERROR", Text = "No Anchor found!", Duration = 3 })
             end
@@ -159,7 +157,7 @@ L.Chatted:Connect(function(m)
                 local a = getAnchor()
                 if a then pcall(function() a.Size = Vector3.new(1,1,1); a.Transparency = 0 end) end
             end
-            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Singularity Field Collapsed. Target Released.", Duration = 4 })
+            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Void Field Collapsed. Target Released.", Duration = 4 })
             
         elseif (cmd == "void" or cmd == "v") and t and t.Character then t.Character:Destroy()
         elseif (cmd == "mute" or cmd == "m") and t then State.Muted[t.UserId] = true

@@ -1,12 +1,12 @@
 --[[
     ╔══════════════════════════════════════════════════════════╗
-    ║       HD ADMIN ARCANE (ETHICAL TRUTH v18.0)         ║
-    ║   "La vérité technique, l'autorité simulée."             ║
+    ║      HD ADMIN ARCANE (QUANTUM SATURATION v33.0)      ║
+    ║   "L'arrêt absolu, la physique brisée."              ║
     ╚══════════════════════════════════════════════════════════╝
     
-    Opération : Sovereign Prestige (v31.0) - THE ETHICAL TRUTH
-    Engine : Kinetic-Inverter v9.0 (Newton Inversion + Resonance Sphere)
-    Fix : Network Authority Boundary (Maximum FE Friction)
+    Opération : Sovereign Prestige (v33.0) - QUANTUM SATURATION
+    Engine : Anchor-Toggle & Torque Saturation (100% FE Freeze)
+    Status : Ultra-Agressive Physics Override
 ]]
 
 -- 1. CONFIGURATION
@@ -32,7 +32,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_EthicalTruth_v31_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_QuantumSaturation_v33_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -91,7 +91,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR THE ETHICAL TRUTH (v31.0)
+-- 3. MOTEUR QUANTUM SATURATION
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -104,13 +104,14 @@ L.Chatted:Connect(function(m)
             local a, isEquipped, tool = getAnchor()
             if a and isEquipped then
                 local oSize = a.Size; local oTrans = a.Transparency; local oCPP = a.CustomPhysicalProperties; local oShape = a.Shape
-                -- v31.0: ET ENGINE (Invisible Sphere 12x12x12 + Kinetic Inverter)
-                a.Shape = Enum.PartType.Ball; a.Size = Vector3.new(12, 12, 12); a.Transparency = 1; a.CanCollide = true; a.Massless = false
-                a.CustomPhysicalProperties = PhysicalProperties.new(100, 2, 0, 1, 1)
+                -- v33.0: QUANTUM SATURATION ENGINE (Sphere XL 12x12x12)
+                a.Size = Vector3.new(12, 12, 12); a.Transparency = 1; a.CanCollide = true; a.Massless = false
+                a.CustomPhysicalProperties = PhysicalProperties.new(100, 100, 0, 100, 100)
+                if a:IsA("Part") then a.Shape = Enum.PartType.Ball end
                 
                 State.ShackleConn = RunService.RenderStepped:Connect(function()
                     if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
-                        pcall(function() a.Size = oSize; a.Transparency = oTrans; a.Shape = oShape; a.CustomPhysicalProperties = oCPP end)
+                        pcall(function() a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = oCPP; if a:IsA("Part") then a.Shape = oShape end; a.Anchored = false end)
                         if State.ShackleConn then State.ShackleConn:Disconnect(); State.ShackleConn = nil end
                         return 
                     end
@@ -119,20 +120,27 @@ L.Chatted:Connect(function(m)
                         for _, v in pairs(L.Character:GetDescendants()) do
                             if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then v:Destroy() end
                         end
-                        -- v31.0: Kinetic Inverter Paradox
-                        local targetRoot = t.Character.HumanoidRootPart
-                        local targetVel = targetRoot.AssemblyLinearVelocity
                         
-                        a.CanCollide = not a.CanCollide -- Strobo-Physics
-                        a.CFrame = CFrame.new(targetRoot.Position + Vector3.new(math.random(-1,1)*0.25, math.random(-1,1)*0.25, math.random(-1,1)*0.25))
-                        -- Newton's Third Law Simulation: Counter-Force
-                        a.AssemblyLinearVelocity = -targetVel * 1.8 
-                        a.AssemblyAngularVelocity = Vector3.new(math.random(-1,1)*5000, 5000, math.random(-1,1)*5000)
+                        -- v33.0: Quantum Saturation Core
+                        local targetRoot = t.Character.HumanoidRootPart
+                        local targetHum = t.Character:FindFirstChildOfClass("Humanoid")
+                        
+                        a.CFrame = targetRoot.CFrame
+                        
+                        -- 1. Anchor-Toggle Saturation (Brise la réplication)
+                        a.Anchored = not a.Anchored
+                        
+                        -- 2. Impulse Overload (Contre le WalkSpeed)
+                        local moveDir = targetHum and targetHum.MoveDirection or Vector3.new(0,0,0)
+                        a.AssemblyLinearVelocity = (moveDir * -250) + Vector3.new(0, math.random(-500, 500), 0)
+                        
+                        -- 3. Rotation Lock (Sature la friction)
+                        a.AssemblyAngularVelocity = Vector3.new(0, 10000, 0)
                     end)
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "ETHICAL TRUTH", Text = "Kinetic Inverter Engaged. Authorities Demo v31.0.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "QUANTUM SATURATION", Text = "Neural Link Severed. v33.0 Active.", Duration = 4 })
             elseif a and not isEquipped then
-                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start ET Engine!", Duration = 5 })
+                StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Quantum Saturation!", Duration = 5 })
             else
                 StarterGui:SetCore("SendNotification", { Title = "ERROR", Text = "No Anchor found!", Duration = 3 })
             end
@@ -142,9 +150,9 @@ L.Chatted:Connect(function(m)
             if State.ShackleConn then 
                 State.ShackleConn:Disconnect(); State.ShackleConn = nil 
                 local a = getAnchor()
-                if a then pcall(function() a.Size = Vector3.new(1,1,1); a.Transparency = 0; a.Shape = Enum.PartType.Block end) end
+                if a then pcall(function() a.Size = Vector3.new(1,1,1); a.Transparency = 0 end) end
             end
-            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Project Paused. All Constraints Released.", Duration = 4 })
+            StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Quantum Field Collapsed. Target Released.", Duration = 4 })
             
         elseif (cmd == "void" or cmd == "v") and t and t.Character then t.Character:Destroy()
         elseif (cmd == "mute" or cmd == "m") and t then State.Muted[t.UserId] = true
@@ -156,9 +164,9 @@ L.Chatted:Connect(function(m)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 ARCANE v31.0", Text = "Newton's Curse Engine Loaded.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 QUANTUM SATURATION v33.0", Text = "Neural Desync Engine Deployed.", Duration = 4 })
 _G.ArcaneCleanup = function() 
     if State.ShackleConn then State.ShackleConn:Disconnect() end
     ScreenGui:Destroy(); State.Active = false 
 end
-print("🔱 ARCANE: Ethical Truth v31.0 (Kinetic Inverter) chargée.")
+print("🔱 ARCANE: Quantum Saturation v33.0 (Absolute Physics Breach) chargée.")

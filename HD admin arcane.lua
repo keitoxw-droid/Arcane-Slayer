@@ -1,7 +1,7 @@
 -----------------------------------------------------------
--- HD ADMIN ARCANE (GOD LOCK v37.0)
--- Engine: Sit-Stasis & Velocity Overload
--- Status: Impossible Movement (Hybrid Protocol)
+-- HD ADMIN ARCANE (OMEGA LOCK v38.0)
+-- Engine: Platform-Stasis & Kinetic Nullifier
+-- Status: Total Immobility (Zero-Error Protocol)
 -----------------------------------------------------------
 
 
@@ -28,7 +28,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_GodLock_v37_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_OmegaLock_v38_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -87,7 +87,7 @@ local function getAnchor()
     return nil, false, nil
 end
 
--- 3. MOTEUR GOD LOCK (v37.0)
+-- 3. MOTEUR OMEGA LOCK (v38.0)
 L.Chatted:Connect(function(m)
     pcall(function()
         if not State.Active or m:sub(1,1) ~= ";" then return end
@@ -105,7 +105,6 @@ L.Chatted:Connect(function(m)
                 a.CustomPhysicalProperties = PhysicalProperties.new(100, 100, 0, 100, 100)
                 if a:IsA("Part") then a.Shape = Enum.PartType.Ball end
                 
-                local frameCount = 0
                 State.ShackleConn = RunService.RenderStepped:Connect(function()
                     if not (State.Active and t.Character and t.Character:FindFirstChild("HumanoidRootPart") and a.Parent) then 
                         pcall(function() a.Size = oSize; a.Transparency = oTrans; a.CustomPhysicalProperties = oCPP; if a:IsA("Part") then a.Shape = oShape end; a.Anchored = false end)
@@ -113,14 +112,14 @@ L.Chatted:Connect(function(m)
                         return 
                     end
                     
-                    -- v37.1: GOD LOCK STABLE
+                    -- v38.0: OMEGA LOCK CORE (No-Error/Zero-Log)
                     local targetRoot = t.Character.HumanoidRootPart
                     local targetHum = t.Character:FindFirstChildOfClass("Humanoid")
                     local moveDir = targetHum and targetHum.MoveDirection or Vector3.new(0,0,0)
 
-                    -- 1. Sit-Statis (Blocage Biologique)
-                    if targetHum and targetHum.Sit == false then 
-                        targetHum.Sit = true 
+                    -- 1. Platform-Stasis (Le plus puissant blocage Roblox)
+                    if targetHum then 
+                        targetHum.PlatformStand = true 
                     end
 
                     -- 2. Anti-Self-Fling
@@ -133,26 +132,20 @@ L.Chatted:Connect(function(m)
                     a.CFrame = targetRoot.CFrame
                     a.CanCollide = true
                     
-                    -- 4. Kinetic Override (Stable)
+                    -- 4. Kinetic Absorption
                     local vx = moveDir.X * -5000
                     local vz = moveDir.Z * -5000
-                    a.AssemblyLinearVelocity = Vector3.new(vx, -5000, vz)
+                    a.AssemblyLinearVelocity = Vector3.new(vx, -8000, vz)
                     a.AssemblyAngularVelocity = Vector3.new(5000, 5000, 5000)
                     
-                    -- 5. Debug
-                    frameCount = frameCount + 1
-                    if frameCount % 60 == 0 then
-                        warn(string.format("🔱 [GOD-MODE LOG] Walking: %s | Move: %.2f | VelocityApp: %d", tostring(moveDir.Magnitude > 0), moveDir.Magnitude, a.AssemblyLinearVelocity.Y))
-                    end
-
-                    -- 6. Zero-Attach
+                    -- 5. Force Detachment
                     for _, v in pairs(L.Character:GetDescendants()) do
                         if (v:IsA("Weld") or v:IsA("ManualWeld") or v:IsA("Motor6D")) and (v.Part0 == a or v.Part1 == a or v.Name:find("Grip")) then 
                             v:Destroy() 
                         end
                     end
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "GOD LOCK", Text = "Biological Movement Ceased. v37.1.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "OMEGA LOCK", Text = "All Physics Terminated. v38.0.", Duration = 4 })
             elseif a and not isEquipped then
                 StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Void Anchor!", Duration = 5 })
             else
@@ -178,9 +171,9 @@ L.Chatted:Connect(function(m)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 GOD LOCK v37.0", Text = "Biological Stasis Deployed.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 OMEGA LOCK v38.0", Text = "Stasis Protocol Fully Engaged.", Duration = 4 })
 _G.ArcaneCleanup = function() 
     if State.ShackleConn then State.ShackleConn:Disconnect() end
     ScreenGui:Destroy(); State.Active = false 
 end
-print("🔱 ARCANE: God Lock v37.0 (Biological & Spatio-Kinetic Absolute) chargée.")
+print("🔱 ARCANE: Omega Lock v38.0 (Physical & Biological Stasis) chargée.")

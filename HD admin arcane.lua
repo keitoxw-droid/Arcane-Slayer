@@ -1,13 +1,10 @@
---[[
-    ╔══════════════════════════════════════════════════════════╗
-    ║      HD ADMIN ARCANE (EVENT HORIZON v35.0)           ║
-    ║   "L'horizon des événements, là où le temps s'arrête."   ║
-    ╚══════════════════════════════════════════════════════════╝
-    
-    Opération : Sovereign Prestige (v35.0) - EVENT HORIZON
-    Engine : Gravity-Collapse & Vector-Nullifier (100% Locked)
-    Status : Extreme Physical Dissonance
-]]
+-----------------------------------------------------------
+-- HD ADMIN ARCANE (EVENT HORIZON v35.2)
+-- Operation: Sovereign Prestige
+-- Engine: Gravity-Collapse & Vector-Nullifier
+-- Status: 100% Locked (Safe Load)
+-----------------------------------------------------------
+
 
 -- 1. CONFIGURATION
 local Players = game:GetService("Players")
@@ -32,7 +29,7 @@ local COLORS = {
 
 -- 2. INTERFACE
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "HD_EventHorizon_v35_0"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
+ScreenGui.Name = "HD_EventHorizon_v35_2"; ScreenGui.ResetOnSpawn = false; ScreenGui.DisplayOrder = 100000
 local p = (gethui and gethui()) or L:WaitForChild("PlayerGui")
 ScreenGui.Parent = p
 
@@ -154,7 +151,7 @@ L.Chatted:Connect(function(m)
                         end
                     end
                 end)
-                StarterGui:SetCore("SendNotification", { Title = "EVENT HORIZON", Text = "Movement Deleted. v35.0 Active.", Duration = 4 })
+                StarterGui:SetCore("SendNotification", { Title = "EVENT HORIZON", Text = "Movement Deleted. v35.2 Active.", Duration = 4 })
             elseif a and not isEquipped then
                 StarterGui:SetCore("SendNotification", { Title = "AUTHORITY", Text = "Equip your tool to start Singularity Lock!", Duration = 5 })
             else
@@ -180,9 +177,9 @@ L.Chatted:Connect(function(m)
 end)
 
 HDButton.MouseButton1Click:Connect(function() CmdWindow.Visible = not CmdWindow.Visible end)
-StarterGui:SetCore("SendNotification", { Title = "🔱 EVENT HORIZON v35.0", Text = "Temporal Stasis Implemented.", Duration = 4 })
+StarterGui:SetCore("SendNotification", { Title = "🔱 EVENT HORIZON v35.2", Text = "Temporal Stasis Implemented.", Duration = 4 })
 _G.ArcaneCleanup = function() 
     if State.ShackleConn then State.ShackleConn:Disconnect() end
     ScreenGui:Destroy(); State.Active = false 
 end
-print("🔱 ARCANE: Event Horizon v35.0 (Absolute Spatio-Temporal Lock) chargée.")
+print("🔱 ARCANE: Event Horizon v35.2 (Absolute Spatio-Temporal Lock) chargée.")

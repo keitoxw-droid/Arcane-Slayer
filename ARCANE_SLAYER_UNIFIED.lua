@@ -96,4 +96,5 @@ Info.BackgroundTransparency = 1
 Info.Font = Enum.Font.Gotham
 Info.TextSize = 10
 
-print("🔱 ARCANE SLAYER : Unified Strike Ready.")
+print("🔱 ARCANE SLAYER : Unified Strike Ready (V20.1).")
+warn("🔱 SCRIPT CHARGÉ AVEC SUCCÈS - APPUIE SUR LE BOUTON POUR CRASH.")

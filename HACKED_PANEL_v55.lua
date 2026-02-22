@@ -3120,9 +3120,9 @@ local function createSettings(window)
 
 			Rayfield.Loading.Visible = false
 
-		end
+--		end
 
-	end
+--	end
 
 
 

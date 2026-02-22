@@ -3120,6 +3120,10 @@ local function createSettings(window)
 
 			Rayfield.Loading.Visible = false
 
+		end
+
+	end
+
 
 
 	if getgenv then getgenv().rayfieldCached = true end
@@ -7622,7 +7626,6 @@ local State_SelectedItem = "Hammer"
 InventoryTab:CreateDropdown({
    Name = "Sélectionner un Item",
    Options = item_list,
-   CurrentOption = {"Hammer"},
    MultipleOptions = false,
    Flag = "ItemSelect",
    Callback = function(Option) State_SelectedItem = Option[1] end,
@@ -7633,12 +7636,14 @@ InventoryTab:CreateButton({
 })
 
 local HouseTab = Window:CreateTab("MAISONS", 4483362458)
-HouseTab:CreateSection("Contrôle des Propriétés")
+HouseTab:CreateSection("Déblocage Global")
 HouseTab:CreateButton({
-   Name = "TOUT DÉVERROUILLER",
+   Name = "Débloquer Toutes les Maisons",
    Callback = function()
-       for i = 1, 35 do pcall(function() BrookhavenRemote:FireServer("PurchaseHouse", i) task.wait(0.1) end) end
-       Rayfield:Notify({Title = "MAISON", Content = "Brèche de sécurité globale effectuée.", Duration = 5})
+      for i = 1, 35 do
+          pcall(function() BrookhavenRemote:FireServer("PurchaseHouse", i) end)
+          task.wait(0.05)
+      end
    end,
 })
 
@@ -7650,14 +7655,10 @@ ServerTab:CreateButton({
    Callback = function()
       _G.CrashActive = not _G.CrashActive
       if _G.CrashActive then
-          Rayfield:Notify({Title = "ARCANE", Content = "Démarrage saturation remotes...", Duration = 5})
+          Rayfield:Notify({Title = "ARCANE", Content = "Saturation Protocol Start...", Duration = 3})
           task.spawn(function()
-              local r_events = {}
-              for _, v in pairs(game:GetDescendants()) do
-                  if v:IsA("RemoteEvent") and not v.Name:lower():find("kick") then table.insert(r_events, v) if #r_events >= 15 then break end end
-              end
               while _G.CrashActive do
-                  for _, r in pairs(r_events) do pcall(function() r:FireServer({["🔱"] = "🔱"}, {["🔱"] = "🔱"}) end) end
+                  for i = 1, 10 do pcall(function() BrookhavenRemote:FireServer("PurchaseHouse", 99) end) end
                   task.wait()
               end
           end)
@@ -7665,33 +7666,4 @@ ServerTab:CreateButton({
    end,
 })
 
-_G.FlingActive = false
-ServerTab:CreateButton({
-   Name = "🔱 FRAPPE DU VIDE (FLING)",
-   Callback = function()
-      _G.FlingActive = not _G.FlingActive
-      if _G.FlingActive then
-          Rayfield:Notify({Title = "ARCANE", Content = "Éjection globale...", Duration = 5})
-          task.spawn(function()
-              while _G.FlingActive do
-                  for _, p in pairs(game:GetPlayers()) do
-                      if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                          local hrp = p.Character.HumanoidRootPart
-                          local bv = Instance.new("BodyVelocity", hrp)
-                          bv.Velocity = Vector3.new(0, 1000, 0)
-                          bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                          local bav = Instance.new("BodyAngularVelocity", hrp)
-                          bav.AngularVelocity = Vector3.new(0, 1000, 0)
-                          bav.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-                          task.delay(0.5, function() if bv then bv:Destroy() end if bav then bav:Destroy() end end)
-                      end
-                  end
-                  task.wait(1)
-              end
-          end)
-      end
-   end,
-})
-
 print("🔱 HACKED PANEL v55 MASTER EDITION LOADED 🔱")
-end

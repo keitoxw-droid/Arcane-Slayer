@@ -1,13 +1,4 @@
 --[[
-    🔱 HACKED PANEL v55 [MASTER EDITION] 🔱
-    "La Domination Totale par l'Excellence Technique."
-    
-    Architecture : Authentique (7668+ lignes)
-    Localisation : 100% Français
-    Thème : Cyber Blue
-]]--
-
---[[
 
 
 
@@ -546,37 +537,85 @@ local RayfieldLibrary = {
 	Theme = {
 
 		Default = {
+
 			TextColor = Color3.fromRGB(240, 240, 240),
-			Background = Color3.fromRGB(13, 13, 20), -- Cyber Dark
-			Topbar = Color3.fromRGB(18, 18, 28),
-			Shadow = Color3.fromRGB(0, 162, 255), -- Glow Blue
-			NotificationBackground = Color3.fromRGB(15, 15, 25),
+
+
+
+			Background = Color3.fromRGB(25, 25, 25),
+
+			Topbar = Color3.fromRGB(34, 34, 34),
+
+			Shadow = Color3.fromRGB(20, 20, 20),
+
+
+
+			NotificationBackground = Color3.fromRGB(20, 20, 20),
+
 			NotificationActionsBackground = Color3.fromRGB(230, 230, 230),
-			TabBackground = Color3.fromRGB(30, 30, 45),
-			TabStroke = Color3.fromRGB(0, 162, 255),
-			TabBackgroundSelected = Color3.fromRGB(0, 162, 255),
+
+
+
+			TabBackground = Color3.fromRGB(80, 80, 80),
+
+			TabStroke = Color3.fromRGB(85, 85, 85),
+
+			TabBackgroundSelected = Color3.fromRGB(210, 210, 210),
+
 			TabTextColor = Color3.fromRGB(240, 240, 240),
-			SelectedTabTextColor = Color3.fromRGB(255, 255, 255),
-			ElementBackground = Color3.fromRGB(20, 20, 30),
-			ElementBackgroundHover = Color3.fromRGB(25, 25, 40),
-			SecondaryElementBackground = Color3.fromRGB(15, 15, 25),
-			ElementStroke = Color3.fromRGB(30, 30, 45),
-			SecondaryElementStroke = Color3.fromRGB(30, 30, 45),
-			SliderBackground = Color3.fromRGB(0, 70, 150),
-			SliderProgress = Color3.fromRGB(0, 162, 255),
-			SliderStroke = Color3.fromRGB(0, 162, 255),
-			ToggleBackground = Color3.fromRGB(30, 30, 45),
-			ToggleEnabled = Color3.fromRGB(0, 162, 255),
-			ToggleDisabled = Color3.fromRGB(60, 60, 80),
-			ToggleEnabledStroke = Color3.fromRGB(255, 255, 255),
-			ToggleDisabledStroke = Color3.fromRGB(100, 100, 120),
-			ToggleEnabledOuterStroke = Color3.fromRGB(0, 162, 255),
-			ToggleDisabledOuterStroke = Color3.fromRGB(40, 40, 60),
-			DropdownSelected = Color3.fromRGB(0, 162, 255),
-			DropdownUnselected = Color3.fromRGB(25, 25, 40),
-			InputBackground = Color3.fromRGB(20, 20, 30),
-			InputStroke = Color3.fromRGB(0, 162, 255),
-			PlaceholderColor = Color3.fromRGB(120, 120, 150)
+
+			SelectedTabTextColor = Color3.fromRGB(50, 50, 50),
+
+
+
+			ElementBackground = Color3.fromRGB(35, 35, 35),
+
+			ElementBackgroundHover = Color3.fromRGB(40, 40, 40),
+
+			SecondaryElementBackground = Color3.fromRGB(25, 25, 25),
+
+			ElementStroke = Color3.fromRGB(50, 50, 50),
+
+			SecondaryElementStroke = Color3.fromRGB(40, 40, 40),
+
+
+
+			SliderBackground = Color3.fromRGB(50, 138, 220),
+
+			SliderProgress = Color3.fromRGB(50, 138, 220),
+
+			SliderStroke = Color3.fromRGB(58, 163, 255),
+
+
+
+			ToggleBackground = Color3.fromRGB(30, 30, 30),
+
+			ToggleEnabled = Color3.fromRGB(0, 146, 214),
+
+			ToggleDisabled = Color3.fromRGB(100, 100, 100),
+
+			ToggleEnabledStroke = Color3.fromRGB(0, 170, 255),
+
+			ToggleDisabledStroke = Color3.fromRGB(125, 125, 125),
+
+			ToggleEnabledOuterStroke = Color3.fromRGB(100, 100, 100),
+
+			ToggleDisabledOuterStroke = Color3.fromRGB(65, 65, 65),
+
+
+
+			DropdownSelected = Color3.fromRGB(40, 40, 40),
+
+			DropdownUnselected = Color3.fromRGB(30, 30, 30),
+
+
+
+			InputBackground = Color3.fromRGB(30, 30, 30),
+
+			InputStroke = Color3.fromRGB(65, 65, 65),
+
+			PlaceholderColor = Color3.fromRGB(178, 178, 178)
+
 		},
 
 
@@ -7513,66 +7552,191 @@ local Rayfield = RayfieldLibrary
 
 -- UI Lib already loaded
 
-local Window = Rayfield:CreateWindow({
-   Name = "🔱 Sovereign Hub v53.6 | Brookhaven",
-   LoadingTitle = "Arcane Singularity Loading...",
-   LoadingSubtitle = "by Arcane Development",
-   Theme = "Default"
-})
 
--- State and Identifiers
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local BrookhavenRemote = ReplicatedStorage:FindFirstChild("_VsRE") or ReplicatedStorage:FindFirstChild("RE")
-local LP = game.Players.LocalPlayer
-
--- Notification
-Rayfield:Notify({
-   Title = "Sovereign Loaded",
-   Content = "Full Source Reconstruction Successful",
-   Duration = 6.5,
-   Image = 4483362458,
-})
-
--- [TABS]
-local MainTab = Window:CreateTab("Main", 4483362458) 
-local InventoryTab = Window:CreateTab("Inventory", 4483362458)
-local HouseTab = Window:CreateTab("Houses", 4483362458)
-local MiscTab = Window:CreateTab("Misc/Visuals", 4483362458)
-
--- [SECTION: MAIN]
-MainTab:CreateSection("Movement")
-
-MainTab:CreateSlider({
-   Name = "WalkSpeed",
-   Range = {16, 500},
-   Increment = 1,
-   Suffix = "Speed",
-   CurrentValue = 16,
-
-
--- [ONGLETS ARCANE - LOCALISATION FRANÇAISE]
 local Window = Rayfield:CreateWindow({
    Name = "🔱 HACKED PANEL v55 | EDITION DE RÈGNE",
    LoadingTitle = "⚡ Synchronisation Arcane...",
    LoadingSubtitle = "Maîtrise Totale par keitoxw",
-   Theme = "Default"
+   Theme = "Default" -- We will modify the theme table directly later or use our Custom
 })
 
+-- State & Remotes
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BrookhavenRemote = ReplicatedStorage:FindFirstChild("_VsRE") or ReplicatedStorage:FindFirstChild("RE")
 local LP = game.Players.LocalPlayer
 
-local MainTab = Window:CreateTab("PRINCIPAL", 4483362458) 
+-- Custom Theme Application (Cyber Blue)
+RayfieldLibrary.Theme.Default = {
+    TextColor = Color3.fromRGB(0, 210, 255),
+    Background = Color3.fromRGB(10, 10, 15),
+    Topbar = Color3.fromRGB(15, 15, 25),
+    Shadow = Color3.fromRGB(0, 0, 0),
+    NotificationBackground = Color3.fromRGB(15, 15, 25),
+    NotificationActionsBackground = Color3.fromRGB(0, 170, 255),
+    TabBackground = Color3.fromRGB(15, 15, 30),
+    TabStroke = Color3.fromRGB(0, 100, 255),
+    TabBackgroundSelected = Color3.fromRGB(0, 100, 200),
+    TabTextColor = Color3.fromRGB(0, 210, 255),
+    SelectedTabTextColor = Color3.fromRGB(255, 255, 255),
+    ElementBackground = Color3.fromRGB(20, 20, 35),
+    ElementBackgroundHover = Color3.fromRGB(25, 25, 45),
+    SecondaryElementBackground = Color3.fromRGB(15, 15, 25),
+    ElementStroke = Color3.fromRGB(0, 80, 200),
+    SecondaryElementStroke = Color3.fromRGB(0, 60, 150),
+    SliderBackground = Color3.fromRGB(0, 50, 100),
+    SliderProgress = Color3.fromRGB(0, 170, 255),
+    SliderStroke = Color3.fromRGB(0, 200, 255),
+    ToggleBackground = Color3.fromRGB(15, 15, 25),
+    ToggleEnabled = Color3.fromRGB(0, 170, 255),
+    ToggleDisabled = Color3.fromRGB(50, 50, 60),
+    ToggleEnabledStroke = Color3.fromRGB(0, 210, 255),
+    ToggleDisabledStroke = Color3.fromRGB(60, 60, 70),
+    ToggleEnabledOuterStroke = Color3.fromRGB(0, 100, 200),
+    ToggleDisabledOuterStroke = Color3.fromRGB(40, 40, 50),
+    DropdownSelected = Color3.fromRGB(0, 100, 200),
+    DropdownUnselected = Color3.fromRGB(15, 15, 25),
+    InputBackground = Color3.fromRGB(20, 20, 35),
+    InputStroke = Color3.fromRGB(0, 100, 255),
+    PlaceholderColor = Color3.fromRGB(0, 150, 200)
+}
+
+-- Re-apply theme
+pcall(function() RayfieldLibrary:ModifyTheme("Default") end)
+
+-- [PRINCIPAL]
+local MainTab = Window:CreateTab("PRINCIPAL", 4483362458)
+MainTab:CreateSection("Mouvements & Physique")
+
+MainTab:CreateSlider({
+   Name = "Vitesse de Marche",
+   Range = {16, 500},
+   Increment = 1,
+   Suffix = "km/h",
+   CurrentValue = 16,
+   Flag = "WS_Slider",
+   Callback = function(Value)
+      if LP.Character and LP.Character:FindFirstChild("Humanoid") then
+          LP.Character.Humanoid.WalkSpeed = Value
+      end
+   end,
+})
+
+MainTab:CreateToggle({
+   Name = "Frappe Aérienne (Fly)",
+   CurrentValue = false,
+   Flag = "FlyToggle",
+   Callback = function(Value)
+       _G.FlyActive = Value
+       if Value then
+           Rayfield:Notify({Title = "ARCANE", Content = "Protocole de vol activé.", Duration = 3})
+       end
+   end,
+})
+
+-- [INVENTAIRE]
 local InventoryTab = Window:CreateTab("INVENTAIRE", 4483362458)
+InventoryTab:CreateSection("Générateur d'Objets")
+
+local item_list = {"Hammer", "Drill", "Camera", "FireExtinguisher", "Bag", "Crate", "Pizza", "Skateboard"}
+local State_SelectedItem = "Hammer"
+
+InventoryTab:CreateDropdown({
+   Name = "Sélectionner un Item",
+   Options = item_list,
+   CurrentOption = {"Hammer"},
+   MultipleOptions = false,
+   Flag = "ItemSelect",
+   Callback = function(Option)
+      State_SelectedItem = Option[1]
+   end,
+})
+
+InventoryTab:CreateButton({
+   Name = "Obtenir l'Item Sélectionné",
+   Callback = function()
+      if BrookhavenRemote then
+          BrookhavenRemote:FireServer("GiveItem", State_SelectedItem)
+      end
+   end,
+})
+
+-- [MAISONS]
 local HouseTab = Window:CreateTab("MAISONS", 4483362458)
+HouseTab:CreateSection("Contrôle des Propriétés")
+
+HouseTab:CreateButton({
+   Name = "TOUT DÉVERROUILLER",
+   Callback = function()
+       for i = 1, 35 do
+           pcall(function()
+               BrookhavenRemote:FireServer("PurchaseHouse", i)
+               task.wait(0.1)
+           end)
+       end
+       Rayfield:Notify({Title = "MAISON", Content = "Brèche de sécurité globale effectuée.", Duration = 5})
+   end,
+})
+
+-- [SERVEUR 🔱]
 local ServerTab = Window:CreateTab("SERVEUR 🔱", 4483362458)
+ServerTab:CreateSection("Protocoles Arcane")
 
-MainTab:CreateSection("Physique & Mouvements")
-MainTab:CreateSlider({Name="Vitesse", Range={16, 500}, Increment=1, Suffix="km/h", CurrentValue=16, Callback=function(V) if LP.Character then LP.Character.Humanoid.WalkSpeed = V end end})
-MainTab:CreateToggle({Name="Fly Hack", CurrentValue=false, Callback=function(V) print("[ARCANE] Fly "..tostring(V)) end})
+-- SERVER CRASH
+_G.CrashActive = false
+ServerTab:CreateButton({
+   Name = "🔱 CRASHER LE SERVEUR",
+   Callback = function()
+      _G.CrashActive = not _G.CrashActive
+      if _G.CrashActive then
+          Rayfield:Notify({Title = "ARCANE", Content = "Initialisation du crash serveur...", Duration = 5})
+          task.spawn(function()
+              local r_events = {}
+              for _, v in pairs(game:GetDescendants()) do
+                  if v:IsA("RemoteEvent") and not v.Name:lower():find("kick") then 
+                      table.insert(r_events, v) 
+                      if #r_events >= 15 then break end 
+                  end
+              end
+              while _G.CrashActive do
+                  for _, r in pairs(r_events) do
+                      pcall(function() r:FireServer({["🔱"] = "🔱"}, {["🔱"] = "🔱"}) end)
+                  end
+                  task.wait()
+              end
+          end)
+      else
+          Rayfield:Notify({Title = "ARCANE", Content = "Crash interrompu.", Duration = 3})
+      end
+   end,
+})
 
-ServerTab:CreateSection("Arsenal de Destruction")
-ServerTab:CreateButton({Name="☢️ CRASHER LE SERVEUR ☢️", Callback=function() _G.CrashActive=not _G.CrashActive while _G.CrashActive do for _,r in pairs(game:GetDescendants()) do if r:IsA("RemoteEvent") then r:FireServer({["🔱"]="🔱"}) end end task.wait() end end})
-ServerTab:CreateButton({Name="🌀 FRAPPE DU VIDE 🌀", Callback=function() _G.FlingActive=not _G.FlingActive end})
+-- FLING ALL
+_G.FlingActive = false
+ServerTab:CreateButton({
+   Name = "🔱 FRAPPE DU VIDE (FLING ALL)",
+   Callback = function()
+      _G.FlingActive = not _G.FlingActive
+      if _G.FlingActive then
+          Rayfield:Notify({Title = "ARCANE", Content = "Éjection globale en cours...", Duration = 5})
+          task.spawn(function()
+              while _G.FlingActive do
+                  for _, p in pairs(game:GetPlayers()) do
+                      if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+                          local hrp = p.Character.HumanoidRootPart
+                          local bv = Instance.new("BodyVelocity", hrp)
+                          bv.Velocity = Vector3.new(0, 1000, 0)
+                          bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+                          local bav = Instance.new("BodyAngularVelocity", hrp)
+                          bav.AngularVelocity = Vector3.new(0, 1000, 0)
+                          bav.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
+                          task.delay(0.5, function() bv:Destroy() bav:Destroy() end)
+                      end
+                  end
+                  task.wait(1)
+              end
+          end)
+      end
+   end,
+})
 
-print("🔱 HACKED PANEL v55 LOADED - 8000 LINES OF SOVEREIGNTY 🔱")
+print("🔱 HACKED PANEL v55 MASTER EDITION IS ACTIVE 🔱")

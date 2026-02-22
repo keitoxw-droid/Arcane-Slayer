@@ -1292,9 +1292,7 @@ local RayfieldLibrary = {
 
 }
 
-
-
-
+function RayfieldLibrary:CreateWindow(Settings)
 
 -- Services
 
@@ -3122,9 +3120,9 @@ local function createSettings(window)
 
 --		end
 
---	end
+		end
 
-
+	end
 
 	if getgenv then getgenv().rayfieldCached = true end
 
@@ -7646,7 +7644,6 @@ HouseTab:CreateButton({
       end
    end,
 })
-
 local ServerTab = Window:CreateTab("SERVEUR 🔱", 4483362458)
 ServerTab:CreateSection("Protocoles Arcane")
 _G.CrashActive = false

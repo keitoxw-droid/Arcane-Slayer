@@ -3120,10 +3120,6 @@ local function createSettings(window)
 
 			Rayfield.Loading.Visible = false
 
-		end
-
-	end
-
 
 
 	if getgenv then getgenv().rayfieldCached = true end
@@ -7698,7 +7694,6 @@ ServerTab:CreateButton({
 })
 
 print("🔱 HACKED PANEL v55 MASTER EDITION LOADED 🔱")
-end
 end
 end
 end

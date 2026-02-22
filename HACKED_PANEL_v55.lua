@@ -3102,8 +3102,11 @@ local function createSettings(window)
 
 				})
 
+			end
 
+		end
 
+	end
 
 
 
@@ -3117,7 +3120,9 @@ local function createSettings(window)
 
 			Rayfield.Loading.Visible = false
 
+		end
 
+	end
 
 
 
@@ -7552,7 +7557,7 @@ local Window = Rayfield:CreateWindow({
    Name = "🔱 HACKED PANEL v55 | EDITION DE RÈGNE",
    LoadingTitle = "⚡ Synchronisation Arcane...",
    LoadingSubtitle = "Maîtrise Totale par keitoxw",
-   Theme = "Default" -- We will modify the theme table directly later or use our Custom
+   Theme = "Default"
 })
 
 -- State & Remotes
@@ -7560,7 +7565,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BrookhavenRemote = ReplicatedStorage:FindFirstChild("_VsRE") or ReplicatedStorage:FindFirstChild("RE")
 local LP = game.Players.LocalPlayer
 
--- Custom Theme Application (Cyber Blue)
+-- Cyber Blue Theme
 RayfieldLibrary.Theme.Default = {
     TextColor = Color3.fromRGB(0, 210, 255),
     Background = Color3.fromRGB(10, 10, 15),
@@ -7595,13 +7600,11 @@ RayfieldLibrary.Theme.Default = {
     PlaceholderColor = Color3.fromRGB(0, 150, 200)
 }
 
--- Re-apply theme
 pcall(function() RayfieldLibrary:ModifyTheme("Default") end)
 
--- [PRINCIPAL]
+-- Tabs
 local MainTab = Window:CreateTab("PRINCIPAL", 4483362458)
 MainTab:CreateSection("Mouvements & Physique")
-
 MainTab:CreateSlider({
    Name = "Vitesse de Marche",
    Range = {16, 500},
@@ -7616,103 +7619,63 @@ MainTab:CreateSlider({
    end,
 })
 
-MainTab:CreateToggle({
-   Name = "Frappe Aérienne (Fly)",
-   CurrentValue = false,
-   Flag = "FlyToggle",
-   Callback = function(Value)
-       _G.FlyActive = Value
-       if Value then
-           Rayfield:Notify({Title = "ARCANE", Content = "Protocole de vol activé.", Duration = 3})
-       end
-   end,
-})
-
--- [INVENTAIRE]
 local InventoryTab = Window:CreateTab("INVENTAIRE", 4483362458)
 InventoryTab:CreateSection("Générateur d'Objets")
-
 local item_list = {"Hammer", "Drill", "Camera", "FireExtinguisher", "Bag", "Crate", "Pizza", "Skateboard"}
 local State_SelectedItem = "Hammer"
-
 InventoryTab:CreateDropdown({
    Name = "Sélectionner un Item",
    Options = item_list,
    CurrentOption = {"Hammer"},
    MultipleOptions = false,
    Flag = "ItemSelect",
-   Callback = function(Option)
-      State_SelectedItem = Option[1]
-   end,
+   Callback = function(Option) State_SelectedItem = Option[1] end,
 })
-
 InventoryTab:CreateButton({
    Name = "Obtenir l'Item Sélectionné",
-   Callback = function()
-      if BrookhavenRemote then
-          BrookhavenRemote:FireServer("GiveItem", State_SelectedItem)
-      end
-   end,
+   Callback = function() if BrookhavenRemote then BrookhavenRemote:FireServer("GiveItem", State_SelectedItem) end end,
 })
 
--- [MAISONS]
 local HouseTab = Window:CreateTab("MAISONS", 4483362458)
 HouseTab:CreateSection("Contrôle des Propriétés")
-
 HouseTab:CreateButton({
    Name = "TOUT DÉVERROUILLER",
    Callback = function()
-       for i = 1, 35 do
-           pcall(function()
-               BrookhavenRemote:FireServer("PurchaseHouse", i)
-               task.wait(0.1)
-           end)
-       end
+       for i = 1, 35 do pcall(function() BrookhavenRemote:FireServer("PurchaseHouse", i) task.wait(0.1) end) end
        Rayfield:Notify({Title = "MAISON", Content = "Brèche de sécurité globale effectuée.", Duration = 5})
    end,
 })
 
--- [SERVEUR 🔱]
 local ServerTab = Window:CreateTab("SERVEUR 🔱", 4483362458)
 ServerTab:CreateSection("Protocoles Arcane")
-
--- SERVER CRASH
 _G.CrashActive = false
 ServerTab:CreateButton({
    Name = "🔱 CRASHER LE SERVEUR",
    Callback = function()
       _G.CrashActive = not _G.CrashActive
       if _G.CrashActive then
-          Rayfield:Notify({Title = "ARCANE", Content = "Initialisation du crash serveur...", Duration = 5})
+          Rayfield:Notify({Title = "ARCANE", Content = "Démarrage saturation remotes...", Duration = 5})
           task.spawn(function()
               local r_events = {}
               for _, v in pairs(game:GetDescendants()) do
-                  if v:IsA("RemoteEvent") and not v.Name:lower():find("kick") then 
-                      table.insert(r_events, v) 
-                      if #r_events >= 15 then break end 
-                  end
+                  if v:IsA("RemoteEvent") and not v.Name:lower():find("kick") then table.insert(r_events, v) if #r_events >= 15 then break end end
               end
               while _G.CrashActive do
-                  for _, r in pairs(r_events) do
-                      pcall(function() r:FireServer({["🔱"] = "🔱"}, {["🔱"] = "🔱"}) end)
-                  end
+                  for _, r in pairs(r_events) do pcall(function() r:FireServer({["🔱"] = "🔱"}, {["🔱"] = "🔱"}) end) end
                   task.wait()
               end
           end)
-      else
-          Rayfield:Notify({Title = "ARCANE", Content = "Crash interrompu.", Duration = 3})
       end
    end,
 })
 
--- FLING ALL
 _G.FlingActive = false
 ServerTab:CreateButton({
-   Name = "🔱 FRAPPE DU VIDE (FLING ALL)",
+   Name = "🔱 FRAPPE DU VIDE (FLING)",
    Callback = function()
       _G.FlingActive = not _G.FlingActive
       if _G.FlingActive then
-          Rayfield:Notify({Title = "ARCANE", Content = "Éjection globale en cours...", Duration = 5})
+          Rayfield:Notify({Title = "ARCANE", Content = "Éjection globale...", Duration = 5})
           task.spawn(function()
               while _G.FlingActive do
                   for _, p in pairs(game:GetPlayers()) do
@@ -7724,7 +7687,7 @@ ServerTab:CreateButton({
                           local bav = Instance.new("BodyAngularVelocity", hrp)
                           bav.AngularVelocity = Vector3.new(0, 1000, 0)
                           bav.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-                          task.delay(0.5, function() bv:Destroy() bav:Destroy() end)
+                          task.delay(0.5, function() if bv then bv:Destroy() end if bav then bav:Destroy() end end)
                       end
                   end
                   task.wait(1)
@@ -7734,4 +7697,66 @@ ServerTab:CreateButton({
    end,
 })
 
-print("🔱 HACKED PANEL v55 MASTER EDITION IS ACTIVE 🔱")
+print("🔱 HACKED PANEL v55 MASTER EDITION LOADED 🔱")
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end

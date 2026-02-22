@@ -1292,7 +1292,9 @@ local RayfieldLibrary = {
 
 }
 
-function RayfieldLibrary:CreateWindow(Settings)
+
+
+
 
 -- Services
 
@@ -3118,11 +3120,11 @@ local function createSettings(window)
 
 			Rayfield.Loading.Visible = false
 
---		end
-
 		end
 
 	end
+
+
 
 	if getgenv then getgenv().rayfieldCached = true end
 
@@ -7088,9 +7090,8 @@ local function createSettings(window)
 
 	if not success then warn('Rayfield had an issue creating settings.') end
 
-
-
-	return Window
+	-- [ARCANE] Commented to allow script flow to continue
+	-- return Window
 
 end
 
@@ -7548,17 +7549,26 @@ local Rayfield = RayfieldLibrary
     Features include Inventory Manipulation, House Hijacking, and Global Speed/Fly.
 --]]
 
--- UI Lib already loaded
+-- UI Lib already loaded, Window is already created locally above.
+-- We must ensure the global Window variable we're using points to it.
+-- In fact, since the UI code runs in the root scope, 'Window' is already defined locally at line 3929.
+-- But wait, to modify the existing Window title, we'd need to access its instances.
+-- Let's just create an empty CreateWindow that returns the existing 'Window' to satisfy the script.
 
+function RayfieldLibrary:CreateWindow(Settings)
+    -- The UI is already built by the global scope. We just return the 'Window' object.
+    -- To update the title, we'd need access to the Topbar, but let's keep it simple.
+    return Window
+end
 
-local Window = Rayfield:CreateWindow({
+local MyWindow = RayfieldLibrary:CreateWindow({
    Name = "🔱 HACKED PANEL v55 | EDITION DE RÈGNE",
    LoadingTitle = "⚡ Synchronisation Arcane...",
    LoadingSubtitle = "Maîtrise Totale par keitoxw",
    Theme = "Default"
 })
 
--- State & Remotes
+-- We need to re-route calls from MyWindow to Window, but since MyWindow IS Window, it works automatically.
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BrookhavenRemote = ReplicatedStorage:FindFirstChild("_VsRE") or ReplicatedStorage:FindFirstChild("RE")
 local LP = game.Players.LocalPlayer
@@ -7633,17 +7643,6 @@ InventoryTab:CreateButton({
    Callback = function() if BrookhavenRemote then BrookhavenRemote:FireServer("GiveItem", State_SelectedItem) end end,
 })
 
-local HouseTab = Window:CreateTab("MAISONS", 4483362458)
-HouseTab:CreateSection("Déblocage Global")
-HouseTab:CreateButton({
-   Name = "Débloquer Toutes les Maisons",
-   Callback = function()
-      for i = 1, 35 do
-          pcall(function() BrookhavenRemote:FireServer("PurchaseHouse", i) end)
-          task.wait(0.05)
-      end
-   end,
-})
 local ServerTab = Window:CreateTab("SERVEUR 🔱", 4483362458)
 ServerTab:CreateSection("Protocoles Arcane")
 _G.CrashActive = false
@@ -7652,10 +7651,14 @@ ServerTab:CreateButton({
    Callback = function()
       _G.CrashActive = not _G.CrashActive
       if _G.CrashActive then
-          Rayfield:Notify({Title = "ARCANE", Content = "Saturation Protocol Start...", Duration = 3})
+          Rayfield:Notify({Title = "ARCANE", Content = "Démarrage saturation remotes...", Duration = 5})
           task.spawn(function()
+              local r_events = {}
+              for _, v in pairs(game:GetDescendants()) do
+                  if v:IsA("RemoteEvent") and not v.Name:lower():find("kick") then table.insert(r_events, v) if #r_events >= 15 then break end end
+              end
               while _G.CrashActive do
-                  for i = 1, 10 do pcall(function() BrookhavenRemote:FireServer("PurchaseHouse", 99) end) end
+                  for _, r in pairs(r_events) do pcall(function() r:FireServer({["🔱"] = "🔱"}, {["🔱"] = "🔱"}) end) end
                   task.wait()
               end
           end)
@@ -7664,3 +7667,59 @@ ServerTab:CreateButton({
 })
 
 print("🔱 HACKED PANEL v55 MASTER EDITION LOADED 🔱")
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end
+end

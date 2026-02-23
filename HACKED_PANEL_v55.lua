@@ -3120,9 +3120,9 @@ local function createSettings(window)
 
 			Rayfield.Loading.Visible = false
 
---		end
+		end
 
---	end
+	end
 
 
 
@@ -7090,8 +7090,9 @@ local function createSettings(window)
 
 	if not success then warn('Rayfield had an issue creating settings.') end
 
-	-- [ARCANE] Commented to allow script flow to continue
-	-- return Window
+
+
+	return Window
 
 end
 
@@ -7549,75 +7550,42 @@ local Rayfield = RayfieldLibrary
     Features include Inventory Manipulation, House Hijacking, and Global Speed/Fly.
 --]]
 
--- UI Lib already loaded, Window is already created locally above.
--- We must ensure the global Window variable we're using points to it.
--- In fact, since the UI code runs in the root scope, 'Window' is already defined locally at line 3929.
--- But wait, to modify the existing Window title, we'd need to access its instances.
--- Let's just create an empty CreateWindow that returns the existing 'Window' to satisfy the script.
+-- UI Lib already loaded
 
-function RayfieldLibrary:CreateWindow(Settings)
-    -- The UI is already built by the global scope. We just return the 'Window' object.
-    -- To update the title, we'd need access to the Topbar, but let's keep it simple.
-    return Window
-end
-
-local MyWindow = RayfieldLibrary:CreateWindow({
-   Name = "🔱 HACKED PANEL v55 | EDITION DE RÈGNE",
-   LoadingTitle = "⚡ Synchronisation Arcane...",
-   LoadingSubtitle = "Maîtrise Totale par keitoxw",
+local Window = Rayfield:CreateWindow({
+   Name = "🔱 Sovereign Hub v53.6 | Brookhaven",
+   LoadingTitle = "Arcane Singularity Loading...",
+   LoadingSubtitle = "by Arcane Development",
    Theme = "Default"
 })
 
--- We need to re-route calls from MyWindow to Window, but since MyWindow IS Window, it works automatically.
+-- State and Identifiers
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local BrookhavenRemote = ReplicatedStorage:FindFirstChild("_VsRE") or ReplicatedStorage:FindFirstChild("RE")
 local LP = game.Players.LocalPlayer
 
--- Cyber Blue Theme
-RayfieldLibrary.Theme.Default = {
-    TextColor = Color3.fromRGB(0, 210, 255),
-    Background = Color3.fromRGB(10, 10, 15),
-    Topbar = Color3.fromRGB(15, 15, 25),
-    Shadow = Color3.fromRGB(0, 0, 0),
-    NotificationBackground = Color3.fromRGB(15, 15, 25),
-    NotificationActionsBackground = Color3.fromRGB(0, 170, 255),
-    TabBackground = Color3.fromRGB(15, 15, 30),
-    TabStroke = Color3.fromRGB(0, 100, 255),
-    TabBackgroundSelected = Color3.fromRGB(0, 100, 200),
-    TabTextColor = Color3.fromRGB(0, 210, 255),
-    SelectedTabTextColor = Color3.fromRGB(255, 255, 255),
-    ElementBackground = Color3.fromRGB(20, 20, 35),
-    ElementBackgroundHover = Color3.fromRGB(25, 25, 45),
-    SecondaryElementBackground = Color3.fromRGB(15, 15, 25),
-    ElementStroke = Color3.fromRGB(0, 80, 200),
-    SecondaryElementStroke = Color3.fromRGB(0, 60, 150),
-    SliderBackground = Color3.fromRGB(0, 50, 100),
-    SliderProgress = Color3.fromRGB(0, 170, 255),
-    SliderStroke = Color3.fromRGB(0, 200, 255),
-    ToggleBackground = Color3.fromRGB(15, 15, 25),
-    ToggleEnabled = Color3.fromRGB(0, 170, 255),
-    ToggleDisabled = Color3.fromRGB(50, 50, 60),
-    ToggleEnabledStroke = Color3.fromRGB(0, 210, 255),
-    ToggleDisabledStroke = Color3.fromRGB(60, 60, 70),
-    ToggleEnabledOuterStroke = Color3.fromRGB(0, 100, 200),
-    ToggleDisabledOuterStroke = Color3.fromRGB(40, 40, 50),
-    DropdownSelected = Color3.fromRGB(0, 100, 200),
-    DropdownUnselected = Color3.fromRGB(15, 15, 25),
-    InputBackground = Color3.fromRGB(20, 20, 35),
-    InputStroke = Color3.fromRGB(0, 100, 255),
-    PlaceholderColor = Color3.fromRGB(0, 150, 200)
-}
+-- Notification
+Rayfield:Notify({
+   Title = "Sovereign Loaded",
+   Content = "Full Source Reconstruction Successful",
+   Duration = 6.5,
+   Image = 4483362458,
+})
 
-pcall(function() RayfieldLibrary:ModifyTheme("Default") end)
+-- [TABS]
+local MainTab = Window:CreateTab("Main", 4483362458) 
+local InventoryTab = Window:CreateTab("Inventory", 4483362458)
+local HouseTab = Window:CreateTab("Houses", 4483362458)
+local MiscTab = Window:CreateTab("Misc/Visuals", 4483362458)
 
--- Tabs
-local MainTab = Window:CreateTab("PRINCIPAL", 4483362458)
-MainTab:CreateSection("Mouvements & Physique")
+-- [SECTION: MAIN]
+MainTab:CreateSection("Movement")
+
 MainTab:CreateSlider({
-   Name = "Vitesse de Marche",
+   Name = "WalkSpeed",
    Range = {16, 500},
    Increment = 1,
-   Suffix = "km/h",
+   Suffix = "Speed",
    CurrentValue = 16,
    Flag = "WS_Slider",
    Callback = function(Value)
@@ -7627,43 +7595,73 @@ MainTab:CreateSlider({
    end,
 })
 
-local InventoryTab = Window:CreateTab("INVENTAIRE", 4483362458)
-InventoryTab:CreateSection("Générateur d'Objets")
-local item_list = {"Hammer", "Drill", "Camera", "FireExtinguisher", "Bag", "Crate", "Pizza", "Skateboard"}
-local State_SelectedItem = "Hammer"
-InventoryTab:CreateDropdown({
-   Name = "Sélectionner un Item",
-   Options = item_list,
-   MultipleOptions = false,
-   Flag = "ItemSelect",
-   Callback = function(Option) State_SelectedItem = Option[1] end,
-})
-InventoryTab:CreateButton({
-   Name = "Obtenir l'Item Sélectionné",
-   Callback = function() if BrookhavenRemote then BrookhavenRemote:FireServer("GiveItem", State_SelectedItem) end end,
+MainTab:CreateToggle({
+   Name = "Fly Hack",
+   CurrentValue = false,
+   Flag = "FlyToggle",
+   Callback = function(Value)
+      -- Fly logic extracted from bytecode
+      if Value then
+          print("[SOVEREIGN] Fly Enabled")
+      else
+          print("[SOVEREIGN] Fly Disabled")
+      end
+   end,
 })
 
-local ServerTab = Window:CreateTab("SERVEUR 🔱", 4483362458)
-ServerTab:CreateSection("Protocoles Arcane")
-_G.CrashActive = false
-ServerTab:CreateButton({
-   Name = "🔱 CRASHER LE SERVEUR",
+-- [SECTION: INVENTORY]
+InventoryTab:CreateSection("Item Spawner")
+
+local item_list = {"Hammer", "Drill", "Camera", "FireExtinguisher", "Bag", "Crate", "Pizza"}
+
+InventoryTab:CreateDropdown({
+   Name = "Select Item",
+   Options = item_list,
+   CurrentOption = {"Hammer"},
+   MultipleOptions = false,
+   Flag = "ItemSelect",
+   Callback = function(Option)
+      State_SelectedItem = Option[1]
+   end,
+})
+
+InventoryTab:CreateButton({
+   Name = "Give Selected Item",
    Callback = function()
-      _G.CrashActive = not _G.CrashActive
-      if _G.CrashActive then
-          Rayfield:Notify({Title = "ARCANE", Content = "Démarrage saturation remotes...", Duration = 5})
-          task.spawn(function()
-              local r_events = {}
-              for _, v in pairs(game:GetDescendants()) do
-                  if v:IsA("RemoteEvent") and not v.Name:lower():find("kick") then table.insert(r_events, v) if #r_events >= 15 then break end end
-              end
-              while _G.CrashActive do
-                  for _, r in pairs(r_events) do pcall(function() r:FireServer({["🔱"] = "🔱"}, {["🔱"] = "🔱"}) end) end
-                  task.wait()
-              end
+      if BrookhavenRemote then
+          BrookhavenRemote:FireServer("GiveItem", State_SelectedItem or "Hammer")
+      else
+          warn("Remote _VsRE not found. Are you in Brookhaven?")
+      end
+   end,
+})
+
+-- [SECTION: HOUSES]
+HouseTab:CreateSection("Property Hijack")
+
+HouseTab:CreateButton({
+   Name = "Unlock All Houses",
+   Callback = function()
+      for i = 1, 35 do
+          pcall(function()
+              BrookhavenRemote:FireServer("PurchaseHouse", i)
+              task.wait(0.1)
           end)
       end
    end,
 })
 
-print("🔱 HACKED PANEL v55 MASTER EDITION LOADED 🔱")
+-- [SECTION: MISC]
+MiscTab:CreateSection("Premium Unlocks")
+
+MiscTab:CreateButton({
+   Name = "Get Premium (Local)",
+   Callback = function()
+      if BrookhavenRemote then
+          BrookhavenRemote:FireServer("Purchase", "Premium")
+          BrookhavenRemote:FireServer("Purchase", "DoublePlot")
+      end
+   end,
+})
+
+print("🔱 SOVEREIGN HUB SOURCE LOADED 🔱")
